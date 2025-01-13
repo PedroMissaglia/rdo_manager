@@ -1,0 +1,25 @@
+<div class="po-wrapper">
+  <po-menu
+    [p-menus]="menus"
+    [p-collapsed]="true"
+    [p-logo]="logo">
+  </po-menu>
+  <po-toolbar
+    p-title="RDO - Relatório de obra diário">
+  </po-toolbar>
+
+  <po-page-list
+  >
+
+    <po-table
+      [p-selectable]="true"
+      p-container="true"
+      [p-hide-table-search]="false"
+      [p-height]="800"
+      (p-show-more)="onShowMore()"
+      [p-hide-columns-manager]="true"
+      [p-items]="tableItems"
+      >
+    </po-table>
+  </po-page-list>
+</div>
