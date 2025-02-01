@@ -1,4 +1,7 @@
+import { DailyReportService } from './daily-report.service';
 import { Component } from '@angular/core';
+import { Router } from '@angular/router';
+import { PoPageAction, PoTableAction, PoTableColumn } from '@po-ui/ng-components';
 
 @Component({
   selector: 'app-home',
@@ -7,11 +10,77 @@ import { Component } from '@angular/core';
 })
 export class HomeComponent {
 
-  logo = '/assets/swl_logo.png'
+  logo = '/assets/swl_logo.png';
+  columns: Array<PoTableColumn> = this.getColumns();
+  selectDailyReport: any;
+  public actions: Array<PoPageAction> = [
+    { label: 'Visualizar',
+      disabled: this.disableEditButton.bind(this),
+    action: this.redirectToDailyReportDetail.bind(this) },
+  ];
+
+  tableActions: Array<PoTableAction> = [
+    {
+      action: this.onShowMore.bind(this),
+      icon: 'ph ph-file-pdf',
+      label: ''
+    }
+  ];
+
+  constructor(
+    private router: Router,
+    private dailyReportService: DailyReportService) {}
+
+  disableEditButton() {
+    return !this.selectDailyReport;
+  }
+
+  onSelectDailyReport(selected: any) {
+    this.selectDailyReport = selected;
+    this.actions[0].disabled = false;
+  }
+
+  onUnselectDailyReport() {
+    this.selectDailyReport = undefined;
+    this.actions[0].disabled = this.disableEditButton();
+  }
+
+  redirectToDailyReportDetail() {
+    this.dailyReportService.item = this.selectDailyReport;
+    this.router.navigate(['detail', this.selectDailyReport['id']]);
+  }
+
+  onShowMore() {}
+
+  getColumns(): Array<PoTableColumn> {
+    return [
+      {property: 'total_de_horas', label: 'Total de horas'},
+      {property: 'horasPrevistas', label: 'Horas previstas'},
+      {
+        property: 'status',
+        type: 'subtitle',
+        width: '180px',
+        subtitles: [
+          { value: 'positive', color: 'color-10', label: 'Meta alcançada', content: 'MA' },
+          { value: 'negative', color: 'color-07', label: 'Abaixo do previsto', content: 'AP'},
+        ]
+      },
+      {property: 'data'},
+      {property: 'endereco'},
+      {property: 'obra'},
+      {property: 'placa'},
+      {property: 'tipo_de_servico', label: 'Tipo de serviço' },
+      {property: 'locomocao', label: 'Locomoção'},
+      {property: 'manutencao', label: 'Manutenção'},
+      {property: 'id', label: 'id'},
+
+    ]
+  }
+
   menus = [
     {
       label: 'Home',
-      icon: 'ph ph-house',
+      icon: 'ph ph-file-text',
       link: '/home',
       shortLabel: 'Home'
     },
@@ -28,248 +97,131 @@ export class HomeComponent {
 
   tableItems = [
     {
-      placa: "ABC-1234",
-      obra: "Construção da ponte",
-      data: "2024-01-15T08:30:00Z",
-      endereco: "Rua das Flores, 123, Centro, SP",
-      tipo_de_servico: 1,
-      colaboradores: ["João Silva", "Carlos Pereira", "Ana Costa"],
-      locomocao: "01:30",
-      manutencao: "02:00",
-      total_de_horas: "03:30"
-    },
-    {
-      placa: "XYZ-5678",
-      obra: "Reforma do prédio",
-      data: "2024-02-20T09:00:00Z",
-      endereco: "Av. Paulista, 987, São Paulo, SP",
-      tipo_de_servico: 2,
-      colaboradores: ["Maria Oliveira", "Rafael Martins", "Juliana Almeida"],
-      locomocao: "00:45",
-      manutencao: "03:00",
-      total_de_horas: "03:45"
-    },
-    {
-      placa: "DEF-9012",
-      obra: "Instalação elétrica",
-      data: "2024-03-05T07:00:00Z",
-      endereco: "Rua Rio Branco, 432, RJ",
-      tipo_de_servico: 3,
-      colaboradores: ["Luís Fernandes", "Ricardo Santos"],
-      locomocao: "00:30",
-      manutencao: "02:30",
-      total_de_horas: "03:00"
-    },
-    {
-      placa: "GHI-3456",
-      obra: "Pintura externa",
-      data: "2024-04-10T10:00:00Z",
-      endereco: "Rua dos Três Rios, 278, RJ",
-      tipo_de_servico: 4,
-      colaboradores: ["Paula Souza", "Carlos Pereira"],
-      locomocao: "01:00",
-      manutencao: "01:30",
-      total_de_horas: "02:30"
-    },
-    {
-      placa: "JKL-7890",
-      obra: "Desentupimento de esgoto",
-      data: "2024-05-18T11:00:00Z",
-      endereco: "Av. Brasil, 556, Rio de Janeiro, RJ",
-      tipo_de_servico: 5,
-      colaboradores: ["Ricardo Santos", "Fernanda Lima"],
-      locomocao: "00:40",
-      manutencao: "02:20",
-      total_de_horas: "03:00"
-    },
-    {
-      placa: "LMN-1234",
-      obra: "Reparação de telhado",
-      data: "2024-06-05T08:30:00Z",
-      endereco: "Rua XV de Novembro, 430, Curitiba, PR",
-      tipo_de_servico: 1,
-      colaboradores: ["Carlos Pereira", "Paula Souza"],
+      id: "6b2f99f4-46b8-4d39-8996-77fdefed6e2b",
+      placa: "KLM-1234",
+      obra: "Reforma de fachada",
+      data: "12/06/2024",
+      endereco: "Rua das Palmeiras, 45, Belo Horizonte, MG",
+      tipo_de_servico: "2",
+      colaboradores: ["Marcelo Costa", "Luciana Pires"],
       locomocao: "00:50",
-      manutencao: "03:00",
-      total_de_horas: "03:50"
+      manutencao: "02:00",
+      total_de_horas: "06:30",
+      horasPrevistas: "08:00",
+      status: "negative"
     },
     {
-      placa: "OPQ-5678",
+      id: "7b732469-8c2d-4628-a9c1-72d4e2e22ed0",
+      placa: "MNO-2345",
+      obra: "Pavimentação de rua",
+      data: "22/07/2024",
+      endereco: "Rua do Sol, 123, Campinas, SP",
+      tipo_de_servico: "1",
+      colaboradores: ["José Souza", "Ricardo Lima", "Paula Rodrigues"],
+      locomocao: "00:30",
+      manutencao: "01:50",
+      total_de_horas: "07:40",
+      horasPrevistas: "08:00",
+      status: "negative"
+    },
+    {
+      id: "ef278d0d-b2d1-4715-98a5-8fc9fc5c211f",
+      placa: "PQR-3456",
       obra: "Construção de muro",
-      data: "2024-07-10T09:00:00Z",
-      endereco: "Av. Rio Branco, 345, Porto Alegre, RS",
-      tipo_de_servico: 2,
-      colaboradores: ["João Silva", "Luís Fernandes"],
-      locomocao: "00:55",
-      manutencao: "02:30",
-      total_de_horas: "03:25"
-    },
-    {
-      placa: "RST-9012",
-      obra: "Instalação de sistema de segurança",
-      data: "2024-08-15T10:00:00Z",
-      endereco: "Rua das Acácias, 876, Belo Horizonte, MG",
-      tipo_de_servico: 3,
-      colaboradores: ["Ricardo Santos", "Juliana Almeida"],
-      locomocao: "00:30",
-      manutencao: "02:15",
-      total_de_horas: "02:45"
-    },
-    {
-      placa: "UVW-3456",
-      obra: "Pintura de fachada",
-      data: "2024-09-20T11:00:00Z",
-      endereco: "Rua das Palmeiras, 210, Fortaleza, CE",
-      tipo_de_servico: 4,
-      colaboradores: ["Maria Oliveira", "Rafael Martins"],
-      locomocao: "01:00",
-      manutencao: "02:30",
-      total_de_horas: "03:30"
-    },
-    {
-      placa: "XYZ-7890",
-      obra: "Construção de piscina",
-      data: "2024-10-25T07:30:00Z",
-      endereco: "Rua Dona Laura, 543, Natal, RN",
-      tipo_de_servico: 5,
-      colaboradores: ["Paula Souza", "Carlos Pereira"],
-      locomocao: "00:45",
-      manutencao: "03:00",
-      total_de_horas: "03:45"
-    },
-    {
-      placa: "ABC-2468",
-      obra: "Serragem de madeira",
-      data: "2024-11-02T08:15:00Z",
-      endereco: "Av. São João, 990, São Paulo, SP",
-      tipo_de_servico: 1,
-      colaboradores: ["João Silva", "Ricardo Santos"],
-      locomocao: "00:40",
-      manutencao: "02:15",
-      total_de_horas: "02:55"
-    },
-    {
-      placa: "DEF-1357",
-      obra: "Construção de casa",
-      data: "2024-12-05T09:30:00Z",
-      endereco: "Rua das Laranjeiras, 345, Curitiba, PR",
-      tipo_de_servico: 2,
-      colaboradores: ["Ana Costa", "Luís Fernandes"],
-      locomocao: "00:50",
-      manutencao: "03:30",
-      total_de_horas: "04:20"
-    },
-    {
-      placa: "GHI-2468",
-      obra: "Reparação hidráulica",
-      data: "2024-01-22T10:00:00Z",
-      endereco: "Rua das Flores, 120, São Paulo, SP",
-      tipo_de_servico: 3,
-      colaboradores: ["Ricardo Santos", "Juliana Almeida"],
-      locomocao: "00:45",
-      manutencao: "02:20",
-      total_de_horas: "03:05"
-    },
-    {
-      placa: "JKL-9876",
-      obra: "Substituição de pisos",
-      data: "2024-02-18T08:30:00Z",
-      endereco: "Av. Brasil, 220, Rio de Janeiro, RJ",
-      tipo_de_servico: 4,
-      colaboradores: ["Carlos Pereira", "Paula Souza"],
-      locomocao: "00:35",
-      manutencao: "02:40",
-      total_de_horas: "03:15"
-    },
-    {
-      placa: "MNO-1122",
-      obra: "Instalação de ar condicionado",
-      data: "2024-03-14T09:00:00Z",
-      endereco: "Rua dos Três Rios, 444, Recife, PE",
-      tipo_de_servico: 5,
-      colaboradores: ["Luís Fernandes", "Rafael Martins"],
-      locomocao: "00:50",
-      manutencao: "02:00",
-      total_de_horas: "02:50"
-    },
-    {
-      placa: "PQR-3344",
-      obra: "Reparo de rede elétrica",
-      data: "2024-04-02T08:00:00Z",
-      endereco: "Rua do Sol, 789, Porto Alegre, RS",
-      tipo_de_servico: 1,
-      colaboradores: ["Maria Oliveira", "Carlos Pereira"],
-      locomocao: "00:55",
-      manutencao: "02:50",
-      total_de_horas: "03:45"
-    },
-    {
-      placa: "STU-5566",
-      obra: "Construção de muros",
-      data: "2024-05-10T10:30:00Z",
-      endereco: "Av. São João, 233, Belo Horizonte, MG",
-      tipo_de_servico: 2,
-      colaboradores: ["Ricardo Santos", "Paula Souza"],
-      locomocao: "01:00",
-      manutencao: "02:30",
-      total_de_horas: "03:30"
-    },
-    {
-      placa: "VWX-7788",
-      obra: "Troca de janelas",
-      data: "2024-06-20T11:00:00Z",
-      endereco: "Rua Paulista, 1000, São Paulo, SP",
-      tipo_de_servico: 3,
-      colaboradores: ["João Silva", "Ana Costa"],
-      locomocao: "00:45",
-      manutencao: "02:20",
-      total_de_horas: "03:05"
-    },
-    {
-      placa: "YZA-9900",
-      obra: "Instalação de portões",
-      data: "2024-07-15T08:30:00Z",
-      endereco: "Rua Rio Branco, 765, Fortaleza, CE",
-      tipo_de_servico: 4,
-      colaboradores: ["Rafael Martins", "Carlos Pereira"],
-      locomocao: "00:40",
-      manutencao: "02:30",
-      total_de_horas: "03:10"
-    },
-    {
-      placa: "BCD-1122",
-      obra: "Construção de galpão",
-      data: "2024-08-25T09:00:00Z",
-      endereco: "Av. Brasília, 400, Curitiba, PR",
-      tipo_de_servico: 5,
-      colaboradores: ["Paula Souza", "Ricardo Santos"],
+      data: "03/08/2024",
+      endereco: "Rua São João, 78, Salvador, BA",
+      tipo_de_servico: "1",
+      colaboradores: ["André Lima", "Sílvia Rocha"],
       locomocao: "01:10",
-      manutencao: "03:00",
-      total_de_horas: "04:10"
+      manutencao: "01:30",
+      total_de_horas: "07:20",
+      horasPrevistas: "08:00",
+      status: "negative"
     },
     {
-      placa: "EFG-2233",
-      obra: "Instalação de iluminação pública",
-      data: "2024-09-30T10:15:00Z",
-      endereco: "Rua das Palmeiras, 99, Belo Horizonte, MG",
-      tipo_de_servico: 1,
-      colaboradores: ["Juliana Almeida", "Rafael Martins"],
+      id: "f9c45ad2-023a-4010-a324-8c0e9a6d258a",
+      placa: "STU-4567",
+      obra: "Instalação de ar condicionado",
+      data: "18/09/2024",
+      endereco: "Av. Rio Branco, 210, Fortaleza, CE",
+      tipo_de_servico: "3",
+      colaboradores: ["Carlos Martins", "Fernanda Almeida"],
+      locomocao: "00:40",
+      manutencao: "02:20",
+      total_de_horas: "06:40",
+      horasPrevistas: "08:00",
+      status: "negative"
+    },
+    {
+      id: "ad9f1a78-c458-45b2-89d1-604e2b87651e",
+      placa: "VWX-5678",
+      obra: "Reforma elétrica",
+      data: "25/09/2024",
+      endereco: "Rua Boa Vista, 34, Curitiba, PR",
+      tipo_de_servico: "3",
+      colaboradores: ["Gustavo Costa", "Renata Souza"],
       locomocao: "00:50",
-      manutencao: "02:40",
-      total_de_horas: "03:30"
+      manutencao: "03:00",
+      total_de_horas: "07:30",
+      horasPrevistas: "08:00",
+      status: "negative"
     },
     {
-      placa: "HIJ-3344",
-      obra: "Reparo de aquecedor",
-      data: "2024-10-14T09:30:00Z",
-      endereco: "Rua do Sol, 500, Recife, PE",
-      tipo_de_servico: 2,
-      colaboradores: ["Carlos Pereira", "Ana Costa"],
-      locomocao: "00:55",
-      manutencao: "03:00",
-      total_de_horas: "03:55"
+      id: "2a809d3f-4441-4629-906b-92e7f56d7be6",
+      placa: "YZA-6789",
+      obra: "Limpeza pós-obra",
+      data: "10/10/2024",
+      endereco: "Av. das Américas, 987, Rio de Janeiro, RJ",
+      tipo_de_servico: "5",
+      colaboradores: ["Vitor Almeida", "Luciana Santos"],
+      locomocao: "01:00",
+      manutencao: "02:00",
+      total_de_horas: "07:00",
+      horasPrevistas: "08:00",
+      status: "negative"
+    },
+    {
+      id: "97b78a5f-f25b-4d71-a9a7-c063f9c2355b",
+      placa: "BCD-9012",
+      obra: "Desentupimento de esgoto",
+      data: "22/11/2024",
+      endereco: "Rua dos Três Irmãos, 45, São Paulo, SP",
+      tipo_de_servico: "5",
+      colaboradores: ["Júlio Rocha", "Tânia Pires"],
+      locomocao: "00:30",
+      manutencao: "02:30",
+      total_de_horas: "07:00",
+      horasPrevistas: "08:00",
+      status: "negative"
+    },
+    {
+      id: "54214a4f-7f1f-4878-8e1a-b51e46e1a67b",
+      placa: "EFG-3456",
+      obra: "Reforma de cozinha",
+      data: "30/11/2024",
+      endereco: "Rua XV de Novembro, 301, Recife, PE",
+      tipo_de_servico: "2",
+      colaboradores: ["Marcos Souza", "Carla Mendes"],
+      locomocao: "00:45",
+      manutencao: "02:15",
+      total_de_horas: "07:30",
+      horasPrevistas: "08:00",
+      status: "negative"
+    },
+    {
+      id: "a20f24ae-5d53-4643-92b7-dad0e5e89926",
+      placa: "GHI-2345",
+      obra: "Instalação de sistema de segurança",
+      data: "05/12/2024",
+      endereco: "Av. Dom Pedro II, 150, Porto Alegre, RS",
+      tipo_de_servico: "4",
+      colaboradores: ["João Gomes", "Patrícia Costa"],
+      locomocao: "01:00",
+      manutencao: "02:00",
+      total_de_horas: "08:00",
+      horasPrevistas: "08:00",
+      status: "positive"
     }
-  ];
-
-  onShowMore() {}
+  ]
+  ;
 }

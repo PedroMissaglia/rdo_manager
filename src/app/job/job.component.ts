@@ -16,7 +16,7 @@ export class JobComponent {
   menus = [
     {
       label: 'Home',
-      icon: 'ph ph-house',
+      icon: 'ph ph-file-text',
       link: '/home',
       shortLabel: 'Home'
     },

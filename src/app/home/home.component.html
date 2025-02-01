@@ -9,15 +9,25 @@
   </po-toolbar>
 
   <po-page-list
+  [p-actions]="actions"
   >
-
     <po-table
       [p-selectable]="true"
       p-container="true"
       [p-hide-table-search]="false"
-      [p-height]="800"
+      [p-height]="650"
+      [p-draggable]="true"
+      [p-actions-right]="false"
+      [p-actions]="tableActions"
+      [p-max-columns]="9"
+      [p-columns]="columns"
+      [p-striped]="true"
+      [p-single-select]="true"
+      [p-text-wrap]="false"
+      [p-sort]="true"
       (p-show-more)="onShowMore()"
-      [p-hide-columns-manager]="true"
+      (p-selected)="onSelectDailyReport($event)"
+      (p-unselected)="onUnselectDailyReport()"
       [p-items]="tableItems"
       >
     </po-table>

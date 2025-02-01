@@ -13,11 +13,13 @@ import { AppRoutingModule } from './app-routing.module';
 import { JobModule } from './job/job.module';
 import { ColaboradorModule } from './colaborador/colaborador.module';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { DetailDailyReportComponent } from './home/detail-daily-report/detail-daily-report.component';
 
 @NgModule({
   declarations: [
     AppComponent,
     HomeComponent,
+    DetailDailyReportComponent,
     LoginComponent,
   ],
   imports: [
