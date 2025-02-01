@@ -4,9 +4,10 @@ import { Router } from '@angular/router';
 import { PoPageAction, PoTableAction, PoTableColumn } from '@po-ui/ng-components';
 
 @Component({
-  selector: 'app-home',
-  templateUrl: './home.component.html',
-  styleUrl: './home.component.scss'
+    selector: 'app-home',
+    templateUrl: './home.component.html',
+    styleUrl: './home.component.scss',
+    standalone: false
 })
 export class HomeComponent {
 

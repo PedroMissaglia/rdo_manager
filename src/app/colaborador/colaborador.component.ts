@@ -3,9 +3,10 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { PoBreadcrumb, PoPageAction, PoPageFilter, PoPageListComponent } from '@po-ui/ng-components';
 
 @Component({
-  selector: 'app-colaborador',
-  templateUrl: './colaborador.component.html',
-  styleUrl: './colaborador.component.scss'
+    selector: 'app-colaborador',
+    templateUrl: './colaborador.component.html',
+    styleUrl: './colaborador.component.scss',
+    standalone: false
 })
 export class ColaboradorComponent implements OnInit{
 

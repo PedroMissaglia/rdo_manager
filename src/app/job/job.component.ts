@@ -2,9 +2,10 @@ import { Component } from '@angular/core';
 import { PoPageAction } from '@po-ui/ng-components';
 
 @Component({
-  selector: 'app-job',
-  templateUrl: './job.component.html',
-  styleUrl: './job.component.scss'
+    selector: 'app-job',
+    templateUrl: './job.component.html',
+    styleUrl: './job.component.scss',
+    standalone: false
 })
 export class JobComponent {
 
