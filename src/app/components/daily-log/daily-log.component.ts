@@ -13,9 +13,6 @@ import { UserService } from '../../services/user.service';
 })
 export class DailyLogComponent implements OnInit, OnDestroy, AfterViewInit{
   isNavbarVisible: boolean = false; // Controls mobile navbar visibility
-  videoElement: any;
-  canvasElement: any;
-
   // Toggle navbar visibility on mobile
   toggleNavbar(): void {
     this.isNavbarVisible = !this.isNavbarVisible;
@@ -159,6 +156,11 @@ export class DailyLogComponent implements OnInit, OnDestroy, AfterViewInit{
   imageUrl: string = '';
   caption: string = '';
 
+  private videoElement!: HTMLVideoElement;
+  private stream: MediaStream | undefined;
+  private canvasElement!: HTMLCanvasElement | undefined;
+  private canvasContext!: CanvasRenderingContext2D | null;
+
   @ViewChild('videoElement') videoElementRef!: ElementRef<HTMLVideoElement>;
 
   constructor(
@@ -184,6 +186,8 @@ export class DailyLogComponent implements OnInit, OnDestroy, AfterViewInit{
 
     this.loadOperators();
     this.loadServices();
+
+    this.initializeCamera();
   }
 
   ngOnDestroy(): void {
@@ -192,6 +196,28 @@ export class DailyLogComponent implements OnInit, OnDestroy, AfterViewInit{
       tracks.forEach(track => track.stop());
     }
   }
+
+  private initializeCamera() {
+    const constraints = {
+      video: {
+        facingMode: 'environment', // This targets the back camera
+        width: { ideal: 1280 },
+        height: { ideal: 720 }
+      }
+    };
+
+    navigator.mediaDevices.getUserMedia(constraints)
+      .then((stream) => {
+        this.stream = stream;
+        this.videoElement = <HTMLVideoElement>document.querySelector('video');
+        this.videoElement.srcObject = stream;
+        this.videoElement.play();
+      })
+      .catch((err) => {
+        console.error('Error accessing camera:', err);
+      });
+  }
+
 
   formatDate(date: Date): string {
     const day = String(date.getDate()).padStart(2, '0'); // Pad single digits with leading zeros
@@ -229,6 +255,28 @@ export class DailyLogComponent implements OnInit, OnDestroy, AfterViewInit{
         console.error('Back camera not found');
       }
     });
+  }
+
+  capturePhoto(): void {
+    this.canvasElement = <HTMLCanvasElement>document.createElement('canvas');
+    this.canvasContext = this.canvasElement.getContext('2d');
+
+    // Set canvas dimensions to video dimensions
+    this.canvasElement.width = this.videoElement.videoWidth;
+    this.canvasElement.height = this.videoElement.videoHeight;
+
+    // Draw the current frame from the video onto the canvas
+    this.canvasContext?.drawImage(this.videoElement, 0, 0, this.canvasElement.width, this.canvasElement.height);
+
+    // Convert the canvas to an image
+    const imageUrl = this.canvasElement.toDataURL('image/png');
+
+    // Log the captured image URL (You can display or upload the image here)
+    console.log(imageUrl);
+
+    // Optionally, you can display the captured photo in the HTML
+    const imgElement = <HTMLImageElement>document.getElementById('capturedImage');
+    imgElement.src = imageUrl;
   }
 
   changeOptions(event: any): void {
