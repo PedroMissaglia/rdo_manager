@@ -69,16 +69,19 @@
       <!-- Button Groups -->
 
       <po-container [p-height]="400" class="po-text-center">
-        <!-- Video element to display the camera feed -->
-        <video
-        #videoElement autoplay
-        style="width: 100%; height: 100%; object-fit: cover;"></video>
+        <div class="camera-container">
+          <!-- Video Element to show the live stream -->
+          <video #videoElement autoplay width="100%" height="auto"></video>
 
-        <!-- Canvas element to capture the photo (hidden) -->
-        <canvas #canvasElement style="display: none"></canvas>
+          <!-- Canvas element to capture the photo (hidden) -->
+          <canvas #canvasElement style="display: none;"></canvas>
 
-        <!-- Display the captured image preview -->
-        <img *ngIf="capturedImage" [src]="capturedImage" alt="Captured Photo" class="po-text-center" />
+          <!-- Button to capture the photo -->
+          <button (click)="capturePhoto()">Capture Photo</button>
+
+          <!-- Display the captured image -->
+          <img *ngIf="capturedImage" [src]="capturedImage" alt="Captured Photo" class="captured-image" />
+        </div>
       </po-container>
 
       <po-button-group

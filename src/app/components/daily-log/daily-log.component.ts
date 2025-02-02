@@ -1,5 +1,5 @@
 import { CrudService } from './../../services/crud.service';
-import { Component, ElementRef, ViewChild } from '@angular/core';
+import { Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { PoButtonGroupItem, PoModalAction, PoModalComponent, PoMultiselectFilter, PoMultiselectOption, PoNavbarIconAction, PoNavbarItem, PoStepperOrientation, PoTableColumn } from '@po-ui/ng-components';
 import { CameraService } from '../../services/camera.service';
@@ -11,7 +11,7 @@ import { UserService } from '../../services/user.service';
   templateUrl: './daily-log.component.html',
   styleUrl: './daily-log.component.scss'
 })
-export class DailyLogComponent {
+export class DailyLogComponent implements OnInit, OnDestroy{
   isNavbarVisible: boolean = false; // Controls mobile navbar visibility
 
   // Toggle navbar visibility on mobile
@@ -56,11 +56,11 @@ export class DailyLogComponent {
   ];
   items: any;
 
-  @ViewChild('videoElement')
-  videoElement!: ElementRef;
-  @ViewChild('canvasElement')
-  canvasElement!: ElementRef;
+  @ViewChild('videoElement') videoElement!: ElementRef;
+  @ViewChild('canvasElement') canvasElement!: ElementRef;
   capturedImage!: string;
+
+  private mediaStream: MediaStream | null = null;
 
   close: PoModalAction = {
     action: () => {
@@ -175,6 +175,13 @@ export class DailyLogComponent {
     this.startCamera();
   }
 
+  ngOnDestroy(): void {
+    if (this.mediaStream) {
+      const tracks = this.mediaStream.getTracks();
+      tracks.forEach(track => track.stop());
+    }
+  }
+
   formatDate(date: Date): string {
     const day = String(date.getDate()).padStart(2, '0'); // Pad single digits with leading zeros
     const month = String(date.getMonth() + 1).padStart(2, '0'); // getMonth() is zero-based, so add 1
@@ -189,13 +196,16 @@ export class DailyLogComponent {
   startCamera(): void {
     const constraints = {
       video: {
-        facingMode: 'environment' // 'user' for front camera, 'environment' for rear camera
+        facingMode: 'environment', // Use 'user' for front camera, 'environment' for rear camera
+        width: 1280,
+        height: 720
       }
     };
 
     if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
       navigator.mediaDevices.getUserMedia(constraints)
         .then((stream) => {
+          this.mediaStream = stream;
           this.videoElement.nativeElement.srcObject = stream;
         })
         .catch((err) => {
@@ -222,28 +232,27 @@ export class DailyLogComponent {
 
 
   // Capture photo
+  // Capture the photo from the video stream
   capturePhoto(): void {
     const canvas = this.canvasElement.nativeElement;
     const video = this.videoElement.nativeElement;
 
-    // Set the canvas dimensions to the video dimensions
+    // Set the canvas size to the video size
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
 
-    // Draw the current frame from the video onto the canvas
+    // Draw the current video frame onto the canvas
     const context = canvas.getContext('2d');
-    context.drawImage(video, 0, 0, canvas.width, canvas.height);
+    if (context) {
+      context.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-    // Get the data URL of the image from the canvas
-    this.capturedImage = canvas.toDataURL('image/png');
+      // Get the image data from the canvas
+      this.capturedImage = canvas.toDataURL('image/png'); // Base64 encoded image
 
-    // Stop the video stream (optional)
-    const stream = video.srcObject as MediaStream;
-    const tracks = stream.getTracks();
-    tracks.forEach(track => track.stop());
-
-    // Optionally display the captured image
-    console.log('Captured Image:', this.capturedImage);
+      // Optionally, stop the camera stream after capturing the image
+      const tracks = this.mediaStream?.getTracks();
+      tracks?.forEach(track => track.stop());
+    }
   }
 
   getGeoLocation(): void {
@@ -263,11 +272,6 @@ export class DailyLogComponent {
       this.errorMessage = 'Geolocation is not supported by this browser.';
       console.error('Geolocation is not supported.');
     }
-  }
-
-
-  ngOnDestroy(): void {
-
   }
 
   onHandleStartRoute(action: string) {
