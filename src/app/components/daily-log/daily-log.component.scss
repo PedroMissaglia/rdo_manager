@@ -1,0 +1,106 @@
+/* Custom Navbar Styles */
+.custom-navbar {
+  padding: 1rem; /* Padding for navbar */
+  color: #fff;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: relative;
+}
+
+/* Navbar logo */
+.navbar-logo a {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #fff;
+  text-decoration: none;
+}
+
+/* Desktop links */
+.navbar-links {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.navbar-links a {
+  color: #fff;
+  margin: 0 1rem;
+  text-decoration: none;
+  font-size: 1rem;
+}
+
+/* Navbar links hover effect */
+.navbar-links a:hover {
+  text-decoration: underline;
+}
+
+/* Hamburger icon for mobile */
+.hamburger {
+  display: none;
+  flex-direction: column;
+  justify-content: space-around;
+  width: 30px;
+  height: 20px;
+  cursor: pointer;
+}
+
+.hamburger .bar {
+  background-color: #fff;
+  height: 4px;
+  width: 100%;
+  border-radius: 5px;
+}
+
+/* Show hamburger icon on small screens */
+@media (max-width: 768px) {
+  .desktop-links {
+    display: none; /* Hide links on small screens */
+  }
+
+  .hamburger {
+    display: flex;
+  }
+
+  .mobile-links {
+    display: none;
+    flex-direction: column;
+    position: absolute;
+    top: 60px;
+    right: 20px;
+    background-color: #333;
+    border-radius: 8px;
+    padding: 10px 20px;
+    width: 200px;
+  }
+
+  .mobile-links.show {
+    display: flex;
+  }
+
+  .mobile-links a {
+    margin: 10px 0;
+  }
+
+  /* Wrapper to center the content */
+.po-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh; /* Full viewport height */
+  background-color: #f4f4f4; /* Optional background color */
+  padding: 20px; /* Optional padding for spacing */
+  box-sizing: border-box; /* Ensure padding does not affect width */
+}
+
+/* Adjust content for responsiveness */
+.po-wrapper .content {
+  width: 100%; /* Ensures content spans full width */
+  max-width: 1200px; /* Set a maximum width for your content */
+  padding: 20px; /* Optional padding */
+  background-color: #fff; /* Background color for content */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Optional box shadow for elevation */
+  border-radius: 8px; /* Optional rounded corners */
+}
+
+}

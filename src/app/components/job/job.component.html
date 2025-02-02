@@ -1,0 +1,23 @@
+<po-page-list
+  [p-actions]="actions"
+  p-title="Serviços">
+
+  <po-table
+    p-title="Sample Table"
+    [p-selectable]="true"
+    p-container="true"
+    [p-hide-table-search]="false"
+    [p-single-select]="true"
+    [p-height]="650"
+    [p-striped]="true"
+    [p-columns]="columns"
+    (p-show-more)="onShowMore()"
+    (p-selected)="onSelectService($event)"
+    (p-unselected)="onUnselectService()"
+    [p-hide-columns-manager]="false"
+    [p-items]="tableItems"
+    >
+  </po-table>
+</po-page-list>
+
+

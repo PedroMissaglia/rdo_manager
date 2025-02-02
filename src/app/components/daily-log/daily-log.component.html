@@ -1,0 +1,130 @@
+<po-page-default>
+
+  <nav class="custom-navbar">
+    <!-- Navbar Title (optional logo or text) -->
+    <div class="navbar-logo">
+    </div>
+
+  </nav>
+
+
+  <po-stepper
+    #stepper
+    [p-orientation]="orientation"
+    [p-align-center]="true"
+    [p-step-size]="32"
+  >
+    <po-step p-label="Início de rota">
+      <div class="po-mt-1">
+        <form [formGroup]="myForm">
+          <!-- First Widget with LabelNow Input -->
+          <po-widget class="po-mt-1">
+
+            <po-info p-label="Data e hora" [p-value]="labelNow"> </po-info>
+            <po-info p-label="Obra" [p-value]="userService.user?.obra"> </po-info>
+            <po-info p-label="Operador e placa" [p-value]="getDisplayNameAndPlate()"> </po-info>
+
+            <br>
+            <po-multiselect
+              class=" po-mb-5 po-mt-3"
+              formControlName="contact"
+              (p-change)="changeOptions($event)"
+              p-field-value="uid"
+              [p-hide-select-all]="true"
+              p-label="Operadores"
+              [p-options]="optionsOperators"
+              p-field-label="displayName"
+              p-icon="ph ph-user"
+              p-placeholder="Selecione o operador"
+              required
+            >
+            </po-multiselect>
+
+            <br>
+            <po-combo
+              name="combo"
+              class="po-mb-1"
+              formControlName="service"
+              p-label="Serviço"
+              p-placeholder="Selecione o serviço"
+              [p-options]="optionsServices"
+              required
+            >
+            </po-combo>
+          </po-widget>
+
+          <!-- Button to Start Route -->
+          <po-button
+            class="po-md-12 po-mt-5"
+            p-kind="primary"
+            p-label="Iniciar Rota"
+            [p-disabled]="myForm.invalid || startedRoute"
+            (p-click)="onHandleStartRoute('startRoute')"
+          ></po-button>
+        </form>
+      </div>
+    </po-step>
+
+    <po-step p-label="Coletar fotos">
+      <!-- Button Groups -->
+      <po-button-group
+        class="po-md-12 po-mt-5"
+        [p-buttons]="buttons1"
+      ></po-button-group>
+
+      <po-textarea
+        name="textarea"
+        class="po-md-12 po-mt-3"
+        p-label="Detalhes"
+        [p-rows]="6"
+      ></po-textarea>
+
+      <po-button
+        class="po-md-12"
+        p-kind="tertiary"
+        p-label="Coletar Assinaturas"
+        [p-disabled]="true"
+        (p-click)="onHandleStartRoute('startRoute')"
+      ></po-button>
+    </po-step>
+  </po-stepper>
+
+  <!-- Modal (Hidden by default) -->
+  <po-modal
+    #modal
+    p-title="Iniciar rota"
+    [p-primary-action]="confirm"
+    [p-secondary-action]="close"
+  >
+    <po-dynamic-view
+      [p-fields]="[{ property: 'data' }, {property: 'equipe'}]"
+      [p-value]="getDynamicViewValues()"
+    >
+    </po-dynamic-view>
+  </po-modal>
+</po-page-default>
+
+<po-modal
+  #modalTwo
+  p-title="Câmera"
+  [p-primary-action]="confirmCamera"
+  [p-secondary-action]="close"
+>
+  <!-- Video element to display the camera feed -->
+  <div class="po-text-center">
+    <video #videoElement autoplay></video>
+
+    <!-- Canvas element to capture the photo -->
+    <canvas #canvasElement style="display: none"></canvas>
+
+    <div class="po-text-center">
+      <po-button (p-click)="capturePhoto()" p-label="Capturar foto"
+        >Capturar foto</po-button
+      >
+    </div>
+    <!-- Button to trigger the photo capture -->
+
+    <!-- Optionally, display the captured image -->
+    <img *ngIf="capturedImage" [src]="capturedImage" alt="Captured Photo" />
+  </div>
+</po-modal>

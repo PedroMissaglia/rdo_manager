@@ -1,0 +1,18 @@
+<po-page-list
+  p-title="Colaborador"
+  [p-actions]="actions"
+>
+  <po-table
+    [p-selectable]="true"
+    p-container="true"
+    [p-single-select]="true"
+    [p-hide-table-search]="false"
+    [p-height]="600"
+    (p-selected)="onSelectCollaborator($event)"
+    (p-unselected)="onUnselectCollaborator()"
+    (p-show-more)="onShowMore()"
+    [p-items]="tableItems"
+    [p-columns]="columns"
+    >
+  </po-table>
+</po-page-list>

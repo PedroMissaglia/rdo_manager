@@ -1,1 +1,18 @@
-<router-outlet></router-outlet>
+<div class="po-wrapper" *ngIf="userService.isLogged && userService.user.type === 'Administrador'; else loggedOutTemplate">
+  <!-- Menu and Toolbar visible only when user is logged in -->
+  <po-menu *ngIf="userService.user.type === 'Administrador'"
+    [p-menus]="menus"
+    [p-collapsed]="true"
+    [p-logo]="logo">
+  </po-menu>
+
+  <po-toolbar *ngIf="userService.user.type === 'Administrador'"
+  p-title="RDO - Relatório de obra diário"></po-toolbar>
+
+  <router-outlet></router-outlet>
+</div>
+
+<!-- Template to show when the user is not logged in -->
+<ng-template #loggedOutTemplate>
+  <router-outlet></router-outlet>
+</ng-template>

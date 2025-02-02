@@ -1,19 +1,34 @@
-import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
-// app.module.ts
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
-import { AppComponent } from './app.component';
 import { RouterModule, RouterOutlet, Routes } from '@angular/router';
-import { LoginComponent } from './login/login.component';
 import { PoModule } from '@po-ui/ng-components';
-import { PoTemplatesModule } from '@po-ui/ng-templates';
-import { PoPageLoginModule } from '@po-ui/ng-templates';
-import { HomeComponent } from './home/home.component';
+import { PoPageLoginModule, PoTemplatesModule } from '@po-ui/ng-templates';
 import { AppRoutingModule } from './app-routing.module';
-import { JobModule } from './job/job.module';
-import { ColaboradorModule } from './colaborador/colaborador.module';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { DetailDailyReportComponent } from './home/detail-daily-report/detail-daily-report.component';
+import { provideFirestore, getFirestore, Firestore } from '@angular/fire/firestore'; // Modular API
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { AppComponent } from './app.component';
+import { AngularFireDatabaseModule } from '@angular/fire/compat/database';
+import { AngularFirestoreModule } from '@angular/fire/compat/firestore';
+import { initializeApp, provideFirebaseApp } from '@angular/fire/app';
+import { HomeComponent } from './components/home/home.component';
+import { DetailDailyReportComponent } from './components/home/detail-daily-report/detail-daily-report.component';
+import { LoginComponent } from './components/login/login.component';
+import { ColaboradorModule } from './components/colaborador/colaborador.module';
+import { JobModule } from './components/job/job.module';
+import { DailyLogComponent } from './components/daily-log/daily-log.component';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+
+// Your web app's Firebase configuration
+const firebaseConfig = {
+  apiKey: "AIzaSyDTMXi_vhTNEnUgnPpHwZZLVMEfBtXyh7Y",
+  authDomain: "rdo-manager.firebaseapp.com",
+  databaseURL: "https://rdo-manager-default-rtdb.firebaseio.com",
+  projectId: "rdo-manager",
+  storageBucket: "rdo-manager.firebasestorage.app",
+  messagingSenderId: "774211567998",
+  appId: "1:774211567998:web:d7eb2a66ee2c24c4bdb32f"
+};
 
 @NgModule({
   declarations: [
@@ -21,21 +36,27 @@ import { DetailDailyReportComponent } from './home/detail-daily-report/detail-da
     HomeComponent,
     DetailDailyReportComponent,
     LoginComponent,
+    DailyLogComponent
   ],
   imports: [
     BrowserModule,
-    RouterOutlet,
     AppRoutingModule,
-    RouterModule,
-    JobModule,
     ColaboradorModule,
     BrowserAnimationsModule,
     PoModule,
+    JobModule,
+    FormsModule,
+    ReactiveFormsModule,
     PoPageLoginModule,
-    RouterModule.forRoot([]),
-    PoTemplatesModule],
+    RouterModule,
+    PoTemplatesModule,
+    AngularFireDatabaseModule,
+    AngularFirestoreModule.enablePersistence(),
+  ],
   providers: [
     provideHttpClient(withInterceptorsFromDi()),
+    provideFirestore(() => getFirestore()), // Move to providers
+    provideFirebaseApp(() => initializeApp(firebaseConfig)),  // Initialize Firebase
   ],
   bootstrap: [AppComponent]
 })
