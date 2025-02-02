@@ -172,7 +172,7 @@ export class DailyLogComponent implements OnInit, OnDestroy, AfterViewInit{
     const videoElement = this.videoElementRef.nativeElement;
 
     // Start the camera after the view is initialized
-    this.startCamera(videoElement);
+    this.getBackCameraStream(videoElement);
   }
 
   ngOnInit(): void {
@@ -203,16 +203,32 @@ export class DailyLogComponent implements OnInit, OnDestroy, AfterViewInit{
     return `${day}/${month}/${year} - ${hours}:${minutes}`;
   }
 
-  startCamera(videoElement: HTMLVideoElement) {
-    navigator.mediaDevices
-      .getUserMedia({ video: true })
-      .then((stream) => {
-        videoElement.srcObject = stream;
-        videoElement.play();
-      })
-      .catch((err) => {
-        console.error('Error accessing camera: ', err);
-      });
+  getBackCameraStream(videoElement: HTMLVideoElement) {
+    // Get all media devices
+    navigator.mediaDevices.enumerateDevices().then(devices => {
+      const videoDevices = devices.filter(device => device.kind === 'videoinput');
+
+      // Find the back camera using labels
+      const backCamera = videoDevices.find(device => device.label.toLowerCase().includes('back') || device.label.toLowerCase().includes('environment'));
+
+      if (backCamera) {
+        // Access the back camera using getUserMedia
+        const constraints = {
+          video: {
+            deviceId: backCamera.deviceId, // Use the back camera deviceId
+          }
+        };
+
+        navigator.mediaDevices.getUserMedia(constraints).then((stream) => {
+          videoElement.srcObject = stream;
+          videoElement.play();
+        }).catch((err) => {
+          console.error('Error accessing back camera: ', err);
+        });
+      } else {
+        console.error('Back camera not found');
+      }
+    });
   }
 
   changeOptions(event: any): void {
