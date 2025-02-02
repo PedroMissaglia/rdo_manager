@@ -103,4 +103,38 @@
   border-radius: 8px; /* Optional rounded corners */
 }
 
+.camera-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 20px;
+  position: relative;  /* Allows positioning of other elements within the container */
+}
+
+video {
+  border: 2px solid #ccc; /* Optional styling for video border */
+  width: 100%; /* Ensures the video scales to the container width */
+  height: auto; /* Maintains aspect ratio */
+}
+
+button {
+  padding: 10px 20px;
+  background-color: #4caf50;
+  color: white;
+  border: none;
+  cursor: pointer;
+  margin-top: 10px;
+}
+
+button:hover {
+  background-color: #45a049;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+  margin-top: 10px;
+}
+
+
 }

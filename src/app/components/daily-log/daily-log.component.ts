@@ -1,5 +1,5 @@
 import { CrudService } from './../../services/crud.service';
-import { Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { PoButtonGroupItem, PoModalAction, PoModalComponent, PoMultiselectFilter, PoMultiselectOption, PoNavbarIconAction, PoNavbarItem, PoStepperOrientation, PoTableColumn } from '@po-ui/ng-components';
 import { CameraService } from '../../services/camera.service';
@@ -11,8 +11,10 @@ import { UserService } from '../../services/user.service';
   templateUrl: './daily-log.component.html',
   styleUrl: './daily-log.component.scss'
 })
-export class DailyLogComponent implements OnInit, OnDestroy{
+export class DailyLogComponent implements OnInit, OnDestroy, AfterViewInit{
   isNavbarVisible: boolean = false; // Controls mobile navbar visibility
+  videoElement: any;
+  canvasElement: any;
 
   // Toggle navbar visibility on mobile
   toggleNavbar(): void {
@@ -24,7 +26,7 @@ export class DailyLogComponent implements OnInit, OnDestroy{
   startedRoute = false;
 
   buttons1: Array<PoButtonGroupItem> = [
-    { label: 'Coletar fotos', action: this.capturePhoto.bind(this), icon: 'an an-camera', disabled: this.myForm?.invalid }
+    { label: 'Coletar fotos', action: this.takePhoto.bind(this), icon: 'an an-camera', disabled: this.myForm?.invalid }
   ];
 
   serviceOptions = [
@@ -56,8 +58,6 @@ export class DailyLogComponent implements OnInit, OnDestroy{
   ];
   items: any;
 
-  @ViewChild('videoElement') videoElement!: ElementRef;
-  @ViewChild('canvasElement') canvasElement!: ElementRef;
   capturedImage!: string;
 
   private mediaStream: MediaStream | null = null;
@@ -155,13 +155,25 @@ export class DailyLogComponent implements OnInit, OnDestroy{
   }
 
   service: string = '';
+  context: any;
+  imageUrl: string = '';
+  caption: string = '';
+
+  @ViewChild('videoElement') videoElementRef!: ElementRef<HTMLVideoElement>;
 
   constructor(
     private cameraService: CameraService,
     private crudService: CrudService,
     public userService: UserService,
-    private fb: FormBuilder) {
-    }
+    private fb: FormBuilder)
+  {}
+
+  ngAfterViewInit() {
+    const videoElement = this.videoElementRef.nativeElement;
+
+    // Start the camera after the view is initialized
+    this.startCamera(videoElement);
+  }
 
   ngOnInit(): void {
     this.myForm = this.fb.group({
@@ -172,7 +184,6 @@ export class DailyLogComponent implements OnInit, OnDestroy{
 
     this.loadOperators();
     this.loadServices();
-    this.startCamera();
   }
 
   ngOnDestroy(): void {
@@ -192,30 +203,17 @@ export class DailyLogComponent implements OnInit, OnDestroy{
     return `${day}/${month}/${year} - ${hours}:${minutes}`;
   }
 
-  // Start the camera feed
-  startCamera(): void {
-    const constraints = {
-      video: {
-        facingMode: 'environment', // Use 'user' for front camera, 'environment' for rear camera
-        width: 1280,
-        height: 720
-      }
-    };
-
-    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-      navigator.mediaDevices.getUserMedia(constraints)
-        .then((stream) => {
-          this.mediaStream = stream;
-          this.videoElement.nativeElement.srcObject = stream;
-        })
-        .catch((err) => {
-          console.error('Error accessing the camera: ', err);
-        });
-    } else {
-      console.error('Camera not supported');
-    }
+  startCamera(videoElement: HTMLVideoElement) {
+    navigator.mediaDevices
+      .getUserMedia({ video: true })
+      .then((stream) => {
+        videoElement.srcObject = stream;
+        videoElement.play();
+      })
+      .catch((err) => {
+        console.error('Error accessing camera: ', err);
+      });
   }
-
 
   changeOptions(event: any): void {
     this.heroes = [...event];
@@ -231,28 +229,54 @@ export class DailyLogComponent implements OnInit, OnDestroy{
   }
 
 
-  // Capture photo
-  // Capture the photo from the video stream
-  capturePhoto(): void {
-    const canvas = this.canvasElement.nativeElement;
-    const video = this.videoElement.nativeElement;
+  // Capture photo from the video stream
+  takePhoto() {
+    const videoElement = this.videoElementRef.nativeElement;
 
-    // Set the canvas size to the video size
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
+    if (!videoElement) {
+      console.error('Video element is not available');
+      return;
+    }
 
-    // Draw the current video frame onto the canvas
+    // Create a canvas to capture the video frame
+    const canvas = document.createElement('canvas');
     const context = canvas.getContext('2d');
     if (context) {
-      context.drawImage(video, 0, 0, canvas.width, canvas.height);
+      // Set canvas size to match the video element
+      canvas.width = videoElement.videoWidth;
+      canvas.height = videoElement.videoHeight;
 
-      // Get the image data from the canvas
-      this.capturedImage = canvas.toDataURL('image/png'); // Base64 encoded image
+      // Draw the current video frame onto the canvas
+      context.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
 
-      // Optionally, stop the camera stream after capturing the image
-      const tracks = this.mediaStream?.getTracks();
-      tracks?.forEach(track => track.stop());
+      // Get the base64 image from the canvas
+      this.imageUrl = canvas.toDataURL('image/png');
     }
+  }
+
+  // Upload the photo
+  uploadPost() {
+    if (this.imageUrl && this.caption) {
+      const blob = this.dataURLToBlob(this.imageUrl);
+      const file = new File([blob], 'photo.png', { type: 'image/png' });
+      // this.postService.uploadPost(file, this.caption).subscribe();
+      this.caption = '';
+      this.imageUrl = ''; // Clear the image after upload
+    }
+  }
+
+  // Convert base64 string to a Blob
+  dataURLToBlob(dataURL: string): Blob {
+    const [base64Prefix, base64Data] = dataURL.split(',');
+    const byteString = atob(base64Data);
+    const arrayBuffer = new ArrayBuffer(byteString.length);
+    const uint8Array = new Uint8Array(arrayBuffer);
+
+    for (let i = 0; i < byteString.length; i++) {
+      uint8Array[i] = byteString.charCodeAt(i);
+    }
+
+    return new Blob([uint8Array], { type: 'image/png' });
   }
 
   getGeoLocation(): void {

@@ -68,21 +68,17 @@
     <po-step p-label="Coletar fotos">
       <!-- Button Groups -->
 
-      <po-container [p-height]="400" class="po-text-center">
-        <div class="camera-container">
-          <!-- Video Element to show the live stream -->
-          <video #videoElement autoplay width="100%" height="auto"></video>
+      <div class="camera-container">
+        <!-- Video element to show the camera stream (without controls) -->
+        <video #videoElement width="100%" height="auto" autoplay muted></video>
 
-          <!-- Canvas element to capture the photo (hidden) -->
-          <canvas #canvasElement style="display: none;"></canvas>
-
-          <!-- Button to capture the photo -->
-          <button (click)="capturePhoto()">Capture Photo</button>
-
-          <!-- Display the captured image -->
-          <img *ngIf="capturedImage" [src]="capturedImage" alt="Captured Photo" class="captured-image" />
+        <!-- Display the captured image -->
+        <div *ngIf="imageUrl">
+          <h3>Captured Photo:</h3>
+          <img [src]="imageUrl" alt="Captured Image" width="100%">
         </div>
-      </po-container>
+      </div>
+
 
       <po-button-group
         class="po-md-12 po-mt-5"
@@ -129,13 +125,13 @@
 >
   <!-- Video element to display the camera feed -->
   <div class="po-text-center">
-    <video #videoElement autoplay></video>
+    <video id="videoElement" width="100%" height="auto" autoplay></video>
 
     <!-- Canvas element to capture the photo -->
     <canvas #canvasElement style="display: none"></canvas>
 
     <div class="po-text-center">
-      <po-button (p-click)="capturePhoto()" p-label="Capturar foto"
+      <po-button (p-click)="takePhoto()" p-label="Capturar foto"
         >Capturar foto</po-button
       >
     </div>
