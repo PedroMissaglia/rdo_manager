@@ -24,7 +24,7 @@ export class DailyLogComponent {
   startedRoute = false;
 
   buttons1: Array<PoButtonGroupItem> = [
-    { label: 'Coletar fotos', action: this.openCamera.bind(this), icon: 'an an-camera', disabled: this.myForm?.invalid }
+    { label: 'Coletar fotos', action: this.capturePhoto.bind(this), icon: 'an an-camera', disabled: this.myForm?.invalid }
   ];
 
   serviceOptions = [
@@ -119,6 +119,10 @@ export class DailyLogComponent {
     }
   }
 
+  openCamera() {
+
+  }
+
   heroes: Array<any> = [];
 
   // Logo and alternative text
@@ -168,6 +172,7 @@ export class DailyLogComponent {
 
     this.loadOperators();
     this.loadServices();
+    this.startCamera();
   }
 
   formatDate(date: Date): string {
@@ -180,23 +185,8 @@ export class DailyLogComponent {
     return `${day}/${month}/${year} - ${hours}:${minutes}`;
   }
 
-
-  changeOptions(event: any): void {
-    this.heroes = [...event];
-  }
-
-  getDynamicViewValues() {
-    let equipe: string = '';
-    this.heroes.forEach((hero, index) => {
-      index === 0 ? equipe = equipe.concat(hero.name) : equipe = equipe.concat(', ' + hero.name)
-    })
-
-    return JSON.parse(`{ "data": "${this.labelNow}", "equipe": "${equipe}" }`)
-  }
-
-  // Open the camera
-  openCamera(): void {
-
+  // Start the camera feed
+  startCamera(): void {
     const constraints = {
       video: {
         facingMode: 'environment' // 'user' for front camera, 'environment' for rear camera
@@ -214,33 +204,31 @@ export class DailyLogComponent {
     } else {
       console.error('Camera not supported');
     }
-
-    this.getGeoLocation();
   }
 
 
+  changeOptions(event: any): void {
+    this.heroes = [...event];
+  }
+
+  getDynamicViewValues() {
+    let equipe: string = '';
+    this.heroes.forEach((hero, index) => {
+      index === 0 ? equipe = equipe.concat(hero.name) : equipe = equipe.concat(', ' + hero.name)
+    })
+
+    return JSON.parse(`{ "data": "${this.labelNow}", "equipe": "${equipe}" }`)
+  }
 
 
-
-
+  // Capture photo
   capturePhoto(): void {
     const canvas = this.canvasElement.nativeElement;
     const video = this.videoElement.nativeElement;
 
-    // Request fullscreen on the video element
-    if (video.requestFullscreen) {
-      video.requestFullscreen();
-    } else if (video.mozRequestFullScreen) { // Firefox
-      video.mozRequestFullScreen();
-    } else if (video.webkitRequestFullscreen) { // Chrome, Safari
-      video.webkitRequestFullscreen();
-    } else if (video.msRequestFullscreen) { // IE/Edge
-      video.msRequestFullscreen();
-    }
-
-    // Set the canvas dimensions to the video dimensions (fullscreen size)
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
+    // Set the canvas dimensions to the video dimensions
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
 
     // Draw the current frame from the video onto the canvas
     const context = canvas.getContext('2d');
@@ -254,15 +242,9 @@ export class DailyLogComponent {
     const tracks = stream.getTracks();
     tracks.forEach(track => track.stop());
 
-    // Optionally display the captured image in the console or elsewhere
+    // Optionally display the captured image
     console.log('Captured Image:', this.capturedImage);
-
-    // Optionally, exit fullscreen after capturing (if needed)
-    if (document.exitFullscreen) {
-      document.exitFullscreen();  // Standard method
-    }
   }
-
 
   getGeoLocation(): void {
     if (navigator.geolocation) {

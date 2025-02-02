@@ -67,6 +67,20 @@
 
     <po-step p-label="Coletar fotos">
       <!-- Button Groups -->
+
+      <po-container [p-height]="400" class="po-text-center">
+        <!-- Video element to display the camera feed -->
+        <video
+        #videoElement autoplay
+        style="width: 100%; height: 100%; object-fit: cover;"></video>
+
+        <!-- Canvas element to capture the photo (hidden) -->
+        <canvas #canvasElement style="display: none"></canvas>
+
+        <!-- Display the captured image preview -->
+        <img *ngIf="capturedImage" [src]="capturedImage" alt="Captured Photo" class="po-text-center" />
+      </po-container>
+
       <po-button-group
         class="po-md-12 po-mt-5"
         [p-buttons]="buttons1"
