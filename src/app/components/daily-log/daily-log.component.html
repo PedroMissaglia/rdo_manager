@@ -68,11 +68,20 @@
     <po-step p-label="Coletar fotos">
       <!-- Button Groups -->
 
-      <div class="camera-container">
-        <!-- Video element to show the camera stream (without controls) -->
+      <div class="po-text-center">
+        <!-- Make sure the references match what you have in the component -->
         <video #videoElement width="100%" height="auto" autoplay></video>
-        <button (click)="capturePhoto()">Capture Photo</button>
-        <img id="capturedImage" *ngIf="image" />
+        <canvas #canvasElement style="display: none;"></canvas>
+
+        <div class="po-text-center">
+          <po-button (p-click)="takePhoto()" p-label="Capturar foto"
+            >Capturar foto</po-button
+          >
+        </div>
+        <!-- Button to trigger the photo capture -->
+
+        <!-- Optionally, display the captured image -->
+        <img *ngIf="capturedImage" [src]="imageUrl" alt="Captured Photo" />
       </div>
 
 
@@ -105,35 +114,10 @@
     [p-primary-action]="confirm"
     [p-secondary-action]="close"
   >
-    <po-dynamic-view
+    <!-- <po-dynamic-view
       [p-fields]="[{ property: 'data' }, {property: 'equipe'}]"
       [p-value]="getDynamicViewValues()"
     >
-    </po-dynamic-view>
+    </po-dynamic-view> -->
   </po-modal>
 </po-page-default>
-
-<po-modal
-  #modalTwo
-  p-title="Câmera"
-  [p-primary-action]="confirmCamera"
-  [p-secondary-action]="close"
->
-  <!-- Video element to display the camera feed -->
-  <div class="po-text-center">
-    <video id="videoElement" width="100%" height="auto" autoplay></video>
-
-    <!-- Canvas element to capture the photo -->
-    <canvas #canvasElement style="display: none"></canvas>
-
-    <div class="po-text-center">
-      <po-button (p-click)="takePhoto()" p-label="Capturar foto"
-        >Capturar foto</po-button
-      >
-    </div>
-    <!-- Button to trigger the photo capture -->
-
-    <!-- Optionally, display the captured image -->
-    <img *ngIf="capturedImage" [src]="capturedImage" alt="Captured Photo" />
-  </div>
-</po-modal>

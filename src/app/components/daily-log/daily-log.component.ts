@@ -1,7 +1,7 @@
 import { CrudService } from './../../services/crud.service';
 import { AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { PoButtonGroupItem, PoModalAction, PoModalComponent, PoMultiselectFilter, PoMultiselectOption, PoNavbarIconAction, PoNavbarItem, PoStepperOrientation, PoTableColumn } from '@po-ui/ng-components';
+import { PoButtonGroupItem, PoModalAction, PoModalComponent, PoMultiselectOption, PoNavbarIconAction, PoNavbarItem, PoStepperOrientation, PoTableColumn } from '@po-ui/ng-components';
 import { CameraService } from '../../services/camera.service';
 import { UserService } from '../../services/user.service';
 
@@ -9,9 +9,9 @@ import { UserService } from '../../services/user.service';
   selector: 'app-daily-log',
   standalone: false,
   templateUrl: './daily-log.component.html',
-  styleUrl: './daily-log.component.scss'
+  styleUrls: ['./daily-log.component.scss']
 })
-export class DailyLogComponent implements OnInit, OnDestroy, AfterViewInit{
+export class DailyLogComponent implements OnInit, OnDestroy, AfterViewInit {
   isNavbarVisible: boolean = false; // Controls mobile navbar visibility
   // Toggle navbar visibility on mobile
   toggleNavbar(): void {
@@ -43,17 +43,6 @@ export class DailyLogComponent implements OnInit, OnDestroy, AfterViewInit{
 
   orientation = PoStepperOrientation.Horizontal;
 
-  // Define icon actions for the navbar
-  iconActions: PoNavbarIconAction[] = [
-    {
-      icon: 'po-icon-search', action: () => alert('Search clicked!'),
-      label: 'JHJJJJ'
-    },
-    {
-      icon: 'po-icon-help', action: () => alert('Help clicked!'),
-      label: 'JHJHJHJ'
-    }
-  ];
   items: any;
 
   capturedImage!: string;
@@ -71,7 +60,7 @@ export class DailyLogComponent implements OnInit, OnDestroy, AfterViewInit{
   confirm: PoModalAction = {
     action: () => {
       this.poModal?.close();
-      this.startedRoute = true
+      this.startedRoute = true;
     },
     label: 'Confirmar'
   };
@@ -83,10 +72,23 @@ export class DailyLogComponent implements OnInit, OnDestroy, AfterViewInit{
     return this.userService.user?.displayName! + ' / ' + this.userService.user?.placa!;
   }
 
+  changeOptions(event: any): void {
+    this.heroes = [...event];
+  }
+
+  getDynamicViewValues() {
+    let equipe: string = '';
+    this.heroes.forEach((hero, index) => {
+      index === 0 ? equipe = equipe.concat(hero.name) : equipe = equipe.concat(', ' + hero.name)
+    })
+
+    return
+  }
+
   confirmCamera: PoModalAction = {
     action: () => {
       this.poModalCamera?.close();
-      this.startedRoute = true
+      this.startedRoute = true;
     },
     label: 'Confirmar'
   };
@@ -97,7 +99,7 @@ export class DailyLogComponent implements OnInit, OnDestroy, AfterViewInit{
       this.items.map((user: any) => {
         user.value = user.uid;
         user.label = user.displayName;
-      } )
+      });
       this.optionsOperators = [...this.items];
     } catch (error) {
       console.error('Error loading items:', error);
@@ -110,7 +112,7 @@ export class DailyLogComponent implements OnInit, OnDestroy, AfterViewInit{
       this.items.map((user: any) => {
         user.value = user.id;
         user.label = user.nome;
-      } )
+      });
       this.optionsServices = [...this.items];
     } catch (error) {
       console.error('Error loading items:', error);
@@ -122,10 +124,6 @@ export class DailyLogComponent implements OnInit, OnDestroy, AfterViewInit{
   }
 
   heroes: Array<any> = [];
-
-  // Logo and alternative text
-  logoUrl: string = 'assets/swl_logo.png';
-  logoAlt: string = 'My Application Logo';
 
   // Shadow option
   navbarShadow: boolean = true;
@@ -162,19 +160,16 @@ export class DailyLogComponent implements OnInit, OnDestroy, AfterViewInit{
   private stream: MediaStream | undefined;
   @ViewChild('canvasElement', { static: false }) canvasElement!: ElementRef;
 
-
   constructor(
     private cameraService: CameraService,
     private crudService: CrudService,
     public userService: UserService,
-    private fb: FormBuilder)
-  {}
+    private fb: FormBuilder
+  ) { }
 
   ngAfterViewInit() {
-    // const videoElement = this.videoElementRef.nativeElement;
-
-    // // Start the camera after the view is initialized
-    // this.getBackCameraStream(videoElement);
+    // Initialize the camera feed
+    this.initializeCamera();
   }
 
   ngOnInit(): void {
@@ -186,43 +181,52 @@ export class DailyLogComponent implements OnInit, OnDestroy, AfterViewInit{
 
     this.loadOperators();
     this.loadServices();
-
-    this.startCamera();
   }
 
-  startCamera() {
-    // Access the user's camera
-    navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
+  // Initialize the camera and stream to the video element
+  initializeCamera() {
+    const constraints = {
+      video: {
+        facingMode: 'environment' // Try to access the back camera
+      }
+    };
+
+    navigator.mediaDevices.getUserMedia(constraints)
       .then((stream) => {
-        this.mediaStream = stream;
-        this.videoElement.nativeElement.srcObject = stream;
+        this.stream = stream;
+        if (this.videoElement && this.videoElement.nativeElement) {
+          this.videoElement.nativeElement.srcObject = stream;
+          this.videoElement.nativeElement.play();
+        } else {
+          console.error('Video element is not initialized');
+        }
       })
       .catch((err) => {
-        console.error('Error accessing camera: ', err);
-        alert('Camera access denied or unavailable.');
+        console.error('Error accessing camera:', err);
       });
   }
 
-  capturePhoto() {
-    const video = this.videoElement.nativeElement;
+
+  capturePhoto(): void {
     const canvas = this.canvasElement.nativeElement;
-
-    // Set canvas size to match the video feed
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
-
     const context = canvas.getContext('2d');
-    context.drawImage(video, 0, 0, canvas.width, canvas.height);
+    const videoElement = this.videoElement.nativeElement;
 
-    // Capture the image as a base64 encoded PNG
-    this.capturedImage = canvas.toDataURL('image/png');
+    if (context && videoElement) {
+      // Set canvas size to match the video element
+      canvas.width = videoElement.videoWidth;
+      canvas.height = videoElement.videoHeight;
 
-    // Optionally stop the media stream if you're done with it
-    this.stopCamera();
+      // Draw the current video frame onto the canvas
+      context.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
+
+      // Get the base64 image from the canvas
+      this.imageUrl = canvas.toDataURL('image/png');
+    }
   }
 
   stopCamera() {
-    const tracks = this.mediaStream?.getTracks();
+    const tracks = this.stream?.getTracks();
     tracks?.forEach((track) => track.stop());
   }
 
@@ -230,7 +234,6 @@ export class DailyLogComponent implements OnInit, OnDestroy, AfterViewInit{
     // Clean up camera resources when component is destroyed
     this.stopCamera();
   }
-
 
   formatDate(date: Date): string {
     const day = String(date.getDate()).padStart(2, '0'); // Pad single digits with leading zeros
@@ -242,46 +245,9 @@ export class DailyLogComponent implements OnInit, OnDestroy, AfterViewInit{
     return `${day}/${month}/${year} - ${hours}:${minutes}`;
   }
 
-
-
-
-  changeOptions(event: any): void {
-    this.heroes = [...event];
-  }
-
-  getDynamicViewValues() {
-    let equipe: string = '';
-    this.heroes.forEach((hero, index) => {
-      index === 0 ? equipe = equipe.concat(hero.name) : equipe = equipe.concat(', ' + hero.name)
-    })
-
-    return JSON.parse(`{ "data": "${this.labelNow}", "equipe": "${equipe}" }`)
-  }
-
-
   // Capture photo from the video stream
   takePhoto() {
-    const videoElement = this.videoElement.nativeElement;
-
-    if (!videoElement) {
-      console.error('Video element is not available');
-      return;
-    }
-
-    // Create a canvas to capture the video frame
-    const canvas = document.createElement('canvas');
-    const context = canvas.getContext('2d');
-    if (context) {
-      // Set canvas size to match the video element
-      canvas.width = videoElement.videoWidth;
-      canvas.height = videoElement.videoHeight;
-
-      // Draw the current video frame onto the canvas
-      context.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
-
-      // Get the base64 image from the canvas
-      this.imageUrl = canvas.toDataURL('image/png');
-    }
+    this.capturePhoto();
   }
 
   // Upload the photo
