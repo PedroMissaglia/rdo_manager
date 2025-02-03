@@ -1,7 +1,7 @@
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { RouterModule, RouterOutlet, Routes } from '@angular/router';
-import { PoModule } from '@po-ui/ng-components';
+import { PoImageModule, PoModule } from '@po-ui/ng-components';
 import { PoPageLoginModule, PoTemplatesModule } from '@po-ui/ng-templates';
 import { AppRoutingModule } from './app-routing.module';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
@@ -53,6 +53,7 @@ const firebaseConfig = {
     WebcamModule,  // Include WebcamModule in imports
     PoPageLoginModule,
     RouterModule,
+    PoImageModule,
     PoTemplatesModule,
     AngularFireDatabaseModule,
   ],

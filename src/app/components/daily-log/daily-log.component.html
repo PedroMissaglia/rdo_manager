@@ -73,11 +73,10 @@
         <!-- Display the webcam feed -->
         <div class="po-text-center">
           <webcam
-          [height]="500"
-          [width]="500"
+          [height]="400"
+          [width]="400"
           [trigger]="triggerObservable"
           (imageCapture)="handleImage($event)"
-          *ngIf="showWebcam"
           [allowCameraSwitch]="allowCameraSwitch"
           [switchCamera]="nextWebcamObservable"
           [videoOptions]="videoOptions"
@@ -87,20 +86,26 @@
         </webcam>
         </div>
 
-        <po-button (p-click)="triggerSnapshot()" p-label="Coletar foto"></po-button>
+        <po-textarea p-label="Observação" class="po-md-12"></po-textarea>
+        <po-button
+          class="po-md-12 po-mb-1"
+          (p-click)="triggerSnapshot()"
+          p-label="Enviar foto">
+        </po-button>
+
 
         <!-- Optionally display the captured image -->
-        <div class="snapshot" *ngIf="webcamImage">
-          <img [src]="webcamImage.imageAsDataUrl" />
-        </div>
+        <po-container>
+          <div class="snapshot" *ngIf="webcamImage">
+             <po-image [p-src]="webcamImage.imageAsDataUrl" [p-height]="150"> </po-image>
+          </div>
+        </po-container>
 
-        <!-- Display error if there's an issue with the webcam -->
-        <div *ngIf="webcamError">
-          <p>Error: {{ webcamError.message }}</p>
-        </div>
+
+
+
+
       </div>
-
-
       <po-textarea
         name="textarea"
         class="po-md-12 po-mt-3"

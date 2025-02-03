@@ -1,7 +1,7 @@
 import { CrudService } from './../../services/crud.service';
 import { AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { PoButtonGroupItem, PoModalAction, PoModalComponent, PoMultiselectOption, PoNavbarIconAction, PoNavbarItem, PoStepperOrientation, PoTableColumn } from '@po-ui/ng-components';
+import { PoButtonGroupItem, PoModalAction, PoModalComponent, PoMultiselectOption, PoNavbarIconAction, PoNavbarItem, PoSlideItem, PoStepperOrientation, PoTableColumn } from '@po-ui/ng-components';
 import { CameraService } from '../../services/camera.service';
 import { UserService } from '../../services/user.service';
 import { WebcamImage, WebcamInitError } from 'ngx-webcam';
@@ -87,6 +87,16 @@ export class DailyLogComponent implements OnInit {
     this.trigger.next();
   }
 
+  public webcamImages: WebcamImage[] = [];  // Array to store snapshots
+
+
+  slides: Array<PoSlideItem> = [
+    {
+      /** Define o caminho da imagem. */
+      image: '',
+      /** Texto que aparece quando a imagem não é encontrada. */
+    }
+  ];
   public cameraWasSwitched(deviceId: string): void {
     console.log('active device: ' + deviceId);
     this.deviceId = deviceId;
@@ -101,6 +111,7 @@ export class DailyLogComponent implements OnInit {
   public handleInitError(error: WebcamInitError): void {
     this.webcamError = error;
   }
+
 
   public get nextWebcamObservable(): Observable<boolean|string> {
     return this.nextWebcam.asObservable();
