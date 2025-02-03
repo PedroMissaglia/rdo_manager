@@ -5,6 +5,7 @@ import { PoButtonGroupItem, PoModalAction, PoModalComponent, PoMultiselectOption
 import { CameraService } from '../../services/camera.service';
 import { UserService } from '../../services/user.service';
 import { WebcamImage, WebcamInitError } from 'ngx-webcam';
+import { Observable, Subject } from 'rxjs';
 
 @Component({
   selector: 'app-daily-log',
@@ -14,6 +15,7 @@ import { WebcamImage, WebcamInitError } from 'ngx-webcam';
 })
 export class DailyLogComponent implements OnInit {
   isNavbarVisible: boolean = false; // Controls mobile navbar visibility
+  private trigger: Subject<void> = new Subject<void>();
   // Toggle navbar visibility on mobile
   toggleNavbar(): void {
     this.isNavbarVisible = !this.isNavbarVisible;
@@ -23,10 +25,6 @@ export class DailyLogComponent implements OnInit {
 
   startedRoute = false;
   image: any;
-
-  buttons1: Array<PoButtonGroupItem> = [
-    { label: 'Coletar fotos', action: this.doSomething.bind(this), icon: 'an an-camera', disabled: this.myForm?.invalid }
-  ];
 
   serviceOptions = [
     { label: 'Serviço 1', value: '1' },
@@ -67,6 +65,7 @@ export class DailyLogComponent implements OnInit {
   };
 
   optionsOperators: Array<PoMultiselectOption> = [];
+  public deviceId: string = '';
   optionsServices: Array<PoMultiselectOption> = [];
   public webcamImage!: WebcamImage;
 
@@ -75,6 +74,23 @@ export class DailyLogComponent implements OnInit {
 
   // A boolean flag to control the webcam
   public showWebcam: boolean = true;
+  public allowCameraSwitch = true;
+
+  public videoOptions: MediaTrackConstraints = {
+    width: {ideal: 1024},
+    height: {ideal: 576}
+  };
+
+  private nextWebcam: Subject<boolean|string> = new Subject<boolean|string>();
+
+  public triggerSnapshot(): void {
+    this.trigger.next();
+  }
+
+  public cameraWasSwitched(deviceId: string): void {
+    console.log('active device: ' + deviceId);
+    this.deviceId = deviceId;
+  }
 
   // Capture the photo
   public handleImage(webcamImage: WebcamImage): void {
@@ -84,6 +100,10 @@ export class DailyLogComponent implements OnInit {
   // Handle webcam errors
   public handleInitError(error: WebcamInitError): void {
     this.webcamError = error;
+  }
+
+  public get nextWebcamObservable(): Observable<boolean|string> {
+    return this.nextWebcam.asObservable();
   }
 
   // Toggle the webcam visibility
@@ -117,6 +137,10 @@ export class DailyLogComponent implements OnInit {
     },
     label: 'Confirmar'
   };
+
+  public get triggerObservable(): Observable<void> {
+    return this.trigger.asObservable();
+  }
 
   async loadOperators() {
     try {

@@ -69,21 +69,29 @@
       <!-- Button Groups -->
 
       <div class="camera-container">
-        <!-- Button to toggle webcam visibility -->
-
 
         <!-- Display the webcam feed -->
         <div class="po-text-center">
-          <webcam *ngIf="showWebcam"
-                      (imageCapture)="handleImage($event)"
-                      (initError)="handleInitError($event)">
-          </webcam>
+          <webcam
+          [height]="500"
+          [width]="500"
+          [trigger]="triggerObservable"
+          (imageCapture)="handleImage($event)"
+          *ngIf="showWebcam"
+          [allowCameraSwitch]="allowCameraSwitch"
+          [switchCamera]="nextWebcamObservable"
+          [videoOptions]="videoOptions"
+          (cameraSwitched)="cameraWasSwitched($event)"
+          (initError)="handleInitError($event)"
+          >
+        </webcam>
         </div>
 
+        <po-button (p-click)="triggerSnapshot()" p-label="Coletar foto"></po-button>
+
         <!-- Optionally display the captured image -->
-        <div *ngIf="webcamImage">
-          <h3>Captured Image</h3>
-          <img [src]="webcamImage.imageAsDataUrl" alt="Captured Image" />
+        <div class="snapshot" *ngIf="webcamImage">
+          <img [src]="webcamImage.imageAsDataUrl" />
         </div>
 
         <!-- Display error if there's an issue with the webcam -->
@@ -92,11 +100,6 @@
         </div>
       </div>
 
-
-      <po-button-group
-        class="po-md-12 po-mt-5"
-        [p-buttons]="buttons1"
-      ></po-button-group>
 
       <po-textarea
         name="textarea"
