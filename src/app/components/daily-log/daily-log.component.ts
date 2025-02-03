@@ -104,7 +104,7 @@ export class DailyLogComponent implements OnInit {
 
   // Capture the photo
   public handleImage(webcamImage: WebcamImage): void {
-    this.webcamImage = webcamImage;
+    this.webcamImage = webcamImage
   }
 
   // Handle webcam errors
