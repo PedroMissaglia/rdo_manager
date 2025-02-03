@@ -1,7 +1,27 @@
+import { DailyLogService } from './../../services/daily-log.service';
 import { CrudService } from './../../services/crud.service';
-import { AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import {
+  AfterViewInit,
+  Component,
+  ElementRef,
+  OnDestroy,
+  OnInit,
+  ViewChild,
+} from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { PoButtonGroupItem, PoModalAction, PoModalComponent, PoMultiselectOption, PoNavbarIconAction, PoNavbarItem, PoSlideItem, PoStepperComponent, PoStepperOrientation, PoTableColumn } from '@po-ui/ng-components';
+import {
+  PoButtonGroupItem,
+  PoModalAction,
+  PoModalComponent,
+  PoMultiselectComponent,
+  PoMultiselectOption,
+  PoNavbarIconAction,
+  PoNavbarItem,
+  PoSlideItem,
+  PoStepperComponent,
+  PoStepperOrientation,
+  PoTableColumn,
+} from '@po-ui/ng-components';
 import { CameraService } from '../../services/camera.service';
 import { UserService } from '../../services/user.service';
 import { WebcamImage, WebcamInitError } from 'ngx-webcam';
@@ -11,7 +31,7 @@ import { Observable, Subject } from 'rxjs';
   selector: 'app-daily-log',
   standalone: false,
   templateUrl: './daily-log.component.html',
-  styleUrls: ['./daily-log.component.scss']
+  styleUrls: ['./daily-log.component.scss'],
 })
 export class DailyLogComponent implements OnInit {
   isNavbarVisible: boolean = false; // Controls mobile navbar visibility
@@ -28,7 +48,7 @@ export class DailyLogComponent implements OnInit {
 
   serviceOptions = [
     { label: 'Serviço 1', value: '1' },
-    { label: 'Serviço 2', value: '2' }
+    { label: 'Serviço 2', value: '2' },
   ];
 
   labelNow = this.formatDate(new Date());
@@ -37,7 +57,7 @@ export class DailyLogComponent implements OnInit {
   navbarItems: PoNavbarItem[] = [
     { label: 'Home', link: '/' },
     { label: 'About', link: '/about' },
-    { label: 'Contact', link: '/contact' }
+    { label: 'Contact', link: '/contact' },
   ];
 
   orientation = PoStepperOrientation.Horizontal;
@@ -53,15 +73,69 @@ export class DailyLogComponent implements OnInit {
       this.poModal?.close();
     },
     label: 'Cancelar',
-    danger: true
+    danger: true,
   };
 
   confirm: PoModalAction = {
-    action: () => {
-      this.poModal?.close();
-      this.startedRoute = true;
+    action: async () => {
+      let a;
+      const match = this.labelNow.match(/(\d{2}:\d{2})$/);
+      const time = match ? match[1] : null;
+
+      const itemAdded = await this.crudService.addItem(
+        'rdo',
+        {
+          dataInicio: this.labelNow.substring(0, 10),
+          horasPrevistas: '08:00',
+          horaInicio: time,
+          status: 'started',
+        },
+    );
+      if (itemAdded) {
+        this.dailyLogService.item = itemAdded;
+
+        const updatedItem = await this.crudService.updateItem(
+          'rdo',
+          this.dailyLogService.item.id,
+          {
+            id: this.dailyLogService.item.id
+          }
+        );
+
+        this.poModal?.close();
+        this.poStepperComponent.next();
+
+      }
     },
-    label: 'Confirmar'
+    label: 'Confirmar',
+  };
+
+  closePhoto: PoModalAction = {
+    action: () => {
+      this.poModalCamera?.close();
+    },
+    label: 'Cancelar',
+    danger: true,
+  };
+
+  confirmPhoto: PoModalAction = {
+    action: async () => {
+      const labelNow = this.formatDate(new Date());
+      // Use regex to extract the time (HH:mm format)
+      const match = labelNow.match(/(\d{2}:\d{2})$/);
+      const time = match ? match[1] : null;
+
+      const updatedItem = await this.crudService.updateItem(
+        'rdo',
+        this.dailyLogService.item.id,
+        {
+          dataFoto: time,
+          foto: this.webcamImage.imageAsDataUrl,
+        }
+      );
+      console.log(updatedItem)
+    },
+    label: 'Enviar',
   };
 
   @ViewChild(PoStepperComponent)
@@ -79,25 +153,30 @@ export class DailyLogComponent implements OnInit {
   public allowCameraSwitch = true;
 
   public videoOptions: MediaTrackConstraints = {
-    width: {ideal: 1024},
-    height: {ideal: 576}
+    width: { ideal: 1024 },
+    height: { ideal: 576 },
   };
 
-  private nextWebcam: Subject<boolean|string> = new Subject<boolean|string>();
+  private nextWebcam: Subject<boolean | string> = new Subject<
+    boolean | string
+  >();
 
   public triggerSnapshot(): void {
     this.trigger.next();
+    this.poModalCamera?.open();
+    this.getGeoLocation();
   }
 
-  public webcamImages: WebcamImage[] = [];  // Array to store snapshots
+  photoTaken = false;
 
+  public webcamImages: WebcamImage[] = []; // Array to store snapshots
 
   slides: Array<PoSlideItem> = [
     {
       /** Define o caminho da imagem. */
       image: '',
       /** Texto que aparece quando a imagem não é encontrada. */
-    }
+    },
   ];
   public cameraWasSwitched(deviceId: string): void {
     console.log('active device: ' + deviceId);
@@ -107,15 +186,20 @@ export class DailyLogComponent implements OnInit {
   // Capture the photo
   public handleImage(webcamImage: WebcamImage): void {
     this.webcamImage = webcamImage;
+    this.photoTaken = true;
+    this.myForm.get('upload')?.setValue(webcamImage.imageAsDataUrl);
   }
 
-  // Handle webcam errors
+  // Handle webcam e
   public handleInitError(error: WebcamInitError): void {
     this.webcamError = error;
   }
 
+  uploadModel(e: any) {
+    console.log('ksjdskj');
+  }
 
-  public get nextWebcamObservable(): Observable<boolean|string> {
+  public get nextWebcamObservable(): Observable<boolean | string> {
     return this.nextWebcam.asObservable();
   }
 
@@ -127,7 +211,11 @@ export class DailyLogComponent implements OnInit {
   doSomething() {}
 
   getDisplayNameAndPlate() {
-    return this.userService.user?.displayName! + ' / ' + this.userService.user?.placa!;
+    return (
+      this.userService.user?.displayName! +
+      ' / ' +
+      this.userService.user?.placa!
+    );
   }
 
   changeOptions(event: any): void {
@@ -137,10 +225,12 @@ export class DailyLogComponent implements OnInit {
   getDynamicViewValues() {
     let equipe: string = '';
     this.heroes.forEach((hero, index) => {
-      index === 0 ? equipe = equipe.concat(hero.name) : equipe = equipe.concat(', ' + hero.name)
-    })
+      index === 0
+        ? (equipe = equipe.concat(hero.name))
+        : (equipe = equipe.concat(', ' + hero.name));
+    });
 
-    return
+    return;
   }
 
   handleStepper() {
@@ -152,7 +242,7 @@ export class DailyLogComponent implements OnInit {
       this.poModalCamera?.close();
       this.startedRoute = true;
     },
-    label: 'Confirmar'
+    label: 'Confirmar',
   };
 
   public get triggerObservable(): Observable<void> {
@@ -172,14 +262,13 @@ export class DailyLogComponent implements OnInit {
     }
   }
 
-
   deletePhoto() {}
   async loadServices() {
     try {
       this.items = await this.crudService.getItems('service', 100);
       this.items.map((user: any) => {
         user.value = user.id;
-        user.label = user.nome;
+        user.label = user.id + ' - ' + user.nome;
       });
       this.optionsServices = [...this.items];
     } catch (error) {
@@ -187,9 +276,7 @@ export class DailyLogComponent implements OnInit {
     }
   }
 
-  openCamera() {
-
-  }
+  openCamera() {}
 
   heroes: Array<any> = [];
 
@@ -199,8 +286,12 @@ export class DailyLogComponent implements OnInit {
   longitude: number | null = null;
   errorMessage: string = '';
 
-  @ViewChild(PoModalComponent, { static: true }) poModal: PoModalComponent | undefined;
-  @ViewChild('modalTwo', { static: true }) poModalCamera: PoModalComponent | undefined;
+  @ViewChild(PoModalComponent, { static: true }) poModal:
+    | PoModalComponent
+    | undefined;
+  @ViewChild('modalTwo', { static: true }) poModalCamera:
+    | PoModalComponent
+    | undefined;
   multiselect: Array<string> = ['1495831666871', '1405833068599'];
   columns: Array<PoTableColumn> = [
     { property: 'value', label: 'id' },
@@ -210,8 +301,8 @@ export class DailyLogComponent implements OnInit {
       type: 'link',
       action: (value: any) => {
         this.openLink(value);
-      }
-    }
+      },
+    },
   ];
   contact: any;
   openLink(value: any) {
@@ -227,32 +318,29 @@ export class DailyLogComponent implements OnInit {
   videoElement!: ElementRef;
   private stream: MediaStream | undefined;
   @ViewChild('canvasElement', { static: false }) canvasElement!: ElementRef;
+  @ViewChild(PoMultiselectComponent, { static: false })
+  multiSelectComponent!: PoMultiselectComponent;
 
   constructor(
     private cameraService: CameraService,
     private crudService: CrudService,
     public userService: UserService,
+    private dailyLogService: DailyLogService,
     private fb: FormBuilder
-  ) { }
-
+  ) {}
 
   ngOnInit(): void {
     this.myForm = this.fb.group({
-      labelNow: [this.labelNow, [Validators.required]],  // Initialize with a default value
-      contact: [this.contact, [Validators.required]],  // Multiselect should be required
-      service: [this.service, [Validators.required]]    // Combo should be required
+      labelNow: [this.labelNow, [Validators.required]], // Initialize with a default value
+      contact: [this.contact, [Validators.required]], // Multiselect should be required
+      service: [this.service, [Validators.required]], // Combo should be required
     });
 
     this.loadOperators();
     this.loadServices();
   }
 
-
-
-
-
-
-
+  upload: any;
 
   formatDate(date: Date): string {
     const day = String(date.getDate()).padStart(2, '0'); // Pad single digits with leading zeros

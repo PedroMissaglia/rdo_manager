@@ -8,6 +8,7 @@
   </nav>
 
 
+  <form [formGroup]="myForm">
   <po-stepper
     #stepper
     [p-orientation]="orientation"
@@ -16,7 +17,6 @@
   >
     <po-step p-label="Início de rota">
       <div class="po-mt-1">
-        <form [formGroup]="myForm">
           <!-- First Widget with LabelNow Input -->
           <po-widget class="po-mt-1">
 
@@ -26,6 +26,7 @@
 
             <br>
             <po-multiselect
+              #multiSelect
               class=" po-mb-5 po-mt-3"
               formControlName="contact"
               (p-change)="changeOptions($event)"
@@ -58,10 +59,9 @@
             class="po-md-12 po-mt-5"
             p-kind="primary"
             p-label="Iniciar Rota"
-            [p-disabled]="myForm.invalid || startedRoute"
+            [p-disabled]="myForm.invalid"
             (p-click)="onHandleStartRoute('startRoute')"
           ></po-button>
-        </form>
       </div>
     </po-step>
 
@@ -73,40 +73,31 @@
         <!-- Display the webcam feed -->
         <div class="po-text-center">
           <webcam
-          [height]="350"
-          [width]="600"
-          [trigger]="triggerObservable"
-          (imageCapture)="handleImage($event)"
-          [allowCameraSwitch]="allowCameraSwitch"
-          [switchCamera]="nextWebcamObservable"
-          [videoOptions]="videoOptions"
-          (cameraSwitched)="cameraWasSwitched($event)"
-          (initError)="handleInitError($event)"
-          >
-        </webcam>
+            [height]="350"
+            [width]="300"
+            [trigger]="triggerObservable"
+            (imageCapture)="handleImage($event)"
+            [allowCameraSwitch]="allowCameraSwitch"
+            [switchCamera]="nextWebcamObservable"
+            [videoOptions]="videoOptions"
+            (cameraSwitched)="cameraWasSwitched($event)"
+            (initError)="handleInitError($event)"
+            >
+          </webcam>
         </div>
 
         <po-info class="po-md-12" p-label="Data e hora" [p-value]="labelNow"> </po-info>
-        <po-textarea p-label="Observação" class="po-md-12"></po-textarea>
-        <po-button
-          class="po-md-6 po-mb-1"
-          (p-click)="triggerSnapshot()"
-          p-label="Tirar foto">
-        </po-button>
+        <po-textarea
+          p-label="Observação"
+          class="po-md-12">
+        </po-textarea>
+        <div class="po-text-center">
+          <po-button
+            (p-click)="triggerSnapshot()"
+            p-label="Tirar foto">
+          </po-button>
+        </div>
 
-        <!-- Optionally display the captured image -->
-        <po-container *ngIf="webcamImage">
-          <div class="po-row snapshot">
-            <po-image class="po-md-3"
-              [p-src]="webcamImage.imageAsDataUrl"
-              [p-height]="150">
-            </po-image>
-          </div>
-          <po-progress
-            class="po-md-3"
-            (p-cancel)="deletePhoto()"
-          />
-        </po-container>
         <po-button
           class="po-md-12 po-mb-1 po-mt-1"
           (p-click)="handleStepper()"
@@ -136,17 +127,34 @@
     </po-step>
   </po-stepper>
 
-  <!-- Modal (Hidden by default) -->
-  <po-modal
-    #modal
-    p-title="Iniciar rota"
-    [p-primary-action]="confirm"
-    [p-secondary-action]="close"
-  >
-    <!-- <po-dynamic-view
-      [p-fields]="[{ property: 'data' }, {property: 'equipe'}]"
-      [p-value]="getDynamicViewValues()"
-    >
-    </po-dynamic-view> -->
-  </po-modal>
+</form>
+
 </po-page-default>
+
+<po-modal
+  #modal
+  p-title="Iniciar rota"
+  [p-primary-action]="confirm"
+  [p-secondary-action]="close"
+  >
+  <po-info class="po-md-12 po-mt-1" p-label="Data e hora" [p-value]="labelNow"> </po-info>
+  <po-info class="po-md-12 po-mt-1" p-label="Obra" [p-value]="  userService.user?.obra"> </po-info>
+  <po-info class="po-md-12 po-mt-1" p-label="serviço" [p-value]="myForm.get('service')!.value"> </po-info>
+
+
+</po-modal>
+
+
+<po-modal
+  #modalTwo
+  p-title="Confirmar"
+  [p-primary-action]="confirmPhoto"
+  [p-secondary-action]="closePhoto"
+  >
+  <po-image *ngIf="webcamImage"
+    [p-src]="webcamImage.imageAsDataUrl">
+  </po-image>
+  <po-info class="po-md-12 po-mt-1" p-label="Data e hora" [p-value]="labelNow"> </po-info>
+  <po-info class="po-md-12 po-mt-1" p-label="Observações" [p-value]="myForm.get('obs')?.value"> </po-info>
+
+</po-modal>

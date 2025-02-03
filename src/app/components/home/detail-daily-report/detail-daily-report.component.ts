@@ -14,7 +14,6 @@ export class DetailDailyReportComponent implements OnInit {
     {
       property: 'total_de_horas',
       label: 'Total de horas',
-      divider: 'Detalhes do dia na obra',
       gridColumns: 4,
       order: 1,
     },

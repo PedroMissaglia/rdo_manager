@@ -1,6 +1,16 @@
 <po-page-detail
     (p-back)="onHandleGoBack()"
     p-title="Detalhes" >
-    <po-dynamic-view [p-fields]="fields" [p-value]="dailyReportService.item">
-    </po-dynamic-view>
+
+    <po-tabs>
+      <po-tab [p-active]="true" p-label="Detalhes da obra">
+        <po-dynamic-view [p-fields]="fields" [p-value]="dailyReportService.item">
+        </po-dynamic-view>
+      </po-tab >
+      <po-tab p-label="Fotos">
+        <po-image [p-src]="dailyReportService.item?.foto"></po-image>
+        <po-info [p-src]="dailyReportService.item?.foto"></po-info>
+        <po-info [p-src]="dailyReportService.item?.foto"></po-info>
+      </po-tab>
+    </po-tabs>
 </po-page-detail>

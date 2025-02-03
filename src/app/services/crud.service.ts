@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { Firestore, collection, getDocs, addDoc, doc, updateDoc, deleteDoc, query, limit, where } from '@angular/fire/firestore';
+import { Firestore, collection, getDocs, addDoc, doc, updateDoc, deleteDoc, query, limit, where, setDoc } from '@angular/fire/firestore';
 import { inject } from '@angular/core';  // Import inject
 
 @Injectable({
@@ -54,7 +54,7 @@ export class CrudService {
       // Create a reference to the collection in Firestore
       const itemsCollection = collection(this.firestore, collectionName); // Pass the collection name (a string)
       const docRef = await addDoc(itemsCollection, item); // Add the document to the collection
-      return docRef;
+      return { id: docRef.id, ...item };
     } catch (error) {
       console.error("Error adding document: ", error);
       throw error;
@@ -62,10 +62,11 @@ export class CrudService {
   }
 
   // Update (Atualizar um item existente)
-  async updateItem(collection: any, id: string, data: any): Promise<void> {
+  async updateItem(collection: any, id: string, data: any): Promise<any> {
     try {
       const itemDoc = doc(this.firestore, collection, id);
       await updateDoc(itemDoc, data);
+      return { ...data };
     } catch (error) {
       console.error("Error updating document: ", error);
       throw error;
