@@ -4,6 +4,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { PoButtonGroupItem, PoModalAction, PoModalComponent, PoMultiselectOption, PoNavbarIconAction, PoNavbarItem, PoStepperOrientation, PoTableColumn } from '@po-ui/ng-components';
 import { CameraService } from '../../services/camera.service';
 import { UserService } from '../../services/user.service';
+import { WebcamImage, WebcamInitError } from 'ngx-webcam';
 
 @Component({
   selector: 'app-daily-log',
@@ -11,7 +12,7 @@ import { UserService } from '../../services/user.service';
   templateUrl: './daily-log.component.html',
   styleUrls: ['./daily-log.component.scss']
 })
-export class DailyLogComponent implements OnInit, OnDestroy, AfterViewInit {
+export class DailyLogComponent implements OnInit {
   isNavbarVisible: boolean = false; // Controls mobile navbar visibility
   // Toggle navbar visibility on mobile
   toggleNavbar(): void {
@@ -24,7 +25,7 @@ export class DailyLogComponent implements OnInit, OnDestroy, AfterViewInit {
   image: any;
 
   buttons1: Array<PoButtonGroupItem> = [
-    { label: 'Coletar fotos', action: this.takePhoto.bind(this), icon: 'an an-camera', disabled: this.myForm?.invalid }
+    { label: 'Coletar fotos', action: this.doSomething.bind(this), icon: 'an an-camera', disabled: this.myForm?.invalid }
   ];
 
   serviceOptions = [
@@ -67,6 +68,30 @@ export class DailyLogComponent implements OnInit, OnDestroy, AfterViewInit {
 
   optionsOperators: Array<PoMultiselectOption> = [];
   optionsServices: Array<PoMultiselectOption> = [];
+  public webcamImage!: WebcamImage;
+
+  // To handle webcam errors
+  public webcamError!: WebcamInitError;
+
+  // A boolean flag to control the webcam
+  public showWebcam: boolean = true;
+
+  // Capture the photo
+  public handleImage(webcamImage: WebcamImage): void {
+    this.webcamImage = webcamImage;
+  }
+
+  // Handle webcam errors
+  public handleInitError(error: WebcamInitError): void {
+    this.webcamError = error;
+  }
+
+  // Toggle the webcam visibility
+  public toggleWebcam(): void {
+    this.showWebcam = !this.showWebcam;
+  }
+
+  doSomething() {}
 
   getDisplayNameAndPlate() {
     return this.userService.user?.displayName! + ' / ' + this.userService.user?.placa!;
@@ -167,10 +192,6 @@ export class DailyLogComponent implements OnInit, OnDestroy, AfterViewInit {
     private fb: FormBuilder
   ) { }
 
-  ngAfterViewInit() {
-    // Initialize the camera feed
-    this.initializeCamera();
-  }
 
   ngOnInit(): void {
     this.myForm = this.fb.group({
@@ -183,57 +204,12 @@ export class DailyLogComponent implements OnInit, OnDestroy, AfterViewInit {
     this.loadServices();
   }
 
-  // Initialize the camera and stream to the video element
-  initializeCamera() {
-    const constraints = {
-      video: {
-        facingMode: 'environment' // Try to access the back camera
-      }
-    };
-
-    navigator.mediaDevices.getUserMedia(constraints)
-      .then((stream) => {
-        this.stream = stream;
-        if (this.videoElement && this.videoElement.nativeElement) {
-          this.videoElement.nativeElement.srcObject = stream;
-          this.videoElement.nativeElement.play();
-        } else {
-          console.error('Video element is not initialized');
-        }
-      })
-      .catch((err) => {
-        console.error('Error accessing camera:', err);
-      });
-  }
 
 
-  capturePhoto(): void {
-    const canvas = this.canvasElement.nativeElement;
-    const context = canvas.getContext('2d');
-    const videoElement = this.videoElement.nativeElement;
 
-    if (context && videoElement) {
-      // Set canvas size to match the video element
-      canvas.width = videoElement.videoWidth;
-      canvas.height = videoElement.videoHeight;
 
-      // Draw the current video frame onto the canvas
-      context.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
 
-      // Get the base64 image from the canvas
-      this.imageUrl = canvas.toDataURL('image/png');
-    }
-  }
 
-  stopCamera() {
-    const tracks = this.stream?.getTracks();
-    tracks?.forEach((track) => track.stop());
-  }
-
-  ngOnDestroy() {
-    // Clean up camera resources when component is destroyed
-    this.stopCamera();
-  }
 
   formatDate(date: Date): string {
     const day = String(date.getDate()).padStart(2, '0'); // Pad single digits with leading zeros
@@ -243,11 +219,6 @@ export class DailyLogComponent implements OnInit, OnDestroy, AfterViewInit {
     const minutes = String(date.getMinutes()).padStart(2, '0');
 
     return `${day}/${month}/${year} - ${hours}:${minutes}`;
-  }
-
-  // Capture photo from the video stream
-  takePhoto() {
-    this.capturePhoto();
   }
 
   // Upload the photo

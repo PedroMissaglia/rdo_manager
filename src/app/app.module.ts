@@ -18,6 +18,8 @@ import { ColaboradorModule } from './components/colaborador/colaborador.module';
 import { JobModule } from './components/job/job.module';
 import { DailyLogComponent } from './components/daily-log/daily-log.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { WebcamModule } from 'ngx-webcam';  // Import WebcamModule
+import { CameraComponent } from './components/camera/camera.component';
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
@@ -36,7 +38,8 @@ const firebaseConfig = {
     HomeComponent,
     DetailDailyReportComponent,
     LoginComponent,
-    DailyLogComponent
+    DailyLogComponent,
+    CameraComponent
   ],
   imports: [
     BrowserModule,
@@ -47,11 +50,11 @@ const firebaseConfig = {
     JobModule,
     FormsModule,
     ReactiveFormsModule,
+    WebcamModule,  // Include WebcamModule in imports
     PoPageLoginModule,
     RouterModule,
     PoTemplatesModule,
     AngularFireDatabaseModule,
-    AngularFirestoreModule.enablePersistence(),
   ],
   providers: [
     provideHttpClient(withInterceptorsFromDi()),

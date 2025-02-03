@@ -1,0 +1,23 @@
+<div class="camera-container">
+  <!-- Button to toggle webcam visibility -->
+  <button (click)="toggleWebcam()">
+    {{ showWebcam ? 'Hide Camera' : 'Show Camera' }}
+  </button>
+
+  <!-- Display the webcam feed -->
+  <webcam *ngIf="showWebcam"
+              (imageCapture)="handleImage($event)"
+              (initError)="handleInitError($event)">
+  </webcam>
+
+  <!-- Optionally display the captured image -->
+  <div *ngIf="webcamImage">
+    <h3>Captured Image</h3>
+    <img [src]="webcamImage.imageAsDataUrl" alt="Captured Image" />
+  </div>
+
+  <!-- Display error if there's an issue with the webcam -->
+  <div *ngIf="webcamError">
+    <p>Error: {{ webcamError.message }}</p>
+  </div>
+</div>
