@@ -1,7 +1,7 @@
 import { CrudService } from './../../services/crud.service';
 import { AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { PoButtonGroupItem, PoModalAction, PoModalComponent, PoMultiselectOption, PoNavbarIconAction, PoNavbarItem, PoSlideItem, PoStepperOrientation, PoTableColumn } from '@po-ui/ng-components';
+import { PoButtonGroupItem, PoModalAction, PoModalComponent, PoMultiselectOption, PoNavbarIconAction, PoNavbarItem, PoSlideItem, PoStepperComponent, PoStepperOrientation, PoTableColumn } from '@po-ui/ng-components';
 import { CameraService } from '../../services/camera.service';
 import { UserService } from '../../services/user.service';
 import { WebcamImage, WebcamInitError } from 'ngx-webcam';
@@ -64,6 +64,8 @@ export class DailyLogComponent implements OnInit {
     label: 'Confirmar'
   };
 
+  @ViewChild(PoStepperComponent)
+  poStepperComponent!: PoStepperComponent;
   optionsOperators: Array<PoMultiselectOption> = [];
   public deviceId: string = '';
   optionsServices: Array<PoMultiselectOption> = [];
@@ -104,7 +106,7 @@ export class DailyLogComponent implements OnInit {
 
   // Capture the photo
   public handleImage(webcamImage: WebcamImage): void {
-    this.webcamImage = webcamImage
+    this.webcamImage = webcamImage;
   }
 
   // Handle webcam errors
@@ -141,6 +143,10 @@ export class DailyLogComponent implements OnInit {
     return
   }
 
+  handleStepper() {
+    this.poStepperComponent.next();
+  }
+
   confirmCamera: PoModalAction = {
     action: () => {
       this.poModalCamera?.close();
@@ -166,6 +172,8 @@ export class DailyLogComponent implements OnInit {
     }
   }
 
+
+  deletePhoto() {}
   async loadServices() {
     try {
       this.items = await this.crudService.getItems('service', 100);

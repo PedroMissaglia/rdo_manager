@@ -74,7 +74,7 @@
         <div class="po-text-center">
           <webcam
           [height]="400"
-          [width]="400"
+          [width]="500"
           [trigger]="triggerObservable"
           (imageCapture)="handleImage($event)"
           [allowCameraSwitch]="allowCameraSwitch"
@@ -86,24 +86,33 @@
         </webcam>
         </div>
 
+        <po-info class="po-md-12" p-label="Data e hora" [p-value]="labelNow"> </po-info>
         <po-textarea p-label="Observação" class="po-md-12"></po-textarea>
         <po-button
-          class="po-md-12 po-mb-1"
+          class="po-md-6 po-mb-1"
           (p-click)="triggerSnapshot()"
           p-label="Tirar foto">
         </po-button>
 
-
         <!-- Optionally display the captured image -->
         <po-container *ngIf="webcamImage">
-          <div class="snapshot">
-             <po-image [p-src]="webcamImage.imageAsDataUrl" [p-height]="150"> </po-image>
+          <div class="po-row snapshot">
+            <po-image class="po-md-3"
+              [p-src]="webcamImage.imageAsDataUrl"
+              [p-height]="150">
+            </po-image>
           </div>
+          <po-progress
+            class="po-md-3"
+            (p-cancel)="deletePhoto()"
+          />
         </po-container>
-
-
-
-
+        <po-button
+          class="po-md-12 po-mb-1 po-mt-1"
+          (p-click)="handleStepper()"
+          [p-disabled]="!webcamImage"
+          p-label="Finalizar diária">
+        </po-button>
 
       </div>
     </po-step>
