@@ -80,10 +80,13 @@ export class HomeComponent implements OnInit{
 
   getColumns(): Array<PoTableColumn> {
     return [
-      {property: 'dataFoto', label: 'dataFoto'},
-      {property: 'dataInicio', label: 'Data do início'},
-      {property: 'horaInicio', label: 'Hora do início'},
-      {property: 'foto', label: 'Foto'},
+      {property: 'dataInicio', label: 'Data'},
+      {property: 'horaInicio', label: 'Início'},
+      {property: 'horaFim', label: 'Fim'},
+      {property: 'horasPrevistas', label: 'Horas previstas'},
+      {property: 'obra', label: 'Obra'},
+      {property: 'placa', label: 'Placa'},
+
       {
         property: 'status',
         type: 'subtitle',

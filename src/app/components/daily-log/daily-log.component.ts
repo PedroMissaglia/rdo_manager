@@ -17,6 +17,7 @@ import {
   PoMultiselectOption,
   PoNavbarIconAction,
   PoNavbarItem,
+  PoNotificationService,
   PoSlideItem,
   PoStepperComponent,
   PoStepperOrientation,
@@ -26,6 +27,7 @@ import { CameraService } from '../../services/camera.service';
 import { UserService } from '../../services/user.service';
 import { WebcamImage, WebcamInitError } from 'ngx-webcam';
 import { Observable, Subject } from 'rxjs';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-daily-log',
@@ -42,6 +44,7 @@ export class DailyLogComponent implements OnInit {
   }
 
   myForm!: FormGroup;
+  mySecondForm!: FormGroup;
 
   startedRoute = false;
   image: any;
@@ -88,7 +91,11 @@ export class DailyLogComponent implements OnInit {
           dataInicio: this.labelNow.substring(0, 10),
           horasPrevistas: '08:00',
           horaInicio: time,
+          placa: this.userService.user.placa,
+          operadores: this.heroes,
           status: 'started',
+          obra: this.userService.user.obra,
+          user: this.userService.user.login
         },
     );
       if (itemAdded) {
@@ -125,15 +132,19 @@ export class DailyLogComponent implements OnInit {
       const match = labelNow.match(/(\d{2}:\d{2})$/);
       const time = match ? match[1] : null;
 
-      const updatedItem = await this.crudService.updateItem(
+      const updatedItem = await this.crudService.updateItemWithPhoto(
         'rdo',
         this.dailyLogService.item.id,
+        {},
         {
-          dataFoto: time,
           foto: this.webcamImage.imageAsDataUrl,
+          dataFoto: time,
+          observacao: this.mySecondForm.get('obs')!.value
         }
+
       );
-      console.log(updatedItem)
+      this.poModalCamera?.close();
+      this.notificationService.success('Foto salva com sucesso.');
     },
     label: 'Enviar',
   };
@@ -251,7 +262,7 @@ export class DailyLogComponent implements OnInit {
 
   async loadOperators() {
     try {
-      this.items = await this.crudService.getItems('user', 100, 'Operador');
+      this.items = await this.crudService.getItems('user', 100, 'type','Operador');
       this.items.map((user: any) => {
         user.value = user.uid;
         user.label = user.displayName;
@@ -326,18 +337,28 @@ export class DailyLogComponent implements OnInit {
     private crudService: CrudService,
     public userService: UserService,
     private dailyLogService: DailyLogService,
+    private router: Router,
+    private notificationService: PoNotificationService,
     private fb: FormBuilder
   ) {}
 
   ngOnInit(): void {
+
     this.myForm = this.fb.group({
       labelNow: [this.labelNow, [Validators.required]], // Initialize with a default value
       contact: [this.contact, [Validators.required]], // Multiselect should be required
       service: [this.service, [Validators.required]], // Combo should be required
     });
 
+    this.mySecondForm = this.fb.group({
+      obs: ['', []], // Initialize with a default value
+    });
+
     this.loadOperators();
     this.loadServices();
+
+    this.getCurrentDailyLog();
+
   }
 
   upload: any;
@@ -363,6 +384,27 @@ export class DailyLogComponent implements OnInit {
     }
   }
 
+  startedDailyLog = false;
+
+
+  async getCurrentDailyLog() {
+    const date = new Date();
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0'); // getMonth() is zero-based, so add 1
+    const year = date.getFullYear();
+
+    const formattedDate = `${day}/${month}/${year}`;
+
+    const currentDailyLog = await this.crudService.getItems('rdo', 1, 'user', this.userService.user.login)
+    if (currentDailyLog[0]['status'] === 'started'  && formattedDate === currentDailyLog[0].dataInicio){
+      this.dailyLogService.item = currentDailyLog[0];
+      if (currentDailyLog[0].fotos.length) {
+        this.webcamImage = currentDailyLog[0]['fotos'][0].foto;
+      }
+      this.startedDailyLog = true;
+      this.poStepperComponent.next();
+    }
+  }
   // Convert base64 string to a Blob
   dataURLToBlob(dataURL: string): Blob {
     const [base64Prefix, base64Data] = dataURL.split(',');
@@ -407,5 +449,42 @@ export class DailyLogComponent implements OnInit {
 
   action(button: any) {
     alert(`${button.label}`);
+  }
+
+  async onHandleCollectSigns() {
+    // let a;
+    // const match = this.labelNow.match(/(\d{2}:\d{2})$/);
+    // const time = match ? match[1] : null;
+
+    // const itemAdded = await this.crudService.addItem(
+    //   'rdo',
+    //   {
+    //     dataInicio: this.labelNow.substring(0, 10),
+
+    const endDate = this.formatDate(new Date());
+    // Use regex to extract the time (HH:mm format)
+    const match = endDate.match(/(\d{2}:\d{2})$/);
+    const endTime = match ? match[1] : null;
+
+    const updatedItem = await this.crudService.updateItem(
+      'rdo',
+      this.dailyLogService.item.id,
+      {
+        dataFim: endDate.substring(0, 10),
+        horaFim: endTime,
+        status: 'finished'
+      },
+    );
+
+    if (updatedItem) {
+      this.reloadPage();
+    }
+  }
+
+  reloadPage() {
+    // Reload the current route
+    this.router.navigateByUrl('/', { skipLocationChange: true }).then(() => {
+      this.router.navigate([decodeURIComponent(window.location.pathname)]);
+    });
   }
 }

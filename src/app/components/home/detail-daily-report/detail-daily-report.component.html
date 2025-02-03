@@ -8,7 +8,20 @@
         </po-dynamic-view>
       </po-tab >
       <po-tab p-label="Fotos">
-        <po-image [p-src]="dailyReportService.item?.foto"></po-image>
+        <div class="po-md-4" *ngFor="let item of dailyReportService.item?.fotos">
+          <div class="po-row">
+            <po-image
+              class="po-md-6"
+              [p-src]="item.foto">
+            </po-image>
+            <div class="po-md-6">
+              <po-info class="po-md-12" p-label="Hora da foto" [p-value]="item.dataFoto"> </po-info>
+              <po-info class="po-md-12" p-label="Observação" [p-value]="item.observacao"> </po-info>
+            </div>
+          </div>
+        </div>
+
+
       </po-tab>
     </po-tabs>
 </po-page-detail>

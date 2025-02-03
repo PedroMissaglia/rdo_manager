@@ -32,6 +32,7 @@ export class DetailDailyReportComponent implements OnInit {
 
   ngOnInit(): void {
     this.dailyReportService.item;
+
   }
 
   onHandleGoBack() {

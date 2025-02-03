@@ -4,15 +4,26 @@ import { HomeComponent } from './components/home/home.component';
 import { DetailDailyReportComponent } from './components/home/detail-daily-report/detail-daily-report.component';
 import { LoginComponent } from './components/login/login.component';
 import { DailyLogComponent } from './components/daily-log/daily-log.component';
+import { AuthGuard } from './guard/auth.guard';
 
 const routes: Routes = [
   {path: '', redirectTo: 'login', pathMatch: 'full'},
-  {path: 'home', component: HomeComponent},
-  {path: 'detail/:id', component: DetailDailyReportComponent},
+  {path: 'home', component: HomeComponent, canActivate: [AuthGuard]},
+  {path: 'detail/:id', component: DetailDailyReportComponent,     canActivate: [AuthGuard]},
   {path: 'login', component: LoginComponent},
-  {path: 'jobs',  loadChildren: () => import('./components/job/job-routing.module').then(m => m.JobRoutingModule)},
-  {path: 'collaborators',  loadChildren: () => import('./components/colaborador/colaborador-routing.module').then(m => m.ColaboradorRoutingModule)},
-  {path: 'dailyLog',  component: DailyLogComponent},
+  {
+    path: 'jobs',
+    canActivate: [AuthGuard],
+    loadChildren: () => import('./components/job/job-routing.module').then(m => m.JobRoutingModule)},
+  {
+    path: 'collaborators',
+    canActivate: [AuthGuard],
+    loadChildren: () => import('./components/colaborador/colaborador-routing.module').then(m => m.ColaboradorRoutingModule)},
+  {
+    path: 'dailyLog',
+    component: DailyLogComponent,
+    canActivate: [AuthGuard]
+  },
 
 ]
 
