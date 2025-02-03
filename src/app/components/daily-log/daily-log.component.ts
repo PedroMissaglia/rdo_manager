@@ -21,6 +21,7 @@ export class DailyLogComponent implements OnInit, OnDestroy, AfterViewInit{
   myForm!: FormGroup;
 
   startedRoute = false;
+  image: any;
 
   buttons1: Array<PoButtonGroupItem> = [
     { label: 'Coletar fotos', action: this.takePhoto.bind(this), icon: 'an an-camera', disabled: this.myForm?.invalid }
@@ -156,12 +157,11 @@ export class DailyLogComponent implements OnInit, OnDestroy, AfterViewInit{
   imageUrl: string = '';
   caption: string = '';
 
-  private videoElement!: HTMLVideoElement;
+  @ViewChild('videoElement', { static: false })
+  videoElement!: ElementRef;
   private stream: MediaStream | undefined;
-  private canvasElement!: HTMLCanvasElement | undefined;
-  private canvasContext!: CanvasRenderingContext2D | null;
+  @ViewChild('canvasElement', { static: false }) canvasElement!: ElementRef;
 
-  @ViewChild('videoElement') videoElementRef!: ElementRef<HTMLVideoElement>;
 
   constructor(
     private cameraService: CameraService,
@@ -171,10 +171,10 @@ export class DailyLogComponent implements OnInit, OnDestroy, AfterViewInit{
   {}
 
   ngAfterViewInit() {
-    const videoElement = this.videoElementRef.nativeElement;
+    // const videoElement = this.videoElementRef.nativeElement;
 
-    // Start the camera after the view is initialized
-    this.getBackCameraStream(videoElement);
+    // // Start the camera after the view is initialized
+    // this.getBackCameraStream(videoElement);
   }
 
   ngOnInit(): void {
@@ -198,24 +198,36 @@ export class DailyLogComponent implements OnInit, OnDestroy, AfterViewInit{
   }
 
   private initializeCamera() {
-    const constraints = {
-      video: {
-        facingMode: 'environment', // This targets the back camera
-        width: { ideal: 1280 },
-        height: { ideal: 720 }
-      }
-    };
-
-    navigator.mediaDevices.getUserMedia(constraints)
-      .then((stream) => {
-        this.stream = stream;
-        this.videoElement = <HTMLVideoElement>document.querySelector('video');
-        this.videoElement.srcObject = stream;
-        this.videoElement.play();
+    // Access user's camera
+    navigator.mediaDevices.getUserMedia({ video: true })
+      .then(stream => {
+        // Display the camera feed in the video element
+        this.videoElement.nativeElement.srcObject = stream;
       })
-      .catch((err) => {
-        console.error('Error accessing camera:', err);
+      .catch(err => {
+        console.error('Error accessing camera: ', err);
       });
+  }
+
+  capturePhoto() {
+    const video = this.videoElement.nativeElement;
+    const canvas = this.canvasElement.nativeElement;
+
+    // Set the canvas dimensions to the video dimensions
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+
+    // Get the canvas context and draw the current video frame onto the canvas
+    const context = canvas.getContext('2d');
+    context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+    // Get the image data URL from the canvas and store it
+    this.capturedImage = canvas.toDataURL('image/png');
+
+    // Optionally stop the video stream
+    const stream = video.srcObject;
+    const tracks = stream.getTracks();
+    tracks.forEach((track: any) => track.stop());
   }
 
 
@@ -229,55 +241,8 @@ export class DailyLogComponent implements OnInit, OnDestroy, AfterViewInit{
     return `${day}/${month}/${year} - ${hours}:${minutes}`;
   }
 
-  getBackCameraStream(videoElement: HTMLVideoElement) {
-    // Get all media devices
-    navigator.mediaDevices.enumerateDevices().then(devices => {
-      const videoDevices = devices.filter(device => device.kind === 'videoinput');
 
-      // Find the back camera using labels
-      const backCamera = videoDevices.find(device => device.label.toLowerCase().includes('back') || device.label.toLowerCase().includes('environment'));
 
-      if (backCamera) {
-        // Access the back camera using getUserMedia
-        const constraints = {
-          video: {
-            deviceId: backCamera.deviceId, // Use the back camera deviceId
-          }
-        };
-
-        navigator.mediaDevices.getUserMedia(constraints).then((stream) => {
-          videoElement.srcObject = stream;
-          videoElement.play();
-        }).catch((err) => {
-          console.error('Error accessing back camera: ', err);
-        });
-      } else {
-        console.error('Back camera not found');
-      }
-    });
-  }
-
-  capturePhoto(): void {
-    this.canvasElement = <HTMLCanvasElement>document.createElement('canvas');
-    this.canvasContext = this.canvasElement.getContext('2d');
-
-    // Set canvas dimensions to video dimensions
-    this.canvasElement.width = this.videoElement.videoWidth;
-    this.canvasElement.height = this.videoElement.videoHeight;
-
-    // Draw the current frame from the video onto the canvas
-    this.canvasContext?.drawImage(this.videoElement, 0, 0, this.canvasElement.width, this.canvasElement.height);
-
-    // Convert the canvas to an image
-    const imageUrl = this.canvasElement.toDataURL('image/png');
-
-    // Log the captured image URL (You can display or upload the image here)
-    console.log(imageUrl);
-
-    // Optionally, you can display the captured photo in the HTML
-    const imgElement = <HTMLImageElement>document.getElementById('capturedImage');
-    imgElement.src = imageUrl;
-  }
 
   changeOptions(event: any): void {
     this.heroes = [...event];
@@ -295,7 +260,7 @@ export class DailyLogComponent implements OnInit, OnDestroy, AfterViewInit{
 
   // Capture photo from the video stream
   takePhoto() {
-    const videoElement = this.videoElementRef.nativeElement;
+    const videoElement = this.videoElement.nativeElement;
 
     if (!videoElement) {
       console.error('Video element is not available');

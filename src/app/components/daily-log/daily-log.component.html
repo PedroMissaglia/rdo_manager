@@ -70,13 +70,9 @@
 
       <div class="camera-container">
         <!-- Video element to show the camera stream (without controls) -->
-        <video #videoElement width="100%" height="auto" autoplay muted></video>
-
-        <!-- Display the captured image -->
-        <div *ngIf="imageUrl">
-          <h3>Captured Photo:</h3>
-          <img [src]="imageUrl" alt="Captured Image" width="100%">
-        </div>
+        <video #videoElement width="100%" height="auto" autoplay></video>
+        <button (click)="capturePhoto()">Capture Photo</button>
+        <img id="capturedImage" *ngIf="image" />
       </div>
 
 

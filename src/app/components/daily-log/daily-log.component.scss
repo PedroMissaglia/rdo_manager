@@ -112,28 +112,9 @@
 }
 
 video {
-  border: 2px solid #ccc; /* Optional styling for video border */
-  width: 100%; /* Ensures the video scales to the container width */
-  height: auto; /* Maintains aspect ratio */
-}
-
-button {
-  padding: 10px 20px;
-  background-color: #4caf50;
-  color: white;
-  border: none;
-  cursor: pointer;
-  margin-top: 10px;
-}
-
-button:hover {
-  background-color: #45a049;
-}
-
-img {
-  max-width: 100%;
-  height: auto;
-  margin-top: 10px;
+  display: block;
+  margin: 20px auto;
+  border: 2px solid #ddd;
 }
 
 
