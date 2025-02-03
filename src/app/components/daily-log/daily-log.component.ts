@@ -187,25 +187,19 @@ export class DailyLogComponent implements OnInit, OnDestroy, AfterViewInit{
     this.loadOperators();
     this.loadServices();
 
-    this.initializeCamera();
+    this.startCamera();
   }
 
-  ngOnDestroy(): void {
-    if (this.mediaStream) {
-      const tracks = this.mediaStream.getTracks();
-      tracks.forEach(track => track.stop());
-    }
-  }
-
-  private initializeCamera() {
-    // Access user's camera
-    navigator.mediaDevices.getUserMedia({ video: true })
-      .then(stream => {
-        // Display the camera feed in the video element
+  startCamera() {
+    // Access the user's camera
+    navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
+      .then((stream) => {
+        this.mediaStream = stream;
         this.videoElement.nativeElement.srcObject = stream;
       })
-      .catch(err => {
+      .catch((err) => {
         console.error('Error accessing camera: ', err);
+        alert('Camera access denied or unavailable.');
       });
   }
 
@@ -213,21 +207,28 @@ export class DailyLogComponent implements OnInit, OnDestroy, AfterViewInit{
     const video = this.videoElement.nativeElement;
     const canvas = this.canvasElement.nativeElement;
 
-    // Set the canvas dimensions to the video dimensions
+    // Set canvas size to match the video feed
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
 
-    // Get the canvas context and draw the current video frame onto the canvas
     const context = canvas.getContext('2d');
     context.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-    // Get the image data URL from the canvas and store it
+    // Capture the image as a base64 encoded PNG
     this.capturedImage = canvas.toDataURL('image/png');
 
-    // Optionally stop the video stream
-    const stream = video.srcObject;
-    const tracks = stream.getTracks();
-    tracks.forEach((track: any) => track.stop());
+    // Optionally stop the media stream if you're done with it
+    this.stopCamera();
+  }
+
+  stopCamera() {
+    const tracks = this.mediaStream?.getTracks();
+    tracks?.forEach((track) => track.stop());
+  }
+
+  ngOnDestroy() {
+    // Clean up camera resources when component is destroyed
+    this.stopCamera();
   }
 
 
