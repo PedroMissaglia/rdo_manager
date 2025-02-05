@@ -7,7 +7,6 @@
 
   </nav>
 
-
   <po-stepper
   #stepper
   [p-orientation]="orientation"
@@ -15,123 +14,131 @@
   [p-disable-click]="true"
   [p-step-size]="32"
   >
-  <po-step p-label="Início de rota">
-      <form [formGroup]="myForm">
-        <div class="po-mt-1">
-            <!-- First Widget with LabelNow Input -->
-            <po-widget class="po-mt-1">
-              <po-info p-label="Data e hora" [p-value]="labelNow"> </po-info>
-              <po-info p-label="Obra" [p-value]="userService.user?.obra"> </po-info>
-              <po-info p-label="Operador e placa" [p-value]="getDisplayNameAndPlate()"> </po-info>
+    <po-step p-label="Início de rota">
+        <form [formGroup]="myForm">
+          <div class="po-mt-1">
+              <!-- First Widget with LabelNow Input -->
+              <po-widget class="po-mt-1">
+                <po-info p-label="Data e hora" [p-value]="labelNow"> </po-info>
+                <po-info p-label="Cliente" [p-value]="userService.user?.cliente"> </po-info>
+                <po-info p-label="Operador e placa" [p-value]="getDisplayNameAndPlate()"> </po-info>
 
-              <br>
-              <po-multiselect
-                #multiSelect
-                class=" po-mb-5 po-mt-3"
-                formControlName="contact"
-                (p-change)="changeOptions($event)"
-                p-field-value="id"
-                [p-hide-select-all]="true"
-                p-label="Operadores"
-                [p-options]="optionsOperators"
-                [p-disabled]="startedDailyLog"
-                p-field-label="displayName"
-                p-icon="ph ph-user"
-                p-placeholder="Selecione o operador"
-                required
-              >
-              </po-multiselect>
+                <br>
+                <po-multiselect
+                  #multiSelect
+                  class=" po-mb-5 po-mt-3"
+                  formControlName="contact"
+                  (p-change)="changeOptions($event)"
+                  p-field-value="id"
+                  [p-hide-select-all]="true"
+                  p-label="Operadores"
+                  [p-options]="optionsOperators"
+                  [p-disabled]="startedDailyLog"
+                  p-field-label="displayName"
+                  p-icon="ph ph-user"
+                  p-placeholder="Selecione o operador"
+                  required
+                >
+                </po-multiselect>
 
-              <br>
-              <po-combo
-                name="combo"
-                class="po-mb-1"
-                formControlName="service"
-                p-label="Serviço"
-                p-placeholder="Selecione o serviço"
-                [p-disabled]="startedDailyLog"
-                [p-options]="optionsServices"
-                required
-              >
-              </po-combo>
-            </po-widget>
+                <br>
+                <po-combo
+                  #poComboComponent
+                  name="combo"
+                  class="po-mb-1"
+                  formControlName="service"
+                  p-label="Serviço"
+                  p-placeholder="Selecione o serviço"
+                  [p-disabled]="startedDailyLog"
+                  [p-options]="optionsServices"
+                  required
+                >
+                </po-combo>
+              </po-widget>
 
-            <!-- Button to Start Route -->
-            <po-button
-              class="po-md-12 po-mt-5"
-              p-kind="primary"
-              p-label="Iniciar Rota"
-              [p-disabled]="myForm.invalid"
-              (p-click)="onHandleStartRoute('startRoute')"
-            ></po-button>
-        </div>
-      </form>
+              <!-- Button to Start Route -->
+              <po-button
+                class="po-md-12 po-mt-5"
+                p-kind="primary"
+                p-label="Iniciar Rota"
+                [p-disabled]="myForm.invalid"
+                (p-click)="onHandleStartRoute('startRoute')"
+              ></po-button>
+          </div>
+        </form>
     </po-step>
 
-  <po-step p-label="Coletar fotos">
-    <!-- Button Groups -->
-    <form [formGroup]="mySecondForm">
-      <div class="camera-container">
+    <po-step p-label="Coletar fotos">
+      <!-- Button Groups -->
+      <form [formGroup]="mySecondForm">
+        <div class="camera-container">
 
-        <!-- Display the webcam feed -->
-        <div class="po-text-center">
-          <webcam
-            [height]="350"
-            [width]="300"
-            [trigger]="triggerObservable"
-            (imageCapture)="handleImage($event)"
-            [allowCameraSwitch]="allowCameraSwitch"
-            [switchCamera]="nextWebcamObservable"
-            [videoOptions]="videoOptions"
-            (cameraSwitched)="cameraWasSwitched($event)"
-            (initError)="handleInitError($event)"
-            >
-          </webcam>
-        </div>
+          <!-- Display the webcam feed -->
+          <div class="po-text-center">
+            <webcam
+              [height]="350"
+              [width]="300"
+              [trigger]="triggerObservable"
+              (imageCapture)="handleImage($event)"
+              [allowCameraSwitch]="allowCameraSwitch"
+              [switchCamera]="nextWebcamObservable"
+              [videoOptions]="videoOptions"
+              (cameraSwitched)="cameraWasSwitched($event)"
+              (initError)="handleInitError($event)"
+              >
+            </webcam>
+          </div>
 
-        <po-info class="po-md-12" p-label="Data e hora" [p-value]="labelNow"> </po-info>
-        <po-textarea
-          p-label="Observação"
-          formControlName="obs"
-          class="po-md-12">
-        </po-textarea>
-        <div class="po-text-center">
+          <po-info class="po-md-12" p-label="Data e hora" [p-value]="labelNow"> </po-info>
+          <po-textarea
+            p-label="Observação"
+            formControlName="obs"
+            class="po-md-12">
+          </po-textarea>
+          <div class="po-text-center">
+            <po-button
+              (p-click)="triggerSnapshot()"
+              p-label="Tirar foto">
+            </po-button>
+          </div>
+
           <po-button
-            (p-click)="triggerSnapshot()"
-            p-label="Tirar foto">
+            class="po-md-12 po-mb-1 po-mt-1"
+            (p-click)="handleStepper()"
+            [p-disabled]="!webcamImage"
+            p-label="Finalizar diária">
           </po-button>
+
         </div>
+
+      </form>
+    </po-step>
+    <po-step p-label="Finalizar">
+      <!-- Button Groups -->
+      <form [formGroup]="myThirdForm">
+        <po-textarea
+          name="textarea"
+          class="po-md-12 po-mt-3"
+          p-label="Ocorrências"
+          formControlName="occo"
+          [p-rows]="6"
+        ></po-textarea>
+
+        <po-input
+          formControlName="responsavel"
+          class="po-md-12 po-mt-3"
+          p-label="Responsável">
+
+        </po-input>
 
         <po-button
-          class="po-md-12 po-mb-1 po-mt-1"
-          (p-click)="handleStepper()"
-          [p-disabled]="!webcamImage"
-          p-label="Finalizar diária">
-        </po-button>
-
-      </div>
-
-    </form>
-  </po-step>
-  <po-step p-label="Finalizar">
-    <!-- Button Groups -->
-    <form [formGroup]="myThirdForm">
-      <po-textarea
-        name="textarea"
-        class="po-md-12 po-mt-3"
-        p-label="Ocorrências"
-        formControlName="occo"
-        [p-rows]="6"
-      ></po-textarea>
-
-      <po-button
-        class="po-md-12"
-        p-kind="tertiary"
-        p-label="Finalizar diária"
-        (p-click)="onHandleCollectSigns()"
-      ></po-button>
-    </form>
-  </po-step>
+          class="po-md-12"
+          p-kind="tertiary"
+          p-label="Finalizar diária"
+          (p-click)="onHandleCollectSigns()"
+        ></po-button>
+      </form>
+    </po-step>
   </po-stepper>
 
 </po-page-default>
@@ -143,8 +150,8 @@
   [p-secondary-action]="close"
   >
   <po-info class="po-md-12 po-mt-1" p-label="Data e hora" [p-value]="labelNow"> </po-info>
-  <po-info class="po-md-12 po-mt-1" p-label="Obra" [p-value]="  userService.user?.obra"> </po-info>
-  <po-info class="po-md-12 po-mt-1" p-label="serviço" [p-value]="myForm.get('service')!.value"> </po-info>
+  <po-info class="po-md-12 po-mt-1" p-label="Cliente" [p-value]="  userService.user?.cliente"> </po-info>
+  <po-info class="po-md-12 po-mt-1" p-label="serviço" [p-value]="poComboComponent?.selectedOption?.label"> </po-info>
 
 
 </po-modal>

@@ -11,6 +11,7 @@ import {
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import {
   PoButtonGroupItem,
+  PoComboComponent,
   PoModalAction,
   PoModalComponent,
   PoMultiselectComponent,
@@ -83,7 +84,8 @@ export class DailyLogComponent implements OnInit {
 
   confirm: PoModalAction = {
     action: async () => {
-      let a;
+      const id = this.crudService.generateFirebaseId();
+
       const match = this.labelNow.match(/(\d{2}:\d{2})$/);
       const time = match ? match[1] : null;
       let date = new Date();
@@ -98,11 +100,13 @@ export class DailyLogComponent implements OnInit {
           placa: this.userService.user.placa,
           operadores: this.heroes,
           status: 'started',
-          obra: this.userService.user.obra,
+          cliente: this.userService.user.cliente,
           info: 'started',
-          user: this.userService.user.login
+          user: this.userService.user.login,
+          id: id
         },
-    );
+        id
+      );
       if (itemAdded) {
         this.dailyLogService.item = itemAdded;
 
@@ -156,6 +160,8 @@ export class DailyLogComponent implements OnInit {
 
   @ViewChild(PoStepperComponent)
   poStepperComponent!: PoStepperComponent;
+  @ViewChild(PoComboComponent)
+  poComboComponent!: PoComboComponent;
   optionsOperators: Array<PoMultiselectOption> = [];
   public deviceId: string = '';
   optionsServices: Array<PoMultiselectOption> = [];
@@ -167,6 +173,8 @@ export class DailyLogComponent implements OnInit {
   // A boolean flag to control the webcam
   public showWebcam: boolean = true;
   public allowCameraSwitch = true;
+
+
 
   public videoOptions: MediaTrackConstraints = {
     width: { ideal: 1024 },
@@ -359,6 +367,7 @@ export class DailyLogComponent implements OnInit {
 
     this.myThirdForm = this.fb.group({
       occo: ['', []], // Initialize with a default value
+      responsavel: ['', []], // Initialize with a default value
     });
 
     this.loadOperators();
@@ -403,7 +412,7 @@ export class DailyLogComponent implements OnInit {
     const formattedDate = `${day}/${month}/${year}`;
 
     const currentDailyLog = await this.crudService.getItems('rdo', 1, 'user', this.userService.user.login)
-    if (currentDailyLog[0]['status'] === 'started'  && formattedDate === currentDailyLog[0].dataInicio){
+    if (currentDailyLog && currentDailyLog[0]?.status === 'started'  && formattedDate === currentDailyLog[0].dataInicio){
       this.dailyLogService.item = currentDailyLog[0];
       if (currentDailyLog[0].fotos.length) {
         this.webcamImage = currentDailyLog[0]['fotos'][0].foto;
@@ -500,6 +509,7 @@ export class DailyLogComponent implements OnInit {
         dataFim: date,
         dataFimDisplay: this.formatDate(date).substring(0, 10),
         justificativa: this.myThirdForm.get('occo')?.value,
+        responsavel: this.myThirdForm.get('responsavel')?.value,
         horaFim: endTime,
         status: 'finished',
         horasRealizadas: workedHours,

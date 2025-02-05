@@ -12,7 +12,6 @@ import { Router } from '@angular/router';
 export class DetailComponent implements OnInit{
 
   fields: Array<PoDynamicViewField> = [
-    { property: 'id', divider: 'Detalhes do serviço', order: 1 },
     { property: 'nome', label: 'Serviço', gridColumns: 10 },
     { property: 'descricao', label: 'Descrição', gridColumns: 12 },
   ];

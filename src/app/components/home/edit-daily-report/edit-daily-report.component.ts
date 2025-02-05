@@ -15,12 +15,14 @@ export class EditDailyReportComponent {
 
   value: any;
   fields: Array<PoDynamicFormField> = [
-    {property: 'obra', label: 'Cliente', disabled: true},
+    {property: 'obra', label: 'Cliente', gridColumns: 8, disabled: true},
     {property: 'placa', label: 'Placa', disabled: true},
     {property: 'dataInicioDisplay', label: 'Data', disabled: true},
     {property: 'horasPrevistas', label: 'Horas previstas', disabled: true},
     {property: 'horasRealizadas', label: 'Horas realizadas', disabled: true},
-    {property: 'justificativa', label: 'Justificativa'}
+    {property: 'prazo', label: 'Prazo'},
+    {property: 'responsavel', label: 'Responsável', gridColumns: 8},
+    {property: 'justificativa', label: 'Justificativa', rows: 4, gridColumns: 12}
   ];
 
   constructor(
@@ -43,10 +45,12 @@ export class EditDailyReportComponent {
       delete this.dailyReportService.item['$selected'];
     }
 
+    this.dailyReportService.item['info'] = 'justified'
+
     const updatedItem = await this.crudService.updateItem(
       'rdo',
       this.dailyReportService.item['id'],
-      this.dailyReportService.item.collaborator
+      this.dailyReportService.item
     );
 
     if (updatedItem) {

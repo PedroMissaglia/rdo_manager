@@ -32,7 +32,9 @@ export class NewComponent {
   }
 
   async onHandleSave() {
-    const itemAdded = await this.crudService.addItem('service', this.value);
+    const id = this.crudService.generateFirebaseId();
+    this.value['id'] = id;
+    const itemAdded = await this.crudService.addItem('service', this.value, id);
 
     if (itemAdded) {
       this.notificationService.success('Serviço criado com sucesso.');

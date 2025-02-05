@@ -3,6 +3,5 @@ export interface IUser {
   login: string;
   password: string;
   displayName?: string | null; // Allow string, null, or undefined
-  createdAt: Date;
   type: string;
 }

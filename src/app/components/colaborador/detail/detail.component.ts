@@ -11,12 +11,10 @@ import { Router } from '@angular/router';
 })
 export class DetailComponent {
 
-
   fields: Array<PoDynamicViewField> = [
     { property: 'displayName', divider: 'detalhes', order: 1, gridColumns: 4 },
     { property: 'login', label: 'Login', gridColumns: 8 },
-    { property: 'password', label: 'Senha', gridColumns: 12},
-    { property: 'placa', label: 'Placa', gridColumns:4 },
+    { property: 'placa', label: 'Placa', gridColumns:4},
     { property: 'cliente', label: 'Cliente', gridColumns: 8},
     { property: 'type', label: 'Tipo', gridColumns: 6,
       options: [{label: 'Administrador', value: 'Administrador'}, {label: 'Operador', value: 'Operador'}]

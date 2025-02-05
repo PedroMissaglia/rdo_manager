@@ -15,7 +15,7 @@ export class EditComponent {
   fields: Array<PoDynamicFormField> = [
     { property: 'displayName', divider: 'detalhes', order: 1, disabled: true, gridColumns: 4 },
     { property: 'login', label: 'Login', disabled: true, gridColumns: 8 },
-    { property: 'password', label: 'Senha', gridColumns: 12},
+    { property: 'password', label: 'Senha', gridColumns: 12, secret: true, hidePasswordPeek: true},
     { property: 'placa', label: 'Placa', gridColumns:4 },
     { property: 'cliente', label: 'Cliente', gridColumns: 8},
     { property: 'type', label: 'Tipo', gridColumns: 6,       optional: false,

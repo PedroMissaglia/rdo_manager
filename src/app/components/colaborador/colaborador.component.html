@@ -16,3 +16,15 @@
     >
   </po-table>
 </po-page-list>
+
+<po-modal
+  #modalTwo
+  p-title="Excluir"
+  [p-primary-action]="confirm"
+  [p-secondary-action]="close"
+  >
+  <po-dynamic-view
+    [p-fields]="fields"
+    [p-value]="collaboratorService.collaborator">
+  </po-dynamic-view>
+</po-modal>

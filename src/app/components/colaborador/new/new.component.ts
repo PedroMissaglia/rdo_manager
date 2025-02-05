@@ -13,7 +13,6 @@ import { IUser } from '../../../interfaces/user.interface';
 })
 export class NewComponent {
   value: IUser = {
-    createdAt: new Date(),
     displayName: '',
     login: '',
     password: '',
@@ -21,9 +20,9 @@ export class NewComponent {
     id: '',
   };
   fields: Array<PoDynamicFormField> = [
-    { property: 'displayName', divider: 'detalhes', order: 1, gridColumns: 4 },
+    { property: 'displayName', label: 'Nome',divider: 'detalhes', order: 1, gridColumns: 4 },
     { property: 'login', label: 'Login', gridColumns: 8 },
-    { property: 'password', label: 'Senha', gridColumns: 12},
+    { property: 'password', label: 'Senha', gridColumns: 12, secret: true, hidePasswordPeek: false},
     { property: 'placa', label: 'Placa', gridColumns:4 },
     { property: 'cliente', label: 'Cliente', gridColumns: 8},
     { property: 'type', label: 'Tipo', gridColumns: 6,       optional: false,
@@ -44,27 +43,14 @@ export class NewComponent {
 
   async onHandleSave() {
 
-    const itemAdded = await this.crudService.addItem('user', this.value);
+    const id = this.crudService.generateFirebaseId();
+    this.value['id'] = id;
+    const itemAdded = await this.crudService.addItem('user', this.value, id);
 
     if (itemAdded) {
-
-      this.collaboratorService.collaborator = itemAdded;
-
-      const updatedItem = await this.crudService.updateItem(
-        'user',
-        this.collaboratorService.collaborator.id,
-        {
-          id: this.collaboratorService.collaborator.id
-        }
-      );
-
-      if (updatedItem) {
-        this.notificationService.success('Usuário criado com sucesso.');
-        this.router.navigate(['collaborators']);
-      }
-
+      this.notificationService.success('Usuário criado com sucesso.');
+      this.router.navigate(['collaborators']);
     }
+
   }
-
-
 }

@@ -1,7 +1,7 @@
 import { CrudService } from './../../services/crud.service';
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { PoBreadcrumb, PoPageAction, PoPageFilter, PoPageListComponent, PoTableColumn } from '@po-ui/ng-components';
+import { PoBreadcrumb, PoDynamicViewField, PoModalAction, PoModalComponent, PoNotificationService, PoPageAction, PoPageFilter, PoPageListComponent, PoTableColumn } from '@po-ui/ng-components';
 import { CollaboratorService } from '../../services/collaborator.service';
 
 @Component({
@@ -17,8 +17,42 @@ export class ColaboradorComponent implements OnInit{
     { label: 'Novo', action: this.onNewCollaborator.bind(this) },
     { label: 'Visualizar', action: this.onDetailCollaborator.bind(this), disabled: this.disableEditButton.bind(this) },
     { label: 'Editar', action: this.onEditCollaborator.bind(this), disabled: this.disableEditButton.bind(this),  },
-    { label: 'Excluir', disabled: this.disableEditButton.bind(this)}
+    { label: 'Excluir', action: this.onDeleteCollaborator.bind(this), disabled: this.disableEditButton.bind(this)}
   ];
+
+  fields: Array<PoDynamicViewField> = [
+    { property: 'displayName', order: 1, gridColumns: 4 },
+    { property: 'login', label: 'Login', gridColumns: 8 },
+    { property: 'placa', label: 'Placa', gridColumns:4 },
+    { property: 'cliente', label: 'Cliente', gridColumns: 8},
+    { property: 'type', label: 'Tipo', gridColumns: 6,
+      options: [{label: 'Administrador', value: 'Administrador'}, {label: 'Operador', value: 'Operador'}]
+    },
+  ];
+
+  @ViewChild(PoModalComponent, { static: false })
+  poModal!: PoModalComponent;
+
+  close: PoModalAction = {
+    action: () => {
+      this.poModal?.close();
+    },
+    label: 'Cancelar',
+    danger: true,
+  };
+
+  confirm: PoModalAction = {
+    action: async () => {
+      const deletedItem = await this.crudService
+        .deleteItem('user', this.collaboratorService.collaborator['id']);
+
+      await this.loadItems();
+
+      this.poModal.close();
+      this.notificationService.success('Colaborador excluído com sucesso');
+    },
+    label: 'Confirmar',
+  };
 
   items: any;
   columns: Array<PoTableColumn> = this.getColumns();
@@ -32,6 +66,11 @@ export class ColaboradorComponent implements OnInit{
   onEditCollaborator() {
     this.collaboratorService.collaborator = this.selectCollaborator;
     this.router.navigate([`collaborator/edit/${this.selectCollaborator['uid']}`]);
+  }
+
+  onDeleteCollaborator() {
+    this.collaboratorService.collaborator = this.selectCollaborator;
+    this.poModal.open();
   }
 
   selectCollaborator: any;
@@ -48,7 +87,8 @@ export class ColaboradorComponent implements OnInit{
     private router: Router,
     private route: ActivatedRoute,
     private crudService: CrudService,
-    private collaboratorService: CollaboratorService)
+    private notificationService: PoNotificationService,
+    public collaboratorService: CollaboratorService)
   {}
 
   ngOnInit() {
@@ -123,11 +163,9 @@ export class ColaboradorComponent implements OnInit{
     return [
       {property: 'displayName', label: 'Nome'},
       {property: 'login', label: 'Login'},
-      {property: 'password', label: 'Senha'},
       {property: 'type', label: 'Tipo'},
       {property: 'placa', label: 'Placa'},
-      {property: 'obra', label: 'Obra'},
-      {property: 'id', label: 'Id'},
+      {property: 'cliente', label: 'Cliente'}
     ]
   }
 }

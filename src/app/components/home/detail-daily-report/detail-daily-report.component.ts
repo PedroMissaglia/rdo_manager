@@ -11,7 +11,7 @@ import { Router } from '@angular/router';
 })
 export class DetailDailyReportComponent implements OnInit {
   fields: Array<PoDynamicViewField> = [
-    {property: 'obra', label: 'Cliente'},
+    {property: 'cliente', label: 'Cliente'},
     {property: 'placa', label: 'Placa'},
     {property: 'dataInicioDisplay', label: 'Data'},
     {property: 'horasPrevistas', label: 'Horas previstas'},

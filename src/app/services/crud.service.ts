@@ -68,12 +68,14 @@ export class CrudService {
   //   );
   // }
 
-  async addItem(collectionName: string, item: any): Promise<any> {
+  async addItem(collectionName: string, item: any, customId: string): Promise<any> {
     try {
       // Create a reference to the collection in Firestore
       const itemsCollection = collection(this.firestore, collectionName); // Pass the collection name (a string)
-      const docRef = await addDoc(itemsCollection, item); // Add the document to the collection
-      return { id: docRef.id, ...item };
+      const docRef = doc(itemsCollection, customId); // Add the document to the collection
+
+      await setDoc(docRef, item);
+      return { id: customId, ...item };
     } catch (error) {
       console.error("Error adding document: ", error);
       throw error;
@@ -120,27 +122,27 @@ export class CrudService {
   }
 
   // Update (Atualizar um item existente)
-async updateItemWithFoto(collection: string, id: string, data: any): Promise<any> {
-  try {
-    const itemDoc = doc(this.firestore, collection, id);
+  async updateItemWithFoto(collection: string, id: string, data: any): Promise<any> {
+    try {
+      const itemDoc = doc(this.firestore, collection, id);
 
-    // Update the document with the new data
-    await updateDoc(itemDoc, data);
+      // Update the document with the new data
+      await updateDoc(itemDoc, data);
 
-    // Retrieve the updated document to return the full document after the update
-    const updatedDoc = await getDoc(itemDoc);
+      // Retrieve the updated document to return the full document after the update
+      const updatedDoc = await getDoc(itemDoc);
 
-    if (updatedDoc.exists()) {
-      return updatedDoc.data(); // Return the updated data (or the full document data)
-    } else {
-      throw new Error("Document not found");
+      if (updatedDoc.exists()) {
+        return updatedDoc.data(); // Return the updated data (or the full document data)
+      } else {
+        throw new Error("Document not found");
+      }
+
+    } catch (error) {
+      console.error("Error updating document: ", error);
+      throw error;  // Rethrow error after logging
     }
-
-  } catch (error) {
-    console.error("Error updating document: ", error);
-    throw error;  // Rethrow error after logging
   }
-}
 
   // Delete (Deletar um item)
   async deleteItem(collection: any, id: string): Promise<void> {
@@ -151,5 +153,15 @@ async updateItemWithFoto(collection: string, id: string, data: any): Promise<any
       console.error("Error deleting document: ", error);
       throw error;
     }
+  }
+
+  generateFirebaseId(): string {
+    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    let id = '';
+    for (let i = 0; i < 20; i++) {
+      const randomIndex = Math.floor(Math.random() * characters.length);
+      id += characters[randomIndex];
+    }
+    return id;
   }
 }

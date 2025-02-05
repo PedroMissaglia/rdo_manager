@@ -92,7 +92,7 @@ export class HomeComponent implements OnInit{
 
   getColumns(): Array<PoTableColumn> {
     return [
-      {property: 'obra', label: 'Cliente'},
+      {property: 'cliente', label: 'Cliente'},
       {property: 'placa', label: 'Placa'},
       {property: 'dataInicioDisplay', label: 'Data'},
       {property: 'horasPrevistas', label: 'Horas previstas'},
