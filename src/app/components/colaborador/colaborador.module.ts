@@ -5,6 +5,7 @@ import { PoModule } from '@po-ui/ng-components';
 import { NewComponent } from './new/new.component';
 import { DetailComponent } from './detail/detail.component';
 import { EditComponent } from './edit/edit.component';
+import { ColaboradorRoutingModule } from './colaborador-routing.module';
 
 
 
@@ -17,7 +18,8 @@ import { EditComponent } from './edit/edit.component';
     ],
   imports: [
     CommonModule,
-    PoModule
+    PoModule,
+    ColaboradorRoutingModule
   ],
   exports: [
     ColaboradorComponent,

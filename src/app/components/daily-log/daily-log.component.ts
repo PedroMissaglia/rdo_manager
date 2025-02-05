@@ -28,6 +28,7 @@ import { UserService } from '../../services/user.service';
 import { WebcamImage, WebcamInitError } from 'ngx-webcam';
 import { Observable, Subject } from 'rxjs';
 import { Router } from '@angular/router';
+import { IUser } from '../../interfaces/user.interface';
 
 @Component({
   selector: 'app-daily-log',
@@ -45,6 +46,7 @@ export class DailyLogComponent implements OnInit {
 
   myForm!: FormGroup;
   mySecondForm!: FormGroup;
+  myThirdForm!: FormGroup;
 
   startedRoute = false;
   image: any;
@@ -84,17 +86,20 @@ export class DailyLogComponent implements OnInit {
       let a;
       const match = this.labelNow.match(/(\d{2}:\d{2})$/);
       const time = match ? match[1] : null;
+      let date = new Date();
 
       const itemAdded = await this.crudService.addItem(
         'rdo',
         {
-          dataInicio: this.labelNow.substring(0, 10),
-          horasPrevistas: '08:00',
+          dataInicioDisplay: this.labelNow.substring(0, 10),
+          dataInicio: new Date(),
           horaInicio: time,
+          horasPrevistas: '08:00',
           placa: this.userService.user.placa,
           operadores: this.heroes,
           status: 'started',
           obra: this.userService.user.obra,
+          info: 'started',
           user: this.userService.user.login
         },
     );
@@ -264,7 +269,7 @@ export class DailyLogComponent implements OnInit {
     try {
       this.items = await this.crudService.getItems('user', 100, 'type','Operador');
       this.items.map((user: any) => {
-        user.value = user.uid;
+        user.value = user.id;
         user.label = user.displayName;
       });
       this.optionsOperators = [...this.items];
@@ -273,13 +278,12 @@ export class DailyLogComponent implements OnInit {
     }
   }
 
-  deletePhoto() {}
   async loadServices() {
     try {
       this.items = await this.crudService.getItems('service', 100);
-      this.items.map((user: any) => {
-        user.value = user.id;
-        user.label = user.id + ' - ' + user.nome;
+      this.items.map((service: any) => {
+        service.value = service.id;
+        service.label = service.nome;
       });
       this.optionsServices = [...this.items];
     } catch (error) {
@@ -287,7 +291,6 @@ export class DailyLogComponent implements OnInit {
     }
   }
 
-  openCamera() {}
 
   heroes: Array<any> = [];
 
@@ -352,6 +355,10 @@ export class DailyLogComponent implements OnInit {
 
     this.mySecondForm = this.fb.group({
       obs: ['', []], // Initialize with a default value
+    });
+
+    this.myThirdForm = this.fb.group({
+      occo: ['', []], // Initialize with a default value
     });
 
     this.loadOperators();
@@ -451,6 +458,17 @@ export class DailyLogComponent implements OnInit {
     alert(`${button.label}`);
   }
 
+  isDifferenceGreaterThanOrEqualToEightHours(initialDate: Date, finalDate: Date): boolean {
+    // Get the difference in milliseconds
+    const differenceInMillis = finalDate.getTime() - initialDate.getTime();
+
+    // 8 hours in milliseconds
+    const eightHoursInMillis = 8 * 60 * 60 * 1000;
+
+    // Check if the difference is equal to or greater than 8 hours
+    return differenceInMillis >= eightHoursInMillis;
+  }
+
   async onHandleCollectSigns() {
     // let a;
     // const match = this.labelNow.match(/(\d{2}:\d{2})$/);
@@ -466,13 +484,26 @@ export class DailyLogComponent implements OnInit {
     const match = endDate.match(/(\d{2}:\d{2})$/);
     const endTime = match ? match[1] : null;
 
+
+    // Subtração das datas em milissegundos
+    let date = new Date();
+
+    let workedHours = this.calculate(this.dailyLogService.item.dataInicio, date)
+
+    let a =
+      this.isDifferenceGreaterThanOrEqualToEightHours(this.dailyLogService.item.dataInicio, date)
+
     const updatedItem = await this.crudService.updateItem(
       'rdo',
       this.dailyLogService.item.id,
       {
-        dataFim: endDate.substring(0, 10),
+        dataFim: date,
+        dataFimDisplay: this.formatDate(date).substring(0, 10),
+        justificativa: this.myThirdForm.get('occo')?.value,
         horaFim: endTime,
-        status: 'finished'
+        status: 'finished',
+        horasRealizadas: workedHours,
+        info: a ? 'positive' : 'negative'
       },
     );
 
@@ -480,6 +511,22 @@ export class DailyLogComponent implements OnInit {
       this.reloadPage();
     }
   }
+
+  // Função para calcular a diferença entre dois tempos representados como objetos Date
+  calculate(initialDate: Date, finalDate: Date): string {
+    // Get the difference in milliseconds
+    const differenceInMillis = finalDate.getTime() - initialDate.getTime();
+
+    // Calculate the difference in hours and minutes
+    const hours = Math.floor(differenceInMillis / (1000 * 60 * 60)); // 1 hour = 1000 * 60 * 60 ms
+    const minutes = Math.floor((differenceInMillis % (1000 * 60 * 60)) / (1000 * 60)); // 1 minute = 1000 * 60 ms
+
+    // Format as hh:mm
+    const formattedTime = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
+
+    return formattedTime;
+  }
+
 
   reloadPage() {
     // Reload the current route

@@ -15,7 +15,7 @@ export class ColaboradorComponent implements OnInit{
   private disclaimers: any = [];
   public actions: Array<PoPageAction> = [
     { label: 'Novo', action: this.onNewCollaborator.bind(this) },
-    { label: 'Visualizar', action: this.onDetailCollaborator.bind(this) ,disabled: this.disableEditButton.bind(this) },
+    { label: 'Visualizar', action: this.onDetailCollaborator.bind(this), disabled: this.disableEditButton.bind(this) },
     { label: 'Editar', action: this.onEditCollaborator.bind(this), disabled: this.disableEditButton.bind(this),  },
     { label: 'Excluir', disabled: this.disableEditButton.bind(this)}
   ];
@@ -26,12 +26,12 @@ export class ColaboradorComponent implements OnInit{
 
   onDetailCollaborator() {
     this.collaboratorService.collaborator = this.selectCollaborator;
-    this.router.navigate([`/job/${this.selectCollaborator['id']}`]);
+    this.router.navigate([`/collaborator/${this.selectCollaborator['uid']}`]);
   }
 
   onEditCollaborator() {
     this.collaboratorService.collaborator = this.selectCollaborator;
-    this.router.navigate([`job/edit/${this.selectCollaborator['id']}`]);
+    this.router.navigate([`collaborator/edit/${this.selectCollaborator['uid']}`]);
   }
 
   selectCollaborator: any;
@@ -92,11 +92,13 @@ export class ColaboradorComponent implements OnInit{
   }
 
   onNewCollaborator() {
-    this.router.navigate(['/collaborators/create']);
+    this.router.navigate(['/collaborator/create']);
   }
 
   onSelectCollaborator(selected: any) {
     this.selectCollaborator = selected;
+    this.actions[1].disabled = this.disableEditButton();
+    this.actions[2].disabled = this.disableEditButton();
   }
 
   onUnselectCollaborator() {
@@ -125,7 +127,7 @@ export class ColaboradorComponent implements OnInit{
       {property: 'type', label: 'Tipo'},
       {property: 'placa', label: 'Placa'},
       {property: 'obra', label: 'Obra'},
-      {property: 'uid', label: 'Id'},
+      {property: 'id', label: 'Id'},
     ]
   }
 }

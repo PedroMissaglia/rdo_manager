@@ -8,6 +8,7 @@ import { DetailComponent } from './detail/detail.component';
 import { JobRoutingModule } from './job-routing.module';
 import { JobComponent } from './job.component';
 import { EditComponent } from './edit/edit.component';
+import { NewComponent } from './new/new.component';
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
@@ -23,7 +24,8 @@ const firebaseConfig = {
   declarations: [
     JobComponent,
     DetailComponent,
-    EditComponent
+    EditComponent,
+    NewComponent
   ],
   imports: [
     CommonModule,
@@ -32,7 +34,7 @@ const firebaseConfig = {
     AngularFirestoreModule.enablePersistence(),
   ],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
-  exports: [JobComponent, DetailComponent, EditComponent],
+  exports: [JobComponent, DetailComponent, EditComponent, NewComponent],
   providers: [
     provideFirestore(() => getFirestore()),
     provideFirebaseApp(() => initializeApp(firebaseConfig)), // Initialize Firebase

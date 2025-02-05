@@ -20,4 +20,13 @@
   </po-table>
 </po-page-list>
 
+<po-modal
+  p-title="Excluir serviço"
+  [p-primary-action]="confirm"
+  [p-secondary-action]="close">
+  <po-dynamic-view
+    [p-fields]="fields"
+    [p-value]="jobService.job">
+  </po-dynamic-view>
+</po-modal>
 

@@ -1,7 +1,8 @@
 import { Component } from '@angular/core';
-import { PoDynamicFormField } from '@po-ui/ng-components';
+import { PoDynamicFormField, PoNotificationService } from '@po-ui/ng-components';
 import { JobService } from '../job.service';
 import { Router } from '@angular/router';
+import { CrudService } from '../../../services/crud.service';
 
 @Component({
     selector: 'app-edit',
@@ -20,6 +21,8 @@ export class EditComponent {
 
   constructor(
     private jobService: JobService,
+    private crudService: CrudService,
+    private notificationService: PoNotificationService,
     private router: Router) {}
 
   ngOnInit() {
@@ -28,6 +31,24 @@ export class EditComponent {
 
   onHandleGoBack() {
     this.router.navigate([`jobs`]);
+  }
+
+  async onHandleSave() {
+
+    if (this.jobService.job['$selected']) {
+      delete this.jobService.job['$selected'];
+    }
+
+    const updatedItem = await this.crudService.updateItem(
+      'service',
+      this.jobService.job['id'],
+      this.jobService.job
+    );
+
+    if (updatedItem) {
+      this.notificationService.success('Serviço alterado com sucesso.');
+      this.router.navigate(['jobs']);
+    }
   }
 
 }

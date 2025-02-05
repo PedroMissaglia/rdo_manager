@@ -16,9 +16,16 @@ export class HomeComponent implements OnInit{
   columns: Array<PoTableColumn> = this.getColumns();
   selectDailyReport: any;
   public actions: Array<PoPageAction> = [
-    { label: 'Visualizar',
+    {
+      label: 'Visualizar',
       disabled: this.disableEditButton.bind(this),
-    action: this.redirectToDailyReportDetail.bind(this) },
+      action: this.redirectToDailyReportDetail.bind(this)
+    },
+    {
+      label: 'Justificar',
+      disabled: this.disableEditButton.bind(this),
+      action: this.redirectToDailyReportEdit.bind(this)
+    },
   ];
   items: any;
 
@@ -76,26 +83,35 @@ export class HomeComponent implements OnInit{
     this.router.navigate(['detail', this.selectDailyReport['id']]);
   }
 
+  redirectToDailyReportEdit() {
+    this.dailyReportService.item = this.selectDailyReport;
+    this.router.navigate(['edit', this.selectDailyReport['id']]);
+  }
+
   onShowMore() {}
 
   getColumns(): Array<PoTableColumn> {
     return [
-      {property: 'dataInicio', label: 'Data'},
-      {property: 'horaInicio', label: 'Início'},
-      {property: 'horaFim', label: 'Fim'},
-      {property: 'horasPrevistas', label: 'Horas previstas'},
-      {property: 'obra', label: 'Obra'},
+      {property: 'obra', label: 'Cliente'},
       {property: 'placa', label: 'Placa'},
-
+      {property: 'dataInicioDisplay', label: 'Data'},
+      {property: 'horasPrevistas', label: 'Horas previstas'},
+      {property: 'horasRealizadas', label: 'Horas realizadas'},
       {
-        property: 'status',
+        property: 'info',
+        label: 'Status',
         type: 'subtitle',
         width: '180px',
         subtitles: [
           { value: 'positive', color: 'color-10', label: 'Meta alcançada', content: 'MA' },
-          { value: 'negative', color: 'color-07', label: 'Abaixo do previsto', content: 'AP'},
+          { value: 'negative', color: 'color-07', label: 'Não justificado', content: 'NJ'},
+          { value: 'justified', color: 'color-02', label: 'Justificado', content: 'JU'},
+          { value: 'started', color: 'color-08', label: 'Em andamento', content: 'EA'},
         ]
-      }
+      },
+      {property: 'justificativa', label: 'Justificativa'},
+      {property: 'prazo', label: 'Prazo'},
+      {property: 'responsavel', label: 'Responsável'},
     ]
   }
 

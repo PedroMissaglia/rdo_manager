@@ -11,20 +11,12 @@ import { Router } from '@angular/router';
 })
 export class DetailDailyReportComponent implements OnInit {
   fields: Array<PoDynamicViewField> = [
-    {
-      property: 'total_de_horas',
-      label: 'Total de horas',
-      gridColumns: 4,
-      order: 1,
-    },
-    { property: 'horasPrevistas', label: 'Horas previstas', gridColumns: 4 },
-    { property: 'status', label: 'Status do dia', gridColumns: 4 },
-    { property: 'tipo_de_servico', label: 'Tipo de serviço', gridColumns: 4 },
-    { property: 'locomocao', label: 'Locomoção', gridColumns: 4 },
-    { property: 'manutencao', label: 'Manutenção', gridColumns: 4 },
-    { property: 'obra', label: 'Obra', gridColumns: 4 },
-    { property: 'endereco', label: 'Endereço', gridColumns: 12 },
-    { property: 'placa', label: 'Placa', gridColumns: 4 },
+    {property: 'obra', label: 'Cliente'},
+    {property: 'placa', label: 'Placa'},
+    {property: 'dataInicioDisplay', label: 'Data'},
+    {property: 'horasPrevistas', label: 'Horas previstas'},
+    {property: 'horasRealizadas', label: 'Horas realizadas'},
+    {property: 'justificativa', label: 'Justificativa'}
   ];
   constructor(
     public dailyReportService: DailyReportService,

@@ -20,6 +20,7 @@ import { DailyLogComponent } from './components/daily-log/daily-log.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { WebcamModule } from 'ngx-webcam';  // Import WebcamModule
 import { CameraComponent } from './components/camera/camera.component';
+import { EditDailyReportComponent } from './components/home/edit-daily-report/edit-daily-report.component';
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
@@ -39,6 +40,7 @@ const firebaseConfig = {
     DetailDailyReportComponent,
     LoginComponent,
     DailyLogComponent,
+    EditDailyReportComponent,
     CameraComponent
   ],
   imports: [

@@ -4,25 +4,30 @@ import { DetailComponent } from './detail/detail.component';
 import { NewComponent } from './new/new.component';
 import { EditComponent } from './edit/edit.component';
 import { ColaboradorComponent } from './colaborador.component';
+import { AuthGuard } from '../../guard/auth.guard';
 
 
 const jobRoutes: Routes = [
   {
     path: '',
     component: ColaboradorComponent,
+    canActivate: [AuthGuard],
   },
 
   {
-    path: ':id',
+    path: 'collaborator/create',
     component: NewComponent,
+    canActivate: [AuthGuard],
   },
   {
-    path: 'create',
+    path: 'collaborator/:id',
     component: DetailComponent,
+    canActivate: [AuthGuard],
   },
   {
-    path: 'edit/:id',
+    path: 'collaborator/edit/:id',
     component: EditComponent,
+    canActivate: [AuthGuard],
   }
 ];
 

@@ -18,21 +18,23 @@ export class NewComponent {
     login: '',
     password: '',
     type: '',
-    uid: '',
+    id: '',
   };
   fields: Array<PoDynamicFormField> = [
-    { property: 'login', divider: 'Detalhes do colaborador', order: 1, gridColumns: 6 },
-    { property: 'senha', hidePasswordPeek: true ,order: 1, gridColumns: 6 },
-    { property: 'displayName', label: 'Nome', gridColumns: 6 },
+    { property: 'displayName', divider: 'detalhes', order: 1, gridColumns: 4 },
+    { property: 'login', label: 'Login', gridColumns: 8 },
+    { property: 'password', label: 'Senha', gridColumns: 12},
+    { property: 'placa', label: 'Placa', gridColumns:4 },
+    { property: 'cliente', label: 'Cliente', gridColumns: 8},
     { property: 'type', label: 'Tipo', gridColumns: 6,       optional: false,
       options: ['Administrador', 'Operador']
     },
-    { property: 'obra', label: 'Obra', gridColumns: 6  },
   ];
 
   constructor(
     private crudService: CrudService,
     private notificationService: PoNotificationService,
+    private collaboratorService: CollaboratorService,
     private router: Router) {}
 
 
@@ -41,10 +43,26 @@ export class NewComponent {
   }
 
   async onHandleSave() {
+
     const itemAdded = await this.crudService.addItem('user', this.value);
 
     if (itemAdded) {
-      this.notificationService.success('Usuário criado com sucesso.');
+
+      this.collaboratorService.collaborator = itemAdded;
+
+      const updatedItem = await this.crudService.updateItem(
+        'user',
+        this.collaboratorService.collaborator.id,
+        {
+          id: this.collaboratorService.collaborator.id
+        }
+      );
+
+      if (updatedItem) {
+        this.notificationService.success('Usuário criado com sucesso.');
+        this.router.navigate(['collaborators']);
+      }
+
     }
   }
 

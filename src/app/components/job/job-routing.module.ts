@@ -7,6 +7,7 @@ import { JobComponent } from './job.component';
 import { initializeApp, provideFirebaseApp } from '@angular/fire/app';
 import { getFirestore, provideFirestore } from '@angular/fire/firestore';
 import { Firestore } from '@angular/fire/firestore/lite';
+import { AuthGuard } from '../../guard/auth.guard';
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
@@ -23,27 +24,27 @@ const jobRoutes: Routes = [
   {
     path: '',
     component: JobComponent,
-  },
-  {
-    path: 'job/:id',
-    component: DetailComponent,
+    canActivate: [AuthGuard],
   },
   {
     path: 'job/create',
     component: NewComponent,
+    canActivate: [AuthGuard],
+  },
+  {
+    path: 'job/:id',
+    component: DetailComponent,
+    canActivate: [AuthGuard],
   },
   {
     path: 'job/edit/:id',
     component: EditComponent,
+    canActivate: [AuthGuard],
   }
 ];
 
 @NgModule({
   imports: [RouterModule.forChild(jobRoutes)],
   exports: [RouterModule],
-  providers: [
-    provideFirebaseApp(() => initializeApp(firebaseConfig)),  // Initialize Firebase
-    provideFirestore(() => getFirestore()),
-  ]
 })
 export class JobRoutingModule {}

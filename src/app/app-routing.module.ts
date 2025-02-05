@@ -5,11 +5,13 @@ import { DetailDailyReportComponent } from './components/home/detail-daily-repor
 import { LoginComponent } from './components/login/login.component';
 import { DailyLogComponent } from './components/daily-log/daily-log.component';
 import { AuthGuard } from './guard/auth.guard';
+import { EditDailyReportComponent } from './components/home/edit-daily-report/edit-daily-report.component';
 
 const routes: Routes = [
   {path: '', redirectTo: 'login', pathMatch: 'full'},
-  {path: 'home', component: HomeComponent, canActivate: [AuthGuard]},
+  {path: 'home', component: HomeComponent},
   {path: 'detail/:id', component: DetailDailyReportComponent,     canActivate: [AuthGuard]},
+  {path: 'edit/:id', component: EditDailyReportComponent,     canActivate: [AuthGuard]},
   {path: 'login', component: LoginComponent},
   {
     path: 'jobs',

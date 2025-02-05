@@ -12,6 +12,7 @@
   #stepper
   [p-orientation]="orientation"
   [p-align-center]="true"
+  [p-disable-click]="true"
   [p-step-size]="32"
   >
   <po-step p-label="Início de rota">
@@ -29,7 +30,7 @@
                 class=" po-mb-5 po-mt-3"
                 formControlName="contact"
                 (p-change)="changeOptions($event)"
-                p-field-value="uid"
+                p-field-value="id"
                 [p-hide-select-all]="true"
                 p-label="Operadores"
                 [p-options]="optionsOperators"
@@ -112,12 +113,14 @@
 
     </form>
   </po-step>
-    <po-step p-label="Finalizar">
-      <!-- Button Groups -->
+  <po-step p-label="Finalizar">
+    <!-- Button Groups -->
+    <form [formGroup]="myThirdForm">
       <po-textarea
         name="textarea"
         class="po-md-12 po-mt-3"
-        p-label="Detalhes"
+        p-label="Ocorrências"
+        formControlName="occo"
         [p-rows]="6"
       ></po-textarea>
 
@@ -127,7 +130,8 @@
         p-label="Finalizar diária"
         (p-click)="onHandleCollectSigns()"
       ></po-button>
-    </po-step>
+    </form>
+  </po-step>
   </po-stepper>
 
 </po-page-default>
