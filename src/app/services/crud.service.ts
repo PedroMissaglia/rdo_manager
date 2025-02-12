@@ -101,10 +101,10 @@ export class CrudService {
       // Atualiza os dados principais do documento
       await updateDoc(itemDoc, data);
 
-      // Agora, adiciona o novo objeto (foto) no array 'fotos' usando arrayUnion()
-      await updateDoc(itemDoc, {
-        fotos: arrayUnion(newPhoto)
-      });
+      // // Agora, adiciona o novo objeto (foto) no array 'fotos' usando arrayUnion()
+      // await updateDoc(itemDoc, {
+      //   fotos: arrayUnion(newPhoto)
+      // });
 
       // Recupera o documento atualizado para devolver os dados mais recentes
       const updatedDoc = await getDoc(itemDoc);

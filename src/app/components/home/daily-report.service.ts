@@ -6,5 +6,6 @@ import { Injectable } from '@angular/core';
 export class DailyReportService {
 
   item: any;
+  itemFilteredByPlate: any;
   constructor() { }
 }

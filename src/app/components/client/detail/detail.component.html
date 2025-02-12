@@ -1,0 +1,8 @@
+<po-page-detail
+    (p-back)="onHandleGoBack()"
+    p-title="Detalhes" >
+    <po-dynamic-view
+    [p-fields]="fields"
+    [p-value]="clientService.client">
+    </po-dynamic-view>
+</po-page-detail>

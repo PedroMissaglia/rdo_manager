@@ -1,0 +1,31 @@
+<po-page-list
+  [p-actions]="actions"
+  p-title="Clientes">
+
+  <po-table
+    [p-selectable]="true"
+    p-container="true"
+    [p-hide-table-search]="false"
+    [p-single-select]="true"
+    [p-height]="650"
+    [p-striped]="true"
+    [p-columns]="columns"
+    (p-show-more)="onShowMore()"
+    (p-selected)="onSelectClient($event)"
+    (p-unselected)="onUnselectClient()"
+    [p-hide-columns-manager]="false"
+    [p-items]="tableItems"
+    >
+  </po-table>
+</po-page-list>
+
+<po-modal
+  p-title="Excluir cliente"
+  [p-primary-action]="confirm"
+  [p-secondary-action]="close">
+  <po-dynamic-view
+    [p-fields]="fields"
+    [p-value]="clientService.client">
+  </po-dynamic-view>
+</po-modal>
+

@@ -1,7 +1,7 @@
 import { DailyReportService } from './daily-report.service';
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { PoBreadcrumb, PoPageAction, PoTableAction, PoTableColumn } from '@po-ui/ng-components';
+import { PoBreadcrumb, PoPageAction, PoTableAction, PoTableColumn, PoTableDetail } from '@po-ui/ng-components';
 import { CrudService } from '../../services/crud.service';
 
 @Component({
@@ -18,14 +18,8 @@ export class HomeComponent implements OnInit{
   public actions: Array<PoPageAction> = [
     {
       label: 'Visualizar',
-      disabled: this.disableEditButton.bind(this),
       action: this.redirectToDailyReportDetail.bind(this)
-    },
-    {
-      label: 'Justificar',
-      disabled: this.disableEditButton.bind(this),
-      action: this.redirectToDailyReportEdit.bind(this)
-    },
+    }
   ];
   items: any;
 
@@ -37,6 +31,9 @@ export class HomeComponent implements OnInit{
     }
   ];
 
+
+  tableItems: Array<any> = [];
+
   public readonly breadcrumb: PoBreadcrumb = {
     items: [{ label: 'Home', action: this.beforeRedirect.bind(this)}]
   };
@@ -47,25 +44,77 @@ export class HomeComponent implements OnInit{
     private dailyReportService: DailyReportService) {}
 
   ngOnInit() {
-      this.loadItems();
-    }
+    this.loadItems();
+  }
 
   async loadItems() {
     try {
-      this.items = await this.crudService.getItems('rdo');
+      this.items = await this.crudService.getItems('rdo') ?? [];
+
+      this.calcularTotais(this.items);
+
       this.tableItems = this.items;
-    } catch (error) {
+    }
+      catch (error) {
       console.error('Error loading items:', error);
     }
   }
 
-  disableEditButton() {
-    return !this.selectDailyReport;
-  }
+  calcularTotais(dados: any[]): { totalHorasPrevistas: string, totalHorasRealizadas: string } {
+    let totalHorasPrevistas = 0;
+    let totalHorasRealizadas = 0;
 
-  onSelectDailyReport(selected: any) {
-    this.selectDailyReport = selected;
-    this.actions[0].disabled = false;
+    // Função para converter horas e minutos para o formato HH:MM
+    const converterParaHoraMinuto = (totalHoras: number): string => {
+      const horas = Math.floor(totalHoras);  // Parte inteira para as horas
+      const minutos = Math.round((totalHoras - horas) * 60);  // Resto em minutos
+      return `${String(horas).padStart(2, '0')}:${String(minutos).padStart(2, '0')}`;
+    };
+
+    // Itera sobre o array principal
+    dados.forEach(item => {
+      let itemTotalHorasPrevistas = 0;
+      let itemTotalHorasRealizadas = 0;
+
+      item.dailyReport.forEach((report: any) => {
+        // Função para converter string de horas (HH:MM) para número de horas em decimal
+        const converterParaDecimal = (horas: string): number => {
+          if (horas && horas.includes(':')) {
+            const [hora, minutos] = horas.split(':').map(Number);
+            // Convertendo minutos corretamente para horas decimais
+            return hora + minutos / 60;
+          }
+          return 0;  // Retorna 0 caso o formato de hora não seja válido
+        };
+
+        // Converte e soma as horas previstas, mas apenas se o valor não for nulo ou vazio
+        if (report.horasPrevistas && report.horasPrevistas !== '') {
+          itemTotalHorasPrevistas += converterParaDecimal(report.horasPrevistas);
+        }
+
+        // Converte e soma as horas realizadas, mas apenas se o valor não for nulo ou vazio
+        if (report.horasRealizadas && report.horasRealizadas !== '') {
+          itemTotalHorasRealizadas += converterParaDecimal(report.horasRealizadas);
+        }
+      });
+
+      // Atualiza os totais gerais
+      totalHorasPrevistas += itemTotalHorasPrevistas;
+      totalHorasRealizadas += itemTotalHorasRealizadas;
+
+      // Converte a soma para o formato HH:MM
+      item.horasPrevistasTotal = converterParaHoraMinuto(itemTotalHorasPrevistas);
+      item.horasRealizadasTotal = converterParaHoraMinuto(itemTotalHorasRealizadas);
+
+      // Determina a informação do item
+      item.info = itemTotalHorasRealizadas >= itemTotalHorasPrevistas ? 'positive' : 'negative';
+    });
+
+    // Retorna os totais com o formato HH:MM
+    return {
+      totalHorasPrevistas: converterParaHoraMinuto(totalHorasPrevistas),
+      totalHorasRealizadas: converterParaHoraMinuto(totalHorasRealizadas)
+    };
   }
 
   private beforeRedirect() {
@@ -73,14 +122,10 @@ export class HomeComponent implements OnInit{
 
   }
 
-  onUnselectDailyReport() {
-    this.selectDailyReport = undefined;
-    this.actions[0].disabled = this.disableEditButton();
-  }
+  redirectToDailyReportDetail(selectedItem: any) {
 
-  redirectToDailyReportDetail() {
-    this.dailyReportService.item = this.selectDailyReport;
-    this.router.navigate(['detail', this.selectDailyReport['id']]);
+    this.dailyReportService.item = selectedItem;
+    this.router.navigate(['detail', selectedItem['id']]);
   }
 
   redirectToDailyReportEdit() {
@@ -90,48 +135,36 @@ export class HomeComponent implements OnInit{
 
   onShowMore() {}
 
-  getColumns(): Array<PoTableColumn> {
+  getColumns() {
+
+    const airfareDetail: PoTableDetail = {
+      columns: [
+        { property: 'placa', label: 'Placa' },
+        { property: 'dataInicioDisplay', label: 'Data' },
+        { property: 'horasPrevistas', label: 'Horas previstas' },
+        { property: 'horasRealizadas', label: 'Horas realizadas' },
+        { property: 'justificativa' },
+        { property: 'responsavel', label: 'Responsável' },
+      ],
+      typeHeader: 'top'
+    };
+
     return [
-      {property: 'cliente', label: 'Cliente'},
-      {property: 'placa', label: 'Placa'},
-      {property: 'dataInicioDisplay', label: 'Data'},
-      {property: 'horasPrevistas', label: 'Horas previstas'},
-      {property: 'horasRealizadas', label: 'Horas realizadas'},
+      {property: 'displayNameCliente', label: 'Cliente'},
+      {property: 'horasPrevistasTotal', label: 'Total de horas previstas'},
+      {property: 'horasRealizadasTotal', label: 'Total de horas realizadas'},
       {
         property: 'info',
         label: 'Status',
         type: 'subtitle',
         width: '180px',
         subtitles: [
-          { value: 'positive', color: 'color-10', label: 'Meta alcançada', content: 'MA' },
-          { value: 'negative', color: 'color-07', label: 'Não justificado', content: 'NJ'},
-          { value: 'justified', color: 'color-02', label: 'Justificado', content: 'JU'},
-          { value: 'started', color: 'color-08', label: 'Em andamento', content: 'EA'},
+          { value: 'positive', color: 'color-10', label: 'No prazo', content: 'NP' },
+          { value: 'negative', color: 'color-07', label: 'Atrasado', content: 'A'},
         ]
       },
-      {property: 'justificativa', label: 'Justificativa'},
-      {property: 'prazo', label: 'Prazo'},
-      {property: 'responsavel', label: 'Responsável'},
+      {property: 'dailyReport', label: 'Detalhes', type: 'detail', detail: airfareDetail }
     ]
   }
 
-  menus = [
-    {
-      label: 'Home',
-      icon: 'ph ph-file-text',
-      link: '/home',
-      shortLabel: 'Home'
-    },
-    {
-      label: 'Cadastros',
-      icon: 'ph ph-folder-plus',
-      shortLabel: 'Cadastros',
-      subItems: [
-        { label: 'Serviço', link: '/jobs' },
-        { label: 'Colaborador', link: '/collaborators' }
-      ]
-    }
-  ];
-
-  tableItems = [];
 }

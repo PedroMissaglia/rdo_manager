@@ -1,12 +1,20 @@
 <po-page-edit
     (p-cancel)="onHandleGoBack()"
     (p-save)="onHandleSave()"
-    p-title="Detalhes do relatório diário" >
+    p-title="Justificar" >
 
-    <po-dynamic-form
-      p-auto-focus="string"
-      [p-fields]="fields"
-      p-validate-on-input="boolean"
-      [p-value]="value" >
-    </po-dynamic-form>
+    <po-tabs>
+      <po-tab *ngFor="let tab of value['dailyReport']"
+        [p-label]="tab.dataInicioDisplay">
+
+        <po-dynamic-form
+          p-auto-focus="string"
+          [p-fields]="fields"
+          p-validate-on-input="boolean"
+          [p-value]="tab" >
+        </po-dynamic-form>
+      </po-tab>
+    </po-tabs>
+
+
 </po-page-edit>

@@ -9,9 +9,9 @@ import { EditDailyReportComponent } from './components/home/edit-daily-report/ed
 
 const routes: Routes = [
   {path: '', redirectTo: 'login', pathMatch: 'full'},
-  {path: 'home', component: HomeComponent},
-  {path: 'detail/:id', component: DetailDailyReportComponent,     canActivate: [AuthGuard]},
-  {path: 'edit/:id', component: EditDailyReportComponent},
+  {path: 'home', component: HomeComponent, canActivate: [AuthGuard]},
+  {path: 'detail/:id', component: DetailDailyReportComponent, canActivate: [AuthGuard]},
+  {path: 'edit/:id', component: EditDailyReportComponent, canActivate: [AuthGuard]},
   {path: 'login', component: LoginComponent},
   {
     path: 'jobs',
@@ -20,7 +20,13 @@ const routes: Routes = [
   {
     path: 'collaborators',
     canActivate: [AuthGuard],
-    loadChildren: () => import('./components/colaborador/colaborador-routing.module').then(m => m.ColaboradorRoutingModule)},
+    loadChildren: () => import('./components/colaborador/colaborador-routing.module').then(m => m.ColaboradorRoutingModule)
+  },
+  {
+    path: 'clients',
+    canActivate: [AuthGuard],
+    loadChildren: () => import('./components/client/client-routing.module').then(m => m.ClientRoutingModule)
+  },
   {
     path: 'dailyLog',
     component: DailyLogComponent,

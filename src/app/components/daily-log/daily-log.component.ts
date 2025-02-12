@@ -29,7 +29,6 @@ import { UserService } from '../../services/user.service';
 import { WebcamImage, WebcamInitError } from 'ngx-webcam';
 import { Observable, Subject } from 'rxjs';
 import { Router } from '@angular/router';
-import { IUser } from '../../interfaces/user.interface';
 
 @Component({
   selector: 'app-daily-log',
@@ -51,11 +50,6 @@ export class DailyLogComponent implements OnInit {
 
   startedRoute = false;
   image: any;
-
-  serviceOptions = [
-    { label: 'Serviço 1', value: '1' },
-    { label: 'Serviço 2', value: '2' },
-  ];
 
   labelNow = this.formatDate(new Date());
 
@@ -90,9 +84,21 @@ export class DailyLogComponent implements OnInit {
       const time = match ? match[1] : null;
       let date = new Date();
 
-      const itemAdded = await this.crudService.addItem(
-        'rdo',
-        {
+      const currentDate = this.getDate();
+
+      // Verifica se a obra já foi iniciada
+      const currentDailyLog: Array<any> =
+        (await this.crudService.getItems(
+          'rdo',
+          1,
+          'cliente',
+          this.userService.user.cliente
+        )) ?? [];
+
+      let itemAdded;
+
+      if (currentDailyLog.length) {
+        currentDailyLog[0].dailyReport.push({
           dataInicioDisplay: this.labelNow.substring(0, 10),
           dataInicio: new Date(),
           horaInicio: time,
@@ -100,27 +106,68 @@ export class DailyLogComponent implements OnInit {
           placa: this.userService.user.placa,
           operadores: this.heroes,
           status: 'started',
-          cliente: this.userService.user.cliente,
           info: 'started',
           user: this.userService.user.login,
-          id: id
-        },
-        id
-      );
-      if (itemAdded) {
-        this.dailyLogService.item = itemAdded;
+          foto: [],
+          id: id,
+        });
 
-        const updatedItem = await this.crudService.updateItem(
+        const itemAdded = await this.crudService.updateItem(
           'rdo',
-          this.dailyLogService.item.id,
+          currentDailyLog[0].id,
           {
-            id: this.dailyLogService.item.id
+            dailyReport: currentDailyLog[0].dailyReport,
           }
         );
 
+        this.dailyLogService.item = currentDailyLog[0];
+
         this.poModal?.close();
         this.poStepperComponent.next();
+      } else {
+        const itemAdded = await this.crudService.addItem(
+          'rdo',
+          {
+            displayNameCliente: this.userService.user.displayNameCliente,
+            cliente: this.userService.user.cliente,
+            horasPrevistasTotal: '',
+            horasRealizadasTotal: '',
+            acoes: '',
+            status: '',
+            dailyReport: [
+              {
+                dataInicioDisplay: this.labelNow.substring(0, 10),
+                dataInicio: new Date(),
+                horaInicio: time,
+                horasPrevistas: '08:00',
+                placa: this.userService.user.placa,
+                operadores: this.heroes,
+                status: 'started',
+                info: 'started',
+                user: this.userService.user.login,
+                foto: [],
+                id: id,
+              },
+            ],
+            id: id,
+          },
+          id
+        );
 
+        if (itemAdded) {
+          this.dailyLogService.item = itemAdded;
+
+          const updatedItem = await this.crudService.updateItem(
+            'rdo',
+            this.dailyLogService.item.id,
+            {
+              id: this.dailyLogService.item.id,
+            }
+          );
+
+          this.poModal?.close();
+          this.poStepperComponent.next();
+        }
       }
     },
     label: 'Confirmar',
@@ -136,22 +183,35 @@ export class DailyLogComponent implements OnInit {
 
   confirmPhoto: PoModalAction = {
     action: async () => {
+      const currentDate = this.getDate();
+
       const labelNow = this.formatDate(new Date());
       // Use regex to extract the time (HH:mm format)
       const match = labelNow.match(/(\d{2}:\d{2})$/);
       const time = match ? match[1] : null;
 
+      this.dailyLogService.item.dailyReport.forEach((dailyReport: any) => {
+        // Foto do dia
+        if (dailyReport.dataInicioDisplay === currentDate) {
+          dailyReport.foto.push({
+            foto: this.webcamImage.imageAsDataUrl,
+            dataFoto: time,
+            observacao: this.mySecondForm.get('obs')!.value,
+          });
+        }
+      });
+
+      const dailyReportArray = [...this.dailyLogService.item.dailyReport];
+
       const updatedItem = await this.crudService.updateItemWithPhoto(
         'rdo',
         this.dailyLogService.item.id,
-        {},
         {
-          foto: this.webcamImage.imageAsDataUrl,
-          dataFoto: time,
-          observacao: this.mySecondForm.get('obs')!.value
-        }
-
+          dailyReport: dailyReportArray,
+        },
+        {}
       );
+
       this.poModalCamera?.close();
       this.notificationService.success('Foto salva com sucesso.');
     },
@@ -174,8 +234,6 @@ export class DailyLogComponent implements OnInit {
   public showWebcam: boolean = true;
   public allowCameraSwitch = true;
 
-
-
   public videoOptions: MediaTrackConstraints = {
     width: { ideal: 1024 },
     height: { ideal: 576 },
@@ -195,13 +253,6 @@ export class DailyLogComponent implements OnInit {
 
   public webcamImages: WebcamImage[] = []; // Array to store snapshots
 
-  slides: Array<PoSlideItem> = [
-    {
-      /** Define o caminho da imagem. */
-      image: '',
-      /** Texto que aparece quando a imagem não é encontrada. */
-    },
-  ];
   public cameraWasSwitched(deviceId: string): void {
     console.log('active device: ' + deviceId);
     this.deviceId = deviceId;
@@ -219,20 +270,9 @@ export class DailyLogComponent implements OnInit {
     this.webcamError = error;
   }
 
-  uploadModel(e: any) {
-    console.log('ksjdskj');
-  }
-
   public get nextWebcamObservable(): Observable<boolean | string> {
     return this.nextWebcam.asObservable();
   }
-
-  // Toggle the webcam visibility
-  public toggleWebcam(): void {
-    this.showWebcam = !this.showWebcam;
-  }
-
-  doSomething() {}
 
   getDisplayNameAndPlate() {
     return (
@@ -275,7 +315,12 @@ export class DailyLogComponent implements OnInit {
 
   async loadOperators() {
     try {
-      this.items = await this.crudService.getItems('user', 100, 'type','Operador');
+      this.items = await this.crudService.getItems(
+        'user',
+        100,
+        'type',
+        'Operador'
+      );
       this.items.map((user: any) => {
         user.value = user.id;
         user.label = user.displayName;
@@ -299,7 +344,6 @@ export class DailyLogComponent implements OnInit {
     }
   }
 
-
   heroes: Array<any> = [];
 
   // Shadow option
@@ -314,23 +358,8 @@ export class DailyLogComponent implements OnInit {
   @ViewChild('modalTwo', { static: true }) poModalCamera:
     | PoModalComponent
     | undefined;
-  multiselect: Array<string> = ['1495831666871', '1405833068599'];
-  columns: Array<PoTableColumn> = [
-    { property: 'value', label: 'id' },
-    {
-      property: 'label',
-      label: 'Name',
-      type: 'link',
-      action: (value: any) => {
-        this.openLink(value);
-      },
-    },
-  ];
-  contact: any;
-  openLink(value: any) {
-    window.open(`http://google.com/search?q=${value}`, '_blank');
-  }
 
+  contact: any;
   service: string = '';
   context: any;
   imageUrl: string = '';
@@ -354,7 +383,6 @@ export class DailyLogComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-
     this.myForm = this.fb.group({
       labelNow: [this.labelNow, [Validators.required]], // Initialize with a default value
       contact: [this.contact, [Validators.required]], // Multiselect should be required
@@ -374,7 +402,6 @@ export class DailyLogComponent implements OnInit {
     this.loadServices();
 
     this.getCurrentDailyLog();
-
   }
 
   upload: any;
@@ -389,21 +416,37 @@ export class DailyLogComponent implements OnInit {
     return `${day}/${month}/${year} - ${hours}:${minutes}`;
   }
 
-  // Upload the photo
-  uploadPost() {
-    if (this.imageUrl && this.caption) {
-      const blob = this.dataURLToBlob(this.imageUrl);
-      const file = new File([blob], 'photo.png', { type: 'image/png' });
-      // this.postService.uploadPost(file, this.caption).subscribe();
-      this.caption = '';
-      this.imageUrl = ''; // Clear the image after upload
+  startedDailyLog = false;
+
+  async getCurrentDailyLog() {
+    const formattedDate = this.getDate();
+
+    const currentDailyLog: Array<any> =
+      (await this.crudService.getItems(
+        'rdo',
+        1,
+        'cliente',
+        this.userService.user.cliente
+      )) ?? [];
+
+    // Obra iniciada
+    if (currentDailyLog.length) {
+      currentDailyLog[0].dailyReport.forEach((dailyReport: any) => {
+        if (dailyReport.user === this.userService.user.login) {
+          // Acesso ao registro diário pela segunda vez ou mais
+          if (formattedDate === dailyReport.dataInicioDisplay) {
+            if (!(dailyReport.status === 'finished')) {
+              this.dailyLogService.item = currentDailyLog[0];
+              this.startedDailyLog = true;
+              this.poStepperComponent.next();
+            }
+          }
+        }
+      });
     }
   }
 
-  startedDailyLog = false;
-
-
-  async getCurrentDailyLog() {
+  getDate() {
     const date = new Date();
     const day = String(date.getDate()).padStart(2, '0');
     const month = String(date.getMonth() + 1).padStart(2, '0'); // getMonth() is zero-based, so add 1
@@ -411,28 +454,7 @@ export class DailyLogComponent implements OnInit {
 
     const formattedDate = `${day}/${month}/${year}`;
 
-    const currentDailyLog = await this.crudService.getItems('rdo', 1, 'user', this.userService.user.login)
-    if (currentDailyLog && currentDailyLog[0]?.status === 'started'  && formattedDate === currentDailyLog[0].dataInicio){
-      this.dailyLogService.item = currentDailyLog[0];
-      if (currentDailyLog[0].fotos.length) {
-        this.webcamImage = currentDailyLog[0]['fotos'][0].foto;
-      }
-      this.startedDailyLog = true;
-      this.poStepperComponent.next();
-    }
-  }
-  // Convert base64 string to a Blob
-  dataURLToBlob(dataURL: string): Blob {
-    const [base64Prefix, base64Data] = dataURL.split(',');
-    const byteString = atob(base64Data);
-    const arrayBuffer = new ArrayBuffer(byteString.length);
-    const uint8Array = new Uint8Array(arrayBuffer);
-
-    for (let i = 0; i < byteString.length; i++) {
-      uint8Array[i] = byteString.charCodeAt(i);
-    }
-
-    return new Blob([uint8Array], { type: 'image/png' });
+    return formattedDate;
   }
 
   getGeoLocation(): void {
@@ -458,16 +480,10 @@ export class DailyLogComponent implements OnInit {
     this.poModal?.open();
   }
 
-  onContactChange(value: any): void {
-    this.contact = value;
-    console.log('Contact changed:', this.contact);
-  }
-
-  action(button: any) {
-    alert(`${button.label}`);
-  }
-
-  isDifferenceGreaterThanOrEqualToEightHours(initialDate: Date, finalDate: Date): boolean {
+  isDifferenceGreaterThanOrEqualToEightHours(
+    initialDate: Date,
+    finalDate: Date
+  ): boolean {
     // Get the difference in milliseconds
     const differenceInMillis = finalDate.getTime() - initialDate.getTime();
 
@@ -479,42 +495,55 @@ export class DailyLogComponent implements OnInit {
   }
 
   async onHandleCollectSigns() {
-    // let a;
-    // const match = this.labelNow.match(/(\d{2}:\d{2})$/);
-    // const time = match ? match[1] : null;
-
-    // const itemAdded = await this.crudService.addItem(
-    //   'rdo',
-    //   {
-    //     dataInicio: this.labelNow.substring(0, 10),
-
     const endDate = this.formatDate(new Date());
     // Use regex to extract the time (HH:mm format)
     const match = endDate.match(/(\d{2}:\d{2})$/);
     const endTime = match ? match[1] : null;
 
-
     // Subtração das datas em milissegundos
     let date = new Date();
+    let dataInicio: any = new Date();
 
-    let workedHours = this.calculate(this.dailyLogService.item.dataInicio, date)
+    const currentDate = this.getDate();
 
-    let a =
-      this.isDifferenceGreaterThanOrEqualToEightHours(this.dailyLogService.item.dataInicio, date)
+    this.dailyLogService.item.dailyReport.forEach((daily: any) => {
+      if (
+        daily.dataInicioDisplay === currentDate &&
+        daily.user === this.userService.user.login
+      ) {
+        dataInicio = daily.dataInicio;
+
+        const isTimestamp = dataInicio?.seconds ? true : false;
+
+        let workedHours = this.calculate(
+          isTimestamp ? new Date(dataInicio.seconds * 1000) : new Date(dataInicio),
+          date
+        );
+        let a = this.isDifferenceGreaterThanOrEqualToEightHours(
+          isTimestamp ? new Date(dataInicio.seconds * 1000) : new Date(dataInicio),
+          date
+        );
+
+        daily['horasRealizadas'] = workedHours;
+        (daily['dataFim'] = date),
+          (daily['dataFimDisplay'] = this.formatDate(date).substring(0, 10)),
+          (daily['justificativa'] = this.myThirdForm.get('occo')?.value),
+          (daily['responsavel'] = this.myThirdForm.get('responsavel')?.value),
+          (daily['horaFim'] = endTime),
+          (daily['status'] = 'finished'),
+          (daily['horasRealizadas'] = workedHours),
+          (daily['info'] = a ? 'positive' : 'negative');
+      }
+    });
+
+    const dailyReportArray = [...this.dailyLogService.item.dailyReport];
 
     const updatedItem = await this.crudService.updateItem(
       'rdo',
       this.dailyLogService.item.id,
       {
-        dataFim: date,
-        dataFimDisplay: this.formatDate(date).substring(0, 10),
-        justificativa: this.myThirdForm.get('occo')?.value,
-        responsavel: this.myThirdForm.get('responsavel')?.value,
-        horaFim: endTime,
-        status: 'finished',
-        horasRealizadas: workedHours,
-        info: a ? 'positive' : 'negative'
-      },
+        dailyReport: dailyReportArray,
+      }
     );
 
     if (updatedItem) {
@@ -529,14 +558,17 @@ export class DailyLogComponent implements OnInit {
 
     // Calculate the difference in hours and minutes
     const hours = Math.floor(differenceInMillis / (1000 * 60 * 60)); // 1 hour = 1000 * 60 * 60 ms
-    const minutes = Math.floor((differenceInMillis % (1000 * 60 * 60)) / (1000 * 60)); // 1 minute = 1000 * 60 ms
+    const minutes = Math.floor(
+      (differenceInMillis % (1000 * 60 * 60)) / (1000 * 60)
+    ); // 1 minute = 1000 * 60 ms
 
     // Format as hh:mm
-    const formattedTime = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
+    const formattedTime = `${String(hours).padStart(2, '0')}:${String(
+      minutes
+    ).padStart(2, '0')}`;
 
     return formattedTime;
   }
-
 
   reloadPage() {
     // Reload the current route

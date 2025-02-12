@@ -1,23 +1,20 @@
 <po-page-list
-  [p-actions]="actions"
 >
   <po-table
-    [p-selectable]="true"
+    [p-selectable]="false"
     p-container="true"
     [p-hide-table-search]="false"
     [p-height]="650"
     [p-draggable]="true"
-    [p-actions-right]="true"
-    [p-actions]="tableActions"
     [p-max-columns]="9"
+    [p-actions]="actions"
     [p-columns]="columns"
     [p-striped]="true"
     [p-single-select]="true"
+    [p-hide-detail]="false"
     [p-text-wrap]="false"
     [p-sort]="true"
     (p-show-more)="onShowMore()"
-    (p-selected)="onSelectDailyReport($event)"
-    (p-unselected)="onUnselectDailyReport()"
     [p-items]="tableItems"
     >
   </po-table>

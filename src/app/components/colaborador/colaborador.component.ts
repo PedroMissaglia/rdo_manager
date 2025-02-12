@@ -24,7 +24,7 @@ export class ColaboradorComponent implements OnInit{
     { property: 'displayName', order: 1, gridColumns: 4 },
     { property: 'login', label: 'Login', gridColumns: 8 },
     { property: 'placa', label: 'Placa', gridColumns:4 },
-    { property: 'cliente', label: 'Cliente', gridColumns: 8},
+    { property: 'displayNameCliente', label: 'Cliente', gridColumns: 8},
     { property: 'type', label: 'Tipo', gridColumns: 6,
       options: [{label: 'Administrador', value: 'Administrador'}, {label: 'Operador', value: 'Operador'}]
     },
@@ -50,6 +50,11 @@ export class ColaboradorComponent implements OnInit{
 
       this.poModal.close();
       this.notificationService.success('Colaborador excluído com sucesso');
+
+      const currentUrl = this.router.url;
+      this.router.navigateByUrl('/collaborators', { skipLocationChange: true }).then(() => {
+        this.router.navigateByUrl(currentUrl);
+      });
     },
     label: 'Confirmar',
   };
@@ -165,7 +170,7 @@ export class ColaboradorComponent implements OnInit{
       {property: 'login', label: 'Login'},
       {property: 'type', label: 'Tipo'},
       {property: 'placa', label: 'Placa'},
-      {property: 'cliente', label: 'Cliente'}
+      {property: 'displayNameCliente', label: 'Cliente'}
     ]
   }
 }

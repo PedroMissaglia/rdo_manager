@@ -40,15 +40,10 @@ export class AppComponent implements OnInit {
       icon: 'an an-folder-plus',
       shortLabel: 'Cadastros',
       subItems: [
+        { label: 'Cliente', link: '/clients' },
+        { label: 'Colaborador', link: '/collaborators' },
         { label: 'Serviço', link: '/jobs' },
-        { label: 'Colaborador', link: '/collaborators' }
       ]
-    },
-    {
-      label: 'Daily Log',
-      icon: 'an an-folder-plus',
-      shortLabel: 'Daily Log',
-      link: '/dailyLog',
     }
   ];
 

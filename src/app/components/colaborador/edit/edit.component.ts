@@ -12,16 +12,9 @@ import { CrudService } from '../../../services/crud.service';
 })
 export class EditComponent {
   value: any;
-  fields: Array<PoDynamicFormField> = [
-    { property: 'displayName', divider: 'detalhes', order: 1, disabled: true, gridColumns: 4 },
-    { property: 'login', label: 'Login', disabled: true, gridColumns: 8 },
-    { property: 'password', label: 'Senha', gridColumns: 12, secret: true, hidePasswordPeek: true},
-    { property: 'placa', label: 'Placa', gridColumns:4 },
-    { property: 'cliente', label: 'Cliente', gridColumns: 8},
-    { property: 'type', label: 'Tipo', gridColumns: 6,       optional: false,
-      options: ['Administrador', 'Operador']
-    },
-  ];
+  optionsOperators: any[] = [] ;
+  items: any[] = [];
+  fields: Array<PoDynamicFormField> = [];
 
   constructor(
     private collaboratorService: CollaboratorService,
@@ -31,6 +24,32 @@ export class EditComponent {
 
   ngOnInit() {
     this.value = this.collaboratorService.collaborator;
+    this.loadClients();
+  }
+
+  async loadClients() {
+    try {
+      this.items = await this.crudService.getItems('client', 100);
+      this.items.map((user: any) => {
+        user.value = user.id;
+        user.label = user.nome;
+      });
+      this.optionsOperators = [...this.items];
+
+      this.fields = [
+        { property: 'displayName', label: 'Nome',divider: 'detalhes', order: 1, gridColumns: 4 },
+        { property: 'login', label: 'Login', gridColumns: 8 },
+        { property: 'password', label: 'Senha', gridColumns: 12, secret: true, hidePasswordPeek: false},
+        { property: 'placa', label: 'Placa', gridColumns:4 },
+        { property: 'cliente', label: 'Cliente', gridColumns: 8, options: this.optionsOperators, fieldLabel: 'label', fieldValue: 'id'},
+        { property: 'type', label: 'Tipo', gridColumns: 6, optional: false,
+          options: ['Administrador', 'Operador']
+        },
+      ]
+
+    } catch (error) {
+      console.error('Error loading items:', error);
+    }
   }
 
   onHandleGoBack() {

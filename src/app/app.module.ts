@@ -21,6 +21,8 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { WebcamModule } from 'ngx-webcam';  // Import WebcamModule
 import { CameraComponent } from './components/camera/camera.component';
 import { EditDailyReportComponent } from './components/home/edit-daily-report/edit-daily-report.component';
+import { ClientModule } from './components/client/client.module';
+import { DecimalPipe } from '@angular/common';
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
@@ -47,6 +49,7 @@ const firebaseConfig = {
     BrowserModule,
     AppRoutingModule,
     ColaboradorModule,
+    ClientModule,
     BrowserAnimationsModule,
     PoModule,
     JobModule,
@@ -60,6 +63,7 @@ const firebaseConfig = {
     AngularFireDatabaseModule,
   ],
   providers: [
+    DecimalPipe,
     provideHttpClient(withInterceptorsFromDi()),
     provideFirestore(() => getFirestore()), // Move to providers
     provideFirebaseApp(() => initializeApp(firebaseConfig)),  // Initialize Firebase

@@ -20,7 +20,7 @@
               <!-- First Widget with LabelNow Input -->
               <po-widget class="po-mt-1">
                 <po-info p-label="Data e hora" [p-value]="labelNow"> </po-info>
-                <po-info p-label="Cliente" [p-value]="userService.user?.cliente"> </po-info>
+                <po-info p-label="Cliente" [p-value]="userService.user?.displayNameCliente"> </po-info>
                 <po-info p-label="Operador e placa" [p-value]="getDisplayNameAndPlate()"> </po-info>
 
                 <br>
@@ -150,7 +150,7 @@
   [p-secondary-action]="close"
   >
   <po-info class="po-md-12 po-mt-1" p-label="Data e hora" [p-value]="labelNow"> </po-info>
-  <po-info class="po-md-12 po-mt-1" p-label="Cliente" [p-value]="  userService.user?.cliente"> </po-info>
+  <po-info class="po-md-12 po-mt-1" p-label="Cliente" [p-value]="userService.user?.displayNameCliente"> </po-info>
   <po-info class="po-md-12 po-mt-1" p-label="serviço" [p-value]="poComboComponent?.selectedOption?.label"> </po-info>
 
 

@@ -3,28 +3,29 @@ import { RouterModule, Routes } from '@angular/router';
 import { DetailComponent } from './detail/detail.component';
 import { NewComponent } from './new/new.component';
 import { EditComponent } from './edit/edit.component';
-import { ColaboradorComponent } from './colaborador.component';
 import { AuthGuard } from '../../guard/auth.guard';
+import { ClientComponent } from './client.component';
+
 
 const jobRoutes: Routes = [
   {
     path: '',
-    component: ColaboradorComponent,
+    component: ClientComponent,
     canActivate: [AuthGuard],
   },
 
   {
-    path: 'collaborator/create',
+    path: 'client/create',
     component: NewComponent,
     canActivate: [AuthGuard],
   },
   {
-    path: 'collaborator/:id',
+    path: 'client/:id',
     component: DetailComponent,
     canActivate: [AuthGuard],
   },
   {
-    path: 'collaborator/edit/:id',
+    path: 'client/edit/:id',
     component: EditComponent,
     canActivate: [AuthGuard],
   }
@@ -34,4 +35,4 @@ const jobRoutes: Routes = [
   imports: [RouterModule.forChild(jobRoutes)],
   exports: [RouterModule],
 })
-export class ColaboradorRoutingModule {}
+export class ClientRoutingModule {}

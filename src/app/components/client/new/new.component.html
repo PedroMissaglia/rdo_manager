@@ -1,0 +1,12 @@
+<po-page-edit
+    (p-cancel)="onHandleGoBack()"
+    (p-save)="onHandleSave()"
+    p-title="Novo" >
+
+    <po-dynamic-form
+      p-auto-focus="string"
+      [p-fields]="fields"
+      p-validate-on-input="boolean"
+      [p-value]="value" >
+    </po-dynamic-form>
+</po-page-edit>

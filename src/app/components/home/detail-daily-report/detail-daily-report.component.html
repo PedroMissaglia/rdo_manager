@@ -2,26 +2,62 @@
     (p-back)="onHandleGoBack()"
     p-title="Detalhes" >
 
-    <po-tabs>
+    <po-dynamic-view class="po-mt-3" [p-fields]="fields" [p-value]="dailyReportService.item">
+    </po-dynamic-view>
+
+    <po-tabs class="po-mt-3">
       <po-tab [p-active]="true" p-label="Detalhes da obra">
-        <po-dynamic-view [p-fields]="fields" [p-value]="dailyReportService.item">
-        </po-dynamic-view>
+
+        <po-table
+          [p-items]="items"
+          [p-actions]="actions"
+          [p-columns]="columns"></po-table>
       </po-tab >
       <po-tab p-label="Fotos">
-        <div class="po-md-4" *ngFor="let item of dailyReportService.item?.fotos">
-          <div class="po-row">
-            <po-image
-              class="po-md-6"
-              [p-src]="item.foto">
-            </po-image>
-            <div class="po-md-6">
-              <po-info class="po-md-12" p-label="Hora da foto" [p-value]="item.dataFoto"> </po-info>
-              <po-info class="po-md-12" p-label="Observação" [p-value]="item.observacao"> </po-info>
+
+        <form [formGroup]="form">
+          <po-combo
+            name="combo"
+            formControlName="placa"
+            p-label="Selecione a placa"
+            (p-change)="onHandlePlaca($event)"
+            [p-options]="items">
+          </po-combo>
+
+          <po-combo
+            *ngIf="showSecondCombo"
+            name="combo"
+            formControlName="dia"
+            p-label="Selecione o dia"
+            (p-change)="onHandleDia($event)"
+            [p-options]="itemsDias">
+          </po-combo>
+
+        </form>
+
+
+        <div *ngIf="arrFotos">
+          <div class="po-md-6 po-mt-4" *ngFor="let item of arrFotos">
+            <div class="po-row">
+              <po-image
+                class="po-md-6"
+                [p-src]="item.foto">
+              </po-image>
+              <div class="po-md-6">
+                <po-info class="po-md-12" p-label="Hora da foto" [p-value]="item.dataFoto"> </po-info>
+                <po-info class="po-md-12" p-label="Observação" [p-value]="item.observacao"> </po-info>
+                <po-button p-label="Detalhes" (p-click)="openFullscreen(item.foto)"> </po-button>
+              </div>
             </div>
           </div>
         </div>
-
-
       </po-tab>
     </po-tabs>
 </po-page-detail>
+
+<po-modal p-title="Detalhes da foto">
+  <div class="fullscreen-image-container">
+    <img [src]="imageSrc" alt="Full Screen Image" class="fullscreen-image"/>
+  </div>
+</po-modal>
+

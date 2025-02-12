@@ -1,29 +1,31 @@
-import { ColaboradorComponent } from './colaborador.component';
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { ClientComponent } from './client.component';
 import { PoModule } from '@po-ui/ng-components';
-import { NewComponent } from './new/new.component';
 import { DetailComponent } from './detail/detail.component';
+import { NewComponent } from './new/new.component';
 import { EditComponent } from './edit/edit.component';
-import { ColaboradorRoutingModule } from './colaborador-routing.module';
+import { ClientRoutingModule } from './client-routing.module';
+
+
 
 @NgModule({
   declarations: [
-    ColaboradorComponent,
-    NewComponent,
+    ClientComponent,
     DetailComponent,
-    EditComponent
-    ],
+    NewComponent,
+    EditComponent,
+  ],
   imports: [
     CommonModule,
     PoModule,
-    ColaboradorRoutingModule
+    ClientRoutingModule,
   ],
   exports: [
-    ColaboradorComponent,
-    NewComponent,
+    ClientComponent,
     DetailComponent,
+    NewComponent,
     EditComponent
   ]
 })
-export class ColaboradorModule { }
+export class ClientModule { }

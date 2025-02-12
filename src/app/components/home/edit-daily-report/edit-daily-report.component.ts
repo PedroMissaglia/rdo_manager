@@ -15,12 +15,10 @@ export class EditDailyReportComponent {
 
   value: any;
   fields: Array<PoDynamicFormField> = [
-    {property: 'obra', label: 'Cliente', gridColumns: 8, disabled: true},
     {property: 'placa', label: 'Placa', disabled: true},
     {property: 'dataInicioDisplay', label: 'Data', disabled: true},
     {property: 'horasPrevistas', label: 'Horas previstas', disabled: true},
     {property: 'horasRealizadas', label: 'Horas realizadas', disabled: true},
-    {property: 'prazo', label: 'Prazo'},
     {property: 'responsavel', label: 'Responsável', gridColumns: 8},
     {property: 'justificativa', label: 'Justificativa', rows: 4, gridColumns: 12}
   ];
@@ -32,20 +30,35 @@ export class EditDailyReportComponent {
     private router: Router) {}
 
   ngOnInit() {
-    this.value = this.dailyReportService.item;
+    this.value = this.dailyReportService.itemFilteredByPlate;
   }
 
   onHandleGoBack() {
     this.router.navigate([`home`]);
   }
 
+  substituirNoPai(pai: any, filho: any) {
+    // Acessa o array dailyReport do pai
+    for (let i = 0; i < pai.dailyReport.length; i++) {
+      const reportPai = pai.dailyReport[i];
+
+      // Verifica se o user e dataInicioDisplay são iguais
+      if (reportPai.user === filho.user && reportPai.dataInicioDisplay === filho.dataInicioDisplay) {
+        // Substitui o dailyReport do pai pelo do filho
+        pai.dailyReport[i] = filho.dailyReport[0];  // Como o filho tem um único item, substituímos diretamente.
+        break;  // Sai do loop após a substituição
+      }
+    }
+  }
+
   async onHandleSave() {
+
+    this.dailyReportService.itemFilteredByPlate['info'] = 'justified';
+    this.substituirNoPai(this.dailyReportService.item, this.dailyReportService.itemFilteredByPlate)
 
     if (this.dailyReportService.item['$selected']) {
       delete this.dailyReportService.item['$selected'];
     }
-
-    this.dailyReportService.item['info'] = 'justified'
 
     const updatedItem = await this.crudService.updateItem(
       'rdo',
