@@ -244,6 +244,7 @@ export class DailyLogComponent implements OnInit {
   >();
 
   public triggerSnapshot(): void {
+    this.labelNow = this.formatDate(new Date());
     this.trigger.next();
     this.poModalCamera?.open();
     this.getGeoLocation();
