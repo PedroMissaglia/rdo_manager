@@ -92,7 +92,7 @@ export class DailyLogComponent implements OnInit, OnDestroy {
           'rdo',
           1,
           'cliente',
-          this.userService.user.cliente
+          this.userService.getUser().cliente
         )) ?? [];
 
       let itemAdded;
@@ -103,11 +103,11 @@ export class DailyLogComponent implements OnInit, OnDestroy {
           dataInicio: new Date(),
           horaInicio: time,
           horasPrevistas: '08:00',
-          placa: this.userService.user.placa,
+          placa: this.userService.getUser().placa,
           operadores: this.heroes,
           status: 'started',
           info: 'started',
-          user: this.userService.user.login,
+          user: this.userService.getUser().login,
           foto: [],
           id: id,
         });
@@ -128,8 +128,8 @@ export class DailyLogComponent implements OnInit, OnDestroy {
         const itemAdded = await this.crudService.addItem(
           'rdo',
           {
-            displayNameCliente: this.userService.user.displayNameCliente,
-            cliente: this.userService.user.cliente,
+            displayNameCliente: this.userService.getUser().displayNameCliente,
+            cliente: this.userService.getUser().cliente,
             horasPrevistasTotal: '',
             horasRealizadasTotal: '',
             acoes: '',
@@ -140,11 +140,11 @@ export class DailyLogComponent implements OnInit, OnDestroy {
                 dataInicio: new Date(),
                 horaInicio: time,
                 horasPrevistas: '08:00',
-                placa: this.userService.user.placa,
+                placa: this.userService.getUser().placa,
                 operadores: this.heroes,
                 status: 'started',
                 info: 'started',
-                user: this.userService.user.login,
+                user: this.userService.getUser().login,
                 foto: [],
                 id: id,
               },
@@ -197,6 +197,8 @@ export class DailyLogComponent implements OnInit, OnDestroy {
             foto: this.webcamImage.imageAsDataUrl,
             dataFoto: time,
             observacao: this.mySecondForm.get('obs')!.value,
+            latitude: this.latitude,
+            longitude: this.longitude,
           });
         }
       });
@@ -255,7 +257,6 @@ export class DailyLogComponent implements OnInit, OnDestroy {
   public webcamImages: WebcamImage[] = []; // Array to store snapshots
 
   public cameraWasSwitched(deviceId: string): void {
-    console.log('active device: ' + deviceId);
     this.deviceId = deviceId;
   }
 
@@ -277,9 +278,9 @@ export class DailyLogComponent implements OnInit, OnDestroy {
 
   getDisplayNameAndPlate() {
     return (
-      this.userService.user?.displayName! +
+      this.userService.getUser()?.displayName! +
       ' / ' +
-      this.userService.user?.placa!
+      this.userService.getUser()?.placa!
     );
   }
 
@@ -445,13 +446,13 @@ export class DailyLogComponent implements OnInit, OnDestroy {
         'rdo',
         1,
         'cliente',
-        this.userService.user.cliente
+        this.userService.getUser().cliente
       )) ?? [];
 
     // Obra iniciada
     if (currentDailyLog.length) {
       currentDailyLog[0].dailyReport.forEach((dailyReport: any) => {
-        if (dailyReport.user === this.userService.user.login) {
+        if (dailyReport.user === this.userService.getUser().login) {
           // Acesso ao registro diário pela segunda vez ou mais
           if (formattedDate === dailyReport.dataInicioDisplay) {
             if (!(dailyReport.status === 'finished')) {
@@ -482,12 +483,8 @@ export class DailyLogComponent implements OnInit, OnDestroy {
         (position) => {
           this.latitude = position.coords.latitude;
           this.longitude = position.coords.longitude;
-          console.log('Location:', this.latitude, this.longitude);
         },
-        (error) => {
-          this.errorMessage = `Error getting location: ${error.message}`;
-          console.error('Error:', error);
-        }
+
       );
     } else {
       this.errorMessage = 'Geolocation is not supported by this browser.';
@@ -528,7 +525,7 @@ export class DailyLogComponent implements OnInit, OnDestroy {
     this.dailyLogService.item.dailyReport.forEach((daily: any) => {
       if (
         daily.dataInicioDisplay === currentDate &&
-        daily.user === this.userService.user.login
+        daily.user === this.userService.getUser().login
       ) {
         dataInicio = daily.dataInicio;
 

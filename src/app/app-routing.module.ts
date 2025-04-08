@@ -6,13 +6,14 @@ import { LoginComponent } from './components/login/login.component';
 import { DailyLogComponent } from './components/daily-log/daily-log.component';
 import { AuthGuard } from './guard/auth.guard';
 import { EditDailyReportComponent } from './components/home/edit-daily-report/edit-daily-report.component';
+import { LoginGuard } from './guard/login.service';
 
 const routes: Routes = [
   {path: '', redirectTo: 'login', pathMatch: 'full'},
   {path: 'home', component: HomeComponent, canActivate: [AuthGuard]},
   {path: 'detail/:id', component: DetailDailyReportComponent, canActivate: [AuthGuard]},
   {path: 'edit/:id', component: EditDailyReportComponent, canActivate: [AuthGuard]},
-  {path: 'login', component: LoginComponent},
+  {path: 'login', component: LoginComponent, canActivate: [LoginGuard]},
   {
     path: 'jobs',
     canActivate: [AuthGuard],
