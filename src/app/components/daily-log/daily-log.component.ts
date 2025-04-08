@@ -23,6 +23,8 @@ import {
   PoStepperComponent,
   PoStepperOrientation,
   PoTableColumn,
+  PoToolbarAction,
+  PoToolbarProfile,
 } from '@po-ui/ng-components';
 import { CameraService } from '../../services/camera.service';
 import { UserService } from '../../services/user.service';
@@ -48,6 +50,21 @@ export class DailyLogComponent implements OnInit, OnDestroy {
   mySecondForm!: FormGroup;
   myThirdForm!: FormGroup;
 
+  profile: PoToolbarProfile = {
+    title: '',
+  };
+  profileActions: Array<PoToolbarAction> = [
+    {
+      icon: 'an an-sign-out',
+      label: 'Sair',
+      type: 'danger',
+      separator: true,
+      action: (item: any) => {
+        this.userService.logout();
+        this.router.navigate(['login']);
+      },
+    },
+  ];
   startedRoute = false;
   image: any;
 
@@ -393,6 +410,10 @@ export class DailyLogComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
 
+    this.profile = {
+      subtitle: this.userService.getUser()?.login ?? '',
+      title: this.userService.getUser()?.displayName ?? '',
+    };
     this.atualizarHora();
     this.intervalo = setInterval(() => {
       this.atualizarHora();
@@ -587,9 +608,7 @@ export class DailyLogComponent implements OnInit, OnDestroy {
   }
 
   reloadPage() {
-    // Reload the current route
-    this.router.navigateByUrl('/', { skipLocationChange: true }).then(() => {
-      this.router.navigate([decodeURIComponent(window.location.pathname)]);
-    });
-  }
+    this.userService.logout();
+    this.router.navigate(['login']);
+ }
 }

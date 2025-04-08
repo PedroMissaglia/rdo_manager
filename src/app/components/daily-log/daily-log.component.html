@@ -1,12 +1,10 @@
 <po-page-default>
 
-  <nav class="custom-navbar">
-    <!-- Navbar Title (optional logo or text) -->
-    <div class="navbar-logo">
-    </div>
-
-  </nav>
-
+  <po-toolbar
+    [p-profile]="profile"
+    [p-profile-actions]="profileActions"
+    >
+  </po-toolbar>
   <po-stepper
   #stepper
   [p-orientation]="orientation"
