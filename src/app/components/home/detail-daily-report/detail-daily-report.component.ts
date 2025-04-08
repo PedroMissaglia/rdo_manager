@@ -3,6 +3,8 @@ import { DailyReportService } from './../daily-report.service';
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import { FormBuilder, FormGroup } from '@angular/forms';
+import { Observable } from 'rxjs';
+import { HttpClient } from '@angular/common/http';
 
 @Component({
   selector: 'app-detail-daily-report',
@@ -15,12 +17,15 @@ export class DetailDailyReportComponent implements OnInit {
   itemsDias: Array<any> = [];
   showSecondCombo = false;
   selectedPlaca = '';
+  private apiKey = 'AIzaSyD1iWjBHl4D5-1zqGNDtJoRlg5WQiFVPf0';
+  private geocodeUrl = 'https://maps.googleapis.com/maps/api/geocode/json';
+
 
   arrFotos: Array<any> = [];
   form!: FormGroup;
   columns: Array<PoTableColumn> = this.getColumns();
   fields: Array<PoDynamicViewField> = [
-    {property: 'displayNameCliente', label: 'Cliente'},
+    {property: 'displayNameCliente', label: 'Cliente' },
     {property: 'horasPrevistasTotal', label: 'Horas previstas total'},
     {property: 'horasRealizadasTotal', label: 'Horas realizadas total'}
   ];
@@ -38,6 +43,7 @@ export class DetailDailyReportComponent implements OnInit {
 
   constructor(
     public dailyReportService: DailyReportService,
+    private http: HttpClient,
     public fb: FormBuilder,
     private router: Router) {}
 
@@ -108,6 +114,11 @@ export class DetailDailyReportComponent implements OnInit {
 
   onHandleDia(dia: any) {
     this.arrFotos = this.obterFotosPorPlacaEDataInicioDisplay(this.selectedPlaca, dia, this.dailyReportService.item.dailyReport);
+    this.arrFotos.forEach(photo => {
+      this.getAddressFromCoordinates(photo.latitude, photo.longitude)
+        .subscribe(obj => photo.geo = obj?.results[0].formatted_address
+        );
+    })
   }
 
   obterFotosPorPlacaEDataInicioDisplay(placa: string, dataInicioDisplay: string, registros: any[]): any[] {
@@ -123,6 +134,11 @@ export class DetailDailyReportComponent implements OnInit {
 
     // Se não encontrar o registro com a placa e dataInicioDisplay fornecidos, retorna um array vazio
     return [];
+  }
+
+  getAddressFromCoordinates(latitude: number, longitude: number): Observable<any> {
+    const url = `${this.geocodeUrl}?latlng=${latitude},${longitude}&key=${this.apiKey}`;
+    return this.http.get<any>(url);
   }
 
   agruparPorPlaca(arr: any[]) {
