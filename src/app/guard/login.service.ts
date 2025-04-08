@@ -22,7 +22,12 @@ export class LoginGuard implements CanActivate {
 
 
   if(this.userService.isLoggedIn()) {
-    this.router.navigate(['/home']);
+    if (this.userService.getUser().type === 'Administrador') {
+      this.router.navigate(['/home']);
+    }
+    else {
+      this.router.navigate(['/dailyLog']);
+    }
     return false;
     } else {
       // Redireciona para a página de login ou qualquer outra página desejada

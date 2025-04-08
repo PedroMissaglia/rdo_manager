@@ -71,7 +71,7 @@ export class AppComponent implements OnInit {
 
   ngOnInit(): void {
     this.profile = {
-      subtitle: this.userService.getUser().login,
+      subtitle: this.userService.getUser().login ?? '',
       title: this.userService.getUser().displayName ?? '',
     };
   }
