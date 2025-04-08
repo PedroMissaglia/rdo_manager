@@ -13,7 +13,10 @@ import { AuthService } from '../../services/auth.service';
 })
 export class LoginComponent {
 
-  logo = 'src/app/login/swl_logo.png'
+  logo = 'src/app/login/swl_logo.png';
+  literals = {
+
+  }
 
   constructor(
     private authService: AuthService,
@@ -24,20 +27,19 @@ export class LoginComponent {
 
 
   async onSubmit(formData: PoPageLogin) {
-    const user = await this.authService.login(formData.login, formData.password);
+    const user = await this.authService
+      .login(<string>formData.login.trim().toLocaleLowerCase(), formData.password);
 
     if (!user ) return this.messageError();
 
     this.userService.user = user;
+    this.userService.setUser(user);
 
     if (user.type === 'Administrador') {
-      this.userService.isLogged = true;
-
       this.router.navigate(['home']);
     }
 
     if (user.type === 'Operador') {
-      this.userService.isLogged = true;
       this.router.navigate(['dailyLog']);
     }
   }

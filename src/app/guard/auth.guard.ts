@@ -22,7 +22,7 @@ export class AuthGuard implements CanActivate {
   ): Observable<boolean> | Promise<boolean> | boolean {
 
 
-  if(this.userService.isLogged) {
+  if(this.userService.isLoggedIn()) {
       return true;
     } else {
       // Redireciona para a página de login ou qualquer outra página desejada

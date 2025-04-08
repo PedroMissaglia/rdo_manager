@@ -5,20 +5,9 @@ import { Injectable } from '@angular/core';
 })
 export class UserService {
   // Property to store login status
-  private isLoggedIn: boolean = false;
   private _user: any;
 
   constructor() {}
-
-  // Getter for isLogged
-  get isLogged(): boolean {
-    return this.isLoggedIn;
-  }
-
-  // Setter for isLogged
-  set isLogged(value: boolean) {
-    this.isLoggedIn = value;
-  }
 
   // Getter for userType
   get user(): any {
@@ -30,14 +19,25 @@ export class UserService {
     this._user = value;
   }
 
-  // Login function: sets isLogged to true and userType to a specific role
-  login(): void {
-    this.isLoggedIn = true;
+  // Salvar usuário no cache (sessionStorage)
+  setUser(user: any): void {
+    sessionStorage.setItem('user', JSON.stringify(user));
+  }
+
+  // Recuperar usuário do cache
+  getUser(): any {
+    const user = sessionStorage.getItem('user');
+    return user ? JSON.parse(user) : null;
+  }
+
+  // Verificar se o usuário está logado
+  isLoggedIn(): boolean {
+    return this.getUser() !== null;
   }
 
   // Logout function: sets isLogged to false and userType to 'guest'
   logout(): void {
-    this.isLoggedIn = false;
+    sessionStorage.removeItem('user');
   }
 
 }
