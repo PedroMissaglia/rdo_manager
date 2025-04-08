@@ -36,7 +36,7 @@ import { Router } from '@angular/router';
   templateUrl: './daily-log.component.html',
   styleUrls: ['./daily-log.component.scss'],
 })
-export class DailyLogComponent implements OnInit {
+export class DailyLogComponent implements OnInit, OnDestroy {
   isNavbarVisible: boolean = false; // Controls mobile navbar visibility
   private trigger: Subject<void> = new Subject<void>();
   // Toggle navbar visibility on mobile
@@ -365,6 +365,7 @@ export class DailyLogComponent implements OnInit {
   context: any;
   imageUrl: string = '';
   caption: string = '';
+  private intervalo: any;
 
   @ViewChild('videoElement', { static: false })
   videoElement!: ElementRef;
@@ -383,7 +384,20 @@ export class DailyLogComponent implements OnInit {
     private fb: FormBuilder
   ) {}
 
+  ngOnDestroy(): void {
+    if (this.intervalo) {
+      clearInterval(this.intervalo);
+    }
+  }
+
   ngOnInit(): void {
+
+    this.atualizarHora();
+    this.intervalo = setInterval(() => {
+      this.atualizarHora();
+    }, 1000);  // Atualiza a hora a cada 1000ms (1 segundo)
+
+
     this.myForm = this.fb.group({
       labelNow: [this.labelNow, [Validators.required]], // Initialize with a default value
       contact: [this.contact, [Validators.required]], // Multiselect should be required
@@ -403,6 +417,10 @@ export class DailyLogComponent implements OnInit {
     this.loadServices();
 
     this.getCurrentDailyLog();
+  }
+
+  atualizarHora() {
+    this.labelNow = this.formatDate(new Date());
   }
 
   upload: any;
