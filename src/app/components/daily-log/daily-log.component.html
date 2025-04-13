@@ -1,76 +1,79 @@
 <po-page-default>
-
-  <po-toolbar
-    [p-profile]="profile"
-    [p-profile-actions]="profileActions"
-    >
+  <po-toolbar [p-profile]="profile" [p-profile-actions]="profileActions">
   </po-toolbar>
   <po-stepper
-  #stepper
-  [p-orientation]="orientation"
-  [p-align-center]="true"
-  [p-disable-click]="true"
-  [p-step-size]="32"
+    #stepper
+    [p-orientation]="orientation"
+    [p-align-center]="true"
+    [p-disable-click]="true"
+    [p-step-size]="32"
   >
     <po-step p-label="Início de rota">
-        <form [formGroup]="myForm">
-          <div class="po-mt-1">
-              <!-- First Widget with LabelNow Input -->
-              <po-widget class="po-mt-1">
-                <po-info p-label="Data e hora" [p-value]="labelNow"> </po-info>
-                <po-info p-label="Cliente" [p-value]="userService.user?.displayNameCliente"> </po-info>
-                <po-info p-label="Operador e placa" [p-value]="getDisplayNameAndPlate()"> </po-info>
+      <form [formGroup]="myForm">
+        <div class="po-mt-1">
+          <!-- First Widget with LabelNow Input -->
+          <po-widget class="po-mt-1">
+            <po-info p-label="Data e hora" [p-value]="labelNow"> </po-info>
+            <po-info
+              p-label="Cliente"
+              [p-value]="userService.user?.displayNameCliente"
+            >
+            </po-info>
+            <po-info
+              p-label="Operador e placa"
+              [p-value]="getDisplayNameAndPlate()"
+            >
+            </po-info>
 
-                <br>
-                <po-multiselect
-                  #multiSelect
-                  class=" po-mb-5 po-mt-3"
-                  formControlName="contact"
-                  (p-change)="changeOptions($event)"
-                  p-field-value="id"
-                  [p-hide-select-all]="true"
-                  p-label="Operadores"
-                  [p-options]="optionsOperators"
-                  [p-disabled]="startedDailyLog"
-                  p-field-label="displayName"
-                  p-icon="ph ph-user"
-                  p-placeholder="Selecione o operador"
-                  required
-                >
-                </po-multiselect>
+            <br />
+            <po-multiselect
+              #multiSelect
+              class="po-mb-5 po-mt-3"
+              formControlName="contact"
+              (p-change)="changeOptions($event)"
+              p-field-value="id"
+              [p-hide-select-all]="true"
+              p-label="Operadores"
+              [p-options]="optionsOperators"
+              [p-disabled]="startedDailyLog"
+              p-field-label="displayName"
+              p-icon="ph ph-user"
+              p-placeholder="Selecione o operador"
+              required
+            >
+            </po-multiselect>
 
-                <br>
-                <po-combo
-                  #poComboComponent
-                  name="combo"
-                  class="po-mb-1"
-                  formControlName="service"
-                  p-label="Serviço"
-                  p-placeholder="Selecione o serviço"
-                  [p-disabled]="startedDailyLog"
-                  [p-options]="optionsServices"
-                  required
-                >
-                </po-combo>
-              </po-widget>
+            <br />
+            <po-combo
+              #poComboComponent
+              name="combo"
+              class="po-mb-1"
+              formControlName="service"
+              p-label="Serviço"
+              p-placeholder="Selecione o serviço"
+              [p-disabled]="startedDailyLog"
+              [p-options]="optionsServices"
+              required
+            >
+            </po-combo>
+          </po-widget>
 
-              <!-- Button to Start Route -->
-              <po-button
-                class="po-md-12 po-mt-5"
-                p-kind="primary"
-                p-label="Iniciar Rota"
-                [p-disabled]="myForm.invalid"
-                (p-click)="onHandleStartRoute('startRoute')"
-              ></po-button>
-          </div>
-        </form>
+          <!-- Button to Start Route -->
+          <po-button
+            class="po-md-12 po-mt-5"
+            p-kind="primary"
+            p-label="Iniciar Rota"
+            [p-disabled]="myForm.invalid"
+            (p-click)="onHandleStartRoute('startRoute')"
+          ></po-button>
+        </div>
+      </form>
     </po-step>
 
     <po-step p-label="Coletar fotos">
       <!-- Button Groups -->
       <form [formGroup]="mySecondForm">
         <div class="camera-container">
-
           <!-- Display the webcam feed -->
           <div class="po-text-center">
             <webcam
@@ -81,22 +84,35 @@
               [allowCameraSwitch]="allowCameraSwitch"
               [switchCamera]="nextWebcamObservable"
               [videoOptions]="videoOptions"
-              (cameraSwitched)="cameraWasSwitched($event)"
               (initError)="handleInitError($event)"
-              >
+            >
             </webcam>
           </div>
+        </div>
 
-          <po-info class="po-md-12" p-label="Data e hora" [p-value]="labelNow"> </po-info>
+        <div class="po-row">
+
+          <po-info class="po-md-6 po-lg-6 po-sm-6" p-label="Data e hora" [p-value]="labelNow">
+          </po-info>
+
+          <!-- <po-switch
+            class="po-md-6 po-lg-6 po-sm-6"
+              formControlName="type"
+              p-label="Tipo de hora"
+              p-label-off="Hora improdutiva"
+              p-label-on="Hora produtiva">
+            </po-switch> -->
+
+        </div>
+
           <po-textarea
             p-label="Observação"
             formControlName="obs"
-            class="po-md-12">
+            class="po-md-12"
+          >
           </po-textarea>
           <div class="po-text-center">
-            <po-button
-              (p-click)="triggerSnapshot()"
-              p-label="Tirar foto">
+            <po-button (p-click)="triggerSnapshot()" p-label="Tirar foto">
             </po-button>
           </div>
 
@@ -104,11 +120,9 @@
             class="po-md-12 po-mb-1 po-mt-1"
             (p-click)="handleStepper()"
             [p-disabled]="!webcamImage"
-            p-label="Finalizar diária">
+            p-label="Finalizar diária"
+          >
           </po-button>
-
-        </div>
-
       </form>
     </po-step>
     <po-step p-label="Finalizar">
@@ -125,8 +139,8 @@
         <po-input
           formControlName="responsavel"
           class="po-md-12 po-mt-3"
-          p-label="Responsável">
-
+          p-label="Responsável"
+        >
         </po-input>
 
         <po-button
@@ -138,7 +152,6 @@
       </form>
     </po-step>
   </po-stepper>
-
 </po-page-default>
 
 <po-modal
@@ -146,25 +159,72 @@
   p-title="Iniciar rota"
   [p-primary-action]="confirm"
   [p-secondary-action]="close"
+>
+  <po-info class="po-md-12 po-mt-1" p-label="Data e hora" [p-value]="labelNow">
+  </po-info>
+  <po-info
+    class="po-md-12 po-mt-1"
+    p-label="Cliente"
+    [p-value]="userService.user?.displayNameCliente"
   >
-  <po-info class="po-md-12 po-mt-1" p-label="Data e hora" [p-value]="labelNow"> </po-info>
-  <po-info class="po-md-12 po-mt-1" p-label="Cliente" [p-value]="userService.user?.displayNameCliente"> </po-info>
-  <po-info class="po-md-12 po-mt-1" p-label="serviço" [p-value]="poComboComponent?.selectedOption?.label"> </po-info>
-
-
+  </po-info>
+  <po-info
+    class="po-md-12 po-mt-1"
+    p-label="serviço"
+    [p-value]="poComboComponent?.selectedOption?.label"
+  >
+  </po-info>
 </po-modal>
-
 
 <po-modal
   #modalTwo
   p-title="Confirmar"
   [p-primary-action]="confirmPhoto"
   [p-secondary-action]="closePhoto"
-  >
-  <po-image *ngIf="webcamImage"
-    [p-src]="webcamImage.imageAsDataUrl">
+>
+  <po-image *ngIf="webcamImage" [p-src]="webcamImage.imageAsDataUrl">
   </po-image>
-  <po-info class="po-md-12 po-mt-1" p-label="Data e hora" [p-value]="labelNow"> </po-info>
-  <po-info class="po-md-12 po-mt-1" p-label="Observações" [p-value]="mySecondForm.get('obs')?.value"> </po-info>
-
+  <po-info class="po-md-12 po-mt-1" p-label="Data e hora" [p-value]="labelNow">
+  </po-info>
+  <po-info
+    class="po-md-12 po-mt-1"
+    p-label="Observações"
+    [p-value]="mySecondForm.get('obs')?.value"
+  >
+  </po-info>
 </po-modal>
+
+<!-- <po-modal #modalThree p-title="Hora Improdutiva">
+  <po-image *ngIf="webcamImageImprodutiva" [p-src]="webcamImageImprodutiva.imageAsDataUrl">
+  </po-image>
+
+  <div class="po-text-center">
+    <webcam
+      [height]="350"
+      [width]="300"
+      (imageCapture)="handleImageImprodutiva($event)"
+      [allowCameraSwitch]="allowCameraSwitch"
+      [switchCamera]="nextWebcamObservable"
+      [videoOptions]="videoOptions"
+      (initError)="handleInitError($event)"
+    >
+    </webcam>
+  </div>
+
+  <div class="po-text-center">
+    <po-button
+      (p-click)="triggerSnapshotHoraImprodutiva()"
+      p-label="Tirar foto">
+    </po-button>
+  </div>
+
+  <po-textarea p-label="Justificativa" formControlName="justificativaImprodutiva" class="po-md-12">
+  </po-textarea>
+  <po-input
+    class="po-md-12 po-mt-1"
+    formControlName="totalImprodutiva"
+    p-mask="99:99"
+    p-label="Total de horas improdutivas"
+  >
+  </po-input>
+</po-modal> -->

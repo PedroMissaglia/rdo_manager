@@ -18,7 +18,7 @@ export class EditDailyReportComponent {
     {property: 'placa', label: 'Placa', disabled: true},
     {property: 'dataInicioDisplay', label: 'Data', disabled: true},
     {property: 'horasPrevistas', label: 'Horas previstas', disabled: true},
-    {property: 'horasRealizadas', label: 'Horas realizadas', disabled: true},
+    {property: 'horasRealizadas', label: 'Horas executadas', disabled: true},
     {property: 'responsavel', label: 'Responsável', gridColumns: 8},
     {property: 'justificativa', label: 'Justificativa', rows: 4, gridColumns: 12}
   ];

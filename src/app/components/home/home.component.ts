@@ -92,7 +92,7 @@ export class HomeComponent implements OnInit{
           itemTotalHorasPrevistas += converterParaDecimal(report.horasPrevistas);
         }
 
-        // Converte e soma as horas realizadas, mas apenas se o valor não for nulo ou vazio
+        // Converte e soma as Horas executadas, mas apenas se o valor não for nulo ou vazio
         if (report.horasRealizadas && report.horasRealizadas !== '') {
           itemTotalHorasRealizadas += converterParaDecimal(report.horasRealizadas);
         }
@@ -142,7 +142,7 @@ export class HomeComponent implements OnInit{
         { property: 'placa', label: 'Placa' },
         { property: 'dataInicioDisplay', label: 'Data' },
         { property: 'horasPrevistas', label: 'Horas previstas' },
-        { property: 'horasRealizadas', label: 'Horas realizadas' },
+        { property: 'horasRealizadas', label: 'Horas executadas' },
         { property: 'justificativa' },
         { property: 'responsavel', label: 'Responsável' },
       ],
@@ -152,7 +152,7 @@ export class HomeComponent implements OnInit{
     return [
       {property: 'displayNameCliente', label: 'Cliente'},
       {property: 'horasPrevistasTotal', label: 'Total de horas previstas'},
-      {property: 'horasRealizadasTotal', label: 'Total de horas realizadas'},
+      {property: 'horasRealizadasTotal', label: 'Total de Horas executadas'},
       {
         property: 'info',
         label: 'Status',

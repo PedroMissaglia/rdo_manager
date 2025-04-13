@@ -5,12 +5,8 @@ import { PoImageModule, PoModule } from '@po-ui/ng-components';
 import { PoPageLoginModule, PoTemplatesModule } from '@po-ui/ng-templates';
 import { AppRoutingModule } from './app-routing.module';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { provideFirestore, getFirestore, Firestore } from '@angular/fire/firestore'; // Modular API
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { AppComponent } from './app.component';
-import { AngularFireDatabaseModule } from '@angular/fire/compat/database';
-import { AngularFirestoreModule } from '@angular/fire/compat/firestore';
-import { initializeApp, provideFirebaseApp } from '@angular/fire/app';
 import { HomeComponent } from './components/home/home.component';
 import { DetailDailyReportComponent } from './components/home/detail-daily-report/detail-daily-report.component';
 import { LoginComponent } from './components/login/login.component';
@@ -18,13 +14,18 @@ import { ColaboradorModule } from './components/colaborador/colaborador.module';
 import { JobModule } from './components/job/job.module';
 import { DailyLogComponent } from './components/daily-log/daily-log.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { WebcamModule } from 'ngx-webcam';  // Import WebcamModule
+import { WebcamModule } from 'ngx-webcam';
 import { CameraComponent } from './components/camera/camera.component';
 import { EditDailyReportComponent } from './components/home/edit-daily-report/edit-daily-report.component';
 import { ClientModule } from './components/client/client.module';
 import { DecimalPipe } from '@angular/common';
 
-// Your web app's Firebase configuration
+// Firebase Modular Imports (v9+)
+import { initializeApp, provideFirebaseApp } from '@angular/fire/app';
+import { provideFirestore, getFirestore } from '@angular/fire/firestore';
+import { provideStorage, getStorage } from '@angular/fire/storage';
+import { provideDatabase, getDatabase } from '@angular/fire/database';
+
 const firebaseConfig = {
   apiKey: "AIzaSyDTMXi_vhTNEnUgnPpHwZZLVMEfBtXyh7Y",
   authDomain: "rdo-manager.firebaseapp.com",
@@ -55,18 +56,20 @@ const firebaseConfig = {
     JobModule,
     FormsModule,
     ReactiveFormsModule,
-    WebcamModule,  // Include WebcamModule in imports
+    WebcamModule,
     PoPageLoginModule,
     RouterModule,
     PoImageModule,
     PoTemplatesModule,
-    AngularFireDatabaseModule,
   ],
   providers: [
     DecimalPipe,
     provideHttpClient(withInterceptorsFromDi()),
-    provideFirestore(() => getFirestore()), // Move to providers
-    provideFirebaseApp(() => initializeApp(firebaseConfig)),  // Initialize Firebase
+    // Firebase Modular Configuration
+    provideFirebaseApp(() => initializeApp(firebaseConfig)),
+    provideFirestore(() => getFirestore()),
+    provideStorage(() => getStorage()),
+    provideDatabase(() => getDatabase())
   ],
   bootstrap: [AppComponent]
 })

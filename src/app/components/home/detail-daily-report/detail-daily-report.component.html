@@ -1,64 +1,89 @@
-<po-page-detail
-    (p-back)="onHandleGoBack()"
-    p-title="Detalhes" >
+<po-page-detail (p-back)="onHandleGoBack()" p-title="Detalhes">
+  <!-- <po-dynamic-view
+    class="po-mt-3"
+    [p-fields]="fields"
+    [p-value]="dailyReportService.item"
+  >
+  </po-dynamic-view> -->
 
-    <po-dynamic-view class="po-mt-3" [p-fields]="fields" [p-value]="dailyReportService.item">
-    </po-dynamic-view>
+  <po-tabs>
+    <po-tab [p-active]="true" p-label="Detalhes da obra">
+      <po-table
+        [p-items]="items"
+        [p-actions]="actions"
+        [p-columns]="columns"
+      ></po-table>
+    </po-tab>
+    <po-tab p-label="Fotos">
+      <form [formGroup]="form">
+        <po-combo
+          name="combo"
+          class="po-md-6"
+          formControlName="placa"
+          p-label="Selecione a placa"
+          (p-change)="onHandlePlaca($event)"
+          [p-options]="items"
+        >
+        </po-combo>
 
-    <po-tabs class="po-mt-3">
-      <po-tab [p-active]="true" p-label="Detalhes da obra">
+        <po-combo
+          *ngIf="showSecondCombo"
+          name="combo"
+          formControlName="dia"
+          class="po-md-6"
+          p-label="Selecione o dia"
+          (p-change)="onHandleDia($event)"
+          [p-options]="itemsDias"
+        >
+        </po-combo>
+      </form>
 
-        <po-table
-          [p-items]="items"
-          [p-actions]="actions"
-          [p-columns]="columns"></po-table>
-      </po-tab >
-      <po-tab p-label="Fotos">
+      <div class="minha-div container" *ngIf="arrFotos">
+        <div *ngFor="let item of arrFotos">
+          <div class="po-row po-mt-3">
+            <po-image class="po-md-3"
+              [p-height]="150"
+              (click)="openImageViewer(item.foto)"
+              [p-src]="item.foto"
+            >
+            </po-image>
 
-        <form [formGroup]="form">
-          <po-combo
-            name="combo"
-            formControlName="placa"
-            p-label="Selecione a placa"
-            (p-change)="onHandlePlaca($event)"
-            [p-options]="items">
-          </po-combo>
-
-          <po-combo
-            *ngIf="showSecondCombo"
-            name="combo"
-            formControlName="dia"
-            p-label="Selecione o dia"
-            (p-change)="onHandleDia($event)"
-            [p-options]="itemsDias">
-          </po-combo>
-
-        </form>
-
-
-        <div *ngIf="arrFotos">
-          <div class="po-md-6 po-mt-4" *ngFor="let item of arrFotos">
-            <div class="po-row">
-              <po-image
-                class="po-md-6"
-                [p-src]="item.foto">
-              </po-image>
-              <div class="po-md-6">
-                <po-info class="po-md-12" p-label="Hora da foto" [p-value]="item.dataFoto"> </po-info>
-                <po-info class="po-md-12" p-label="Observação" [p-value]="item.observacao"> </po-info>
-                <po-info class="po-md-12" p-label="Geolocalização" [p-value]="item.geo"> </po-info>
-                <po-button p-label="Detalhes" (p-click)="openFullscreen(item.foto)"> </po-button>
-              </div>
+            <div class="po-md-9">
+              <po-info class="po-md-3" p-label="Hora da foto" [p-value]="item.dataFoto">
+              </po-info>
+              <po-info class="po-md-9" p-label="Observação" [p-value]="item.observacao">
+              </po-info>
+              <po-info class="po-md-12" p-label="Geolocalização" [p-value]="item.geo"> </po-info>
             </div>
           </div>
         </div>
-      </po-tab>
-    </po-tabs>
+      </div>
+
+    </po-tab>
+  </po-tabs>
+
+  <div class="">
+
+  </div>
 </po-page-detail>
 
 <po-modal p-title="Detalhes da foto">
   <div class="fullscreen-image-container">
-    <img [src]="imageSrc" alt="Full Screen Image" class="fullscreen-image"/>
+    <img [src]="imageSrc" alt="Full Screen Image" class="fullscreen-image" />
   </div>
 </po-modal>
 
+<div
+  class="image-viewer-overlay"
+  *ngIf="isImageViewerVisible"
+  (click)="closeViewer()"
+>
+  <div class="image-viewer-container" (click)="$event.stopPropagation()">
+    <button class="close-button" (click)="closeViewer()">×</button>
+    <img
+      [src]="currentImageUrl"
+      class="fullscreen-image"
+      alt="Imagem expandida"
+    />
+  </div>
+</div>

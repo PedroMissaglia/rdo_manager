@@ -29,8 +29,9 @@ import {
 import { CameraService } from '../../services/camera.service';
 import { UserService } from '../../services/user.service';
 import { WebcamImage, WebcamInitError } from 'ngx-webcam';
-import { Observable, Subject } from 'rxjs';
+import { finalize, Observable, Subject } from 'rxjs';
 import { Router } from '@angular/router';
+import { StorageService } from '../../services/storage.service';
 
 @Component({
   selector: 'app-daily-log',
@@ -41,10 +42,6 @@ import { Router } from '@angular/router';
 export class DailyLogComponent implements OnInit, OnDestroy {
   isNavbarVisible: boolean = false; // Controls mobile navbar visibility
   private trigger: Subject<void> = new Subject<void>();
-  // Toggle navbar visibility on mobile
-  toggleNavbar(): void {
-    this.isNavbarVisible = !this.isNavbarVisible;
-  }
 
   myForm!: FormGroup;
   mySecondForm!: FormGroup;
@@ -111,8 +108,6 @@ export class DailyLogComponent implements OnInit, OnDestroy {
           'cliente',
           this.userService.getUser().cliente
         )) ?? [];
-
-      let itemAdded;
 
       if (currentDailyLog.length) {
         currentDailyLog[0].dailyReport.push({
@@ -201,41 +196,78 @@ export class DailyLogComponent implements OnInit, OnDestroy {
   confirmPhoto: PoModalAction = {
     action: async () => {
       const currentDate = this.getDate();
-
       const labelNow = this.formatDate(new Date());
-      // Use regex to extract the time (HH:mm format)
       const match = labelNow.match(/(\d{2}:\d{2})$/);
       const time = match ? match[1] : null;
 
-      this.dailyLogService.item.dailyReport.forEach((dailyReport: any) => {
-        // Foto do dia
-        if (dailyReport.dataInicioDisplay === currentDate) {
-          dailyReport.foto.push({
-            foto: this.webcamImage.imageAsDataUrl,
-            dataFoto: time,
-            observacao: this.mySecondForm.get('obs')!.value,
-            latitude: this.latitude,
-            longitude: this.longitude,
-          });
+      try {
+        // 1. Primeiro fazemos o upload da foto
+        if (!this.webcamImage?.imageAsDataUrl) {
+          this.notificationService.error('Nenhuma foto foi capturada.');
+          return;
         }
-      });
 
-      const dailyReportArray = [...this.dailyLogService.item.dailyReport];
+        // Converter dataUrl para Blob
+        const blob = this.dataURItoBlob(this.webcamImage.imageAsDataUrl);
+        const file = new File([blob], `foto_${Date.now()}.jpg`, { type: 'image/jpeg' });
 
-      const updatedItem = await this.crudService.updateItemWithPhoto(
-        'rdo',
-        this.dailyLogService.item.id,
-        {
-          dailyReport: dailyReportArray,
-        },
-        {}
-      );
+        // Mostrar loading enquanto faz upload
+        this.notificationService.information('Enviando foto...');
 
-      this.poModalCamera?.close();
-      this.notificationService.success('Foto salva com sucesso.');
+        // 2. Fazer upload para o Storage
+        const downloadUrl = await this.storageService.uploadFile(file, 'fotos-daily-report').toPromise();
+
+        // 3. Atualizar o objeto com a URL da foto
+        this.dailyLogService.item.dailyReport.forEach((dailyReport: any) => {
+          if (dailyReport.dataInicioDisplay === currentDate) {
+            dailyReport.foto.push({
+              foto: downloadUrl, // Usamos a URL do Storage agora
+              dataFoto: time,
+              observacao: this.mySecondForm.get('obs')!.value,
+              latitude: this.latitude,
+              longitude: this.longitude,
+            });
+          }
+        });
+
+        const dailyReportArray = [...this.dailyLogService.item.dailyReport];
+
+        // 4. Atualizar no banco de dados
+        const updatedItem = await this.crudService.updateItemWithPhoto(
+          'rdo',
+          this.dailyLogService.item.id,
+          {
+            dailyReport: dailyReportArray,
+          },
+          {}
+        );
+
+        this.poModalCamera?.close();
+        this.notificationService.success('Foto salva com sucesso.');
+
+      } catch (error) {
+        console.error('Erro ao salvar foto:', error);
+        this.notificationService.error('Erro ao salvar foto. Tente novamente.');
+      }
     },
     label: 'Enviar',
   };
+
+  private dataURItoBlob(dataURI: string): Blob {
+    // Converter base64 para bytes
+    const byteString = atob(dataURI.split(',')[1]);
+    const mimeString = dataURI.split(',')[0].split(':')[1].split(';')[0];
+
+    // Escrever bytes do array
+    const ab = new ArrayBuffer(byteString.length);
+    const ia = new Uint8Array(ab);
+
+    for (let i = 0; i < byteString.length; i++) {
+      ia[i] = byteString.charCodeAt(i);
+    }
+
+    return new Blob([ab], { type: mimeString });
+  }
 
   @ViewChild(PoStepperComponent)
   poStepperComponent!: PoStepperComponent;
@@ -245,6 +277,7 @@ export class DailyLogComponent implements OnInit, OnDestroy {
   public deviceId: string = '';
   optionsServices: Array<PoMultiselectOption> = [];
   public webcamImage!: WebcamImage;
+  public webcamImageImprodutiva!: WebcamImage;
 
   // To handle webcam errors
   public webcamError!: WebcamInitError;
@@ -269,19 +302,27 @@ export class DailyLogComponent implements OnInit, OnDestroy {
     this.getGeoLocation();
   }
 
+  public triggerSnapshotHoraImprodutiva(): void {
+    this.labelNow = this.formatDate(new Date());
+    this.trigger.next();
+    this.getGeoLocation();
+  }
+
   photoTaken = false;
 
   public webcamImages: WebcamImage[] = []; // Array to store snapshots
-
-  public cameraWasSwitched(deviceId: string): void {
-    this.deviceId = deviceId;
-  }
 
   // Capture the photo
   public handleImage(webcamImage: WebcamImage): void {
     this.webcamImage = webcamImage;
     this.photoTaken = true;
     this.myForm.get('upload')?.setValue(webcamImage.imageAsDataUrl);
+  }
+
+
+  // Capture the photo
+  public handleImageImprodutiva(webcamImage: WebcamImage): void {
+    this.webcamImageImprodutiva = webcamImage;
   }
 
   // Handle webcam e
@@ -303,17 +344,6 @@ export class DailyLogComponent implements OnInit, OnDestroy {
 
   changeOptions(event: any): void {
     this.heroes = [...event];
-  }
-
-  getDynamicViewValues() {
-    let equipe: string = '';
-    this.heroes.forEach((hero, index) => {
-      index === 0
-        ? (equipe = equipe.concat(hero.name))
-        : (equipe = equipe.concat(', ' + hero.name));
-    });
-
-    return;
   }
 
   handleStepper() {
@@ -378,6 +408,10 @@ export class DailyLogComponent implements OnInit, OnDestroy {
     | PoModalComponent
     | undefined;
 
+  @ViewChild('modalThree', { static: true }) poModalHoraImprodutiva:
+    | PoModalComponent
+    | undefined;
+
   contact: any;
   service: string = '';
   context: any;
@@ -395,6 +429,7 @@ export class DailyLogComponent implements OnInit, OnDestroy {
   constructor(
     private cameraService: CameraService,
     private crudService: CrudService,
+    private storageService: StorageService,
     public userService: UserService,
     private dailyLogService: DailyLogService,
     private router: Router,
@@ -428,10 +463,13 @@ export class DailyLogComponent implements OnInit, OnDestroy {
 
     this.mySecondForm = this.fb.group({
       obs: ['', []], // Initialize with a default value
+      type: [true, []], // Initialize with a default value
     });
 
     this.myThirdForm = this.fb.group({
       occo: ['', []], // Initialize with a default value
+      justificativaImprodutiva: ['', []], // Initialize with a default value
+      totalImprodutiva: ['', []], // Initialize with a default value
       responsavel: ['', []], // Initialize with a default value
     });
 
@@ -610,5 +648,6 @@ export class DailyLogComponent implements OnInit, OnDestroy {
   reloadPage() {
     this.userService.logout();
     this.router.navigate(['login']);
- }
+  }
+
 }

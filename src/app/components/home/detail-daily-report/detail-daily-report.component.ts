@@ -1,6 +1,6 @@
 import { PoBreadcrumb, PoDynamicViewField, PoModalComponent, PoPageAction, PoTableColumn, PoTableDetail } from '@po-ui/ng-components';
 import { DailyReportService } from './../daily-report.service';
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, EventEmitter, HostListener, OnInit, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { Observable } from 'rxjs';
@@ -20,6 +20,34 @@ export class DetailDailyReportComponent implements OnInit {
   private apiKey = 'AIzaSyD1iWjBHl4D5-1zqGNDtJoRlg5WQiFVPf0';
   private geocodeUrl = 'https://maps.googleapis.com/maps/api/geocode/json';
 
+  imageUrl: string = '';
+  visible: boolean = false;
+  close = new EventEmitter<void>();
+
+  columnsImage: PoTableColumn[] = [
+    {
+      property: 'foto',
+      label: 'Foto',
+      type: 'columnTemplate',
+      width: '200px'
+    },
+    {
+      property: 'info',
+      label: 'Informações',
+      type: 'columnTemplate'
+    }
+  ];
+
+  @HostListener('document:keydown.escape', ['$event'])
+  onKeydownHandler(event: KeyboardEvent) {
+    this.closeViewer();
+  }
+
+  closeViewer() {
+    this.close.emit();
+    this.closeImageViewer();
+  }
+
 
   arrFotos: Array<any> = [];
   form!: FormGroup;
@@ -27,7 +55,7 @@ export class DetailDailyReportComponent implements OnInit {
   fields: Array<PoDynamicViewField> = [
     {property: 'displayNameCliente', label: 'Cliente' },
     {property: 'horasPrevistasTotal', label: 'Horas previstas total'},
-    {property: 'horasRealizadasTotal', label: 'Horas realizadas total'}
+    {property: 'horasRealizadasTotal', label: 'Horas executadas total'}
   ];
   imageSrc: string = ''; // Input image source
   isFullScreen: boolean = false;
@@ -221,7 +249,7 @@ export class DetailDailyReportComponent implements OnInit {
       columns: [
         { property: 'dataInicioDisplay', label: 'Data' },
         { property: 'horasPrevistas', label: 'Horas previstas' },
-        { property: 'horasRealizadas', label: 'Horas realizadas' },
+        { property: 'horasRealizadas', label: 'Horas executadas' },
         { property: 'justificativa' },
         { property: 'responsavel', label: 'Responsável' },
       ],
@@ -231,7 +259,7 @@ export class DetailDailyReportComponent implements OnInit {
     return [
       { property: 'placa', label: 'Placa' },
       { property: 'horasPrevistasTotal', label: 'Horas previstas total' },
-      { property: 'horasRealizadasTotal', label: 'Horas realizadas total' },
+      { property: 'horasRealizadasTotal', label: 'Horas executadas total' },
       {
         property: 'status',
         label: 'Status',
@@ -244,6 +272,20 @@ export class DetailDailyReportComponent implements OnInit {
       },
       {property: 'detalhes', label: 'Detalhes', type: 'detail', detail: airfareDetail }
     ]
+  }
+
+  isImageViewerVisible = false;
+  currentImageUrl = '';
+
+  openImageViewer(imageUrl: string) {
+    this.currentImageUrl = imageUrl;
+    this.isImageViewerVisible = true;
+    document.body.style.overflow = 'hidden'; // Desabilita scroll da página
+  }
+
+  closeImageViewer() {
+    this.isImageViewerVisible = false;
+    document.body.style.overflow = ''; // Reabilita scroll da página
   }
 
 }
