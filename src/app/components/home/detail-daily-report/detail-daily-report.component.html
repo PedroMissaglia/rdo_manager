@@ -1,13 +1,17 @@
-<po-page-detail (p-back)="onHandleGoBack()" p-title="Detalhes">
-  <!-- <po-dynamic-view
+<po-page-detail
+  (p-back)="onHandleGoBack()"
+  p-title="Detalhes">
+
+    <po-dynamic-view
     class="po-mt-3"
     [p-fields]="fields"
     [p-value]="dailyReportService.item"
   >
-  </po-dynamic-view> -->
+  </po-dynamic-view>
 
   <po-tabs>
     <po-tab [p-active]="true" p-label="Detalhes da obra">
+
       <po-table
         [p-items]="items"
         [p-actions]="actions"
@@ -38,8 +42,9 @@
         </po-combo>
       </form>
 
-      <div class="minha-div container" *ngIf="arrFotos">
-        <div *ngFor="let item of arrFotos">
+      <div class="minha-div container" *ngIf="arrFotos.length > 0">
+        <app-map apiKey="AIzaSyD1iWjBHl4D5-1zqGNDtJoRlg5WQiFVPf0" [locais]="arrFotos"></app-map>
+        <!-- <div *ngFor="let item of arrFotos">
           <div class="po-row po-mt-3">
             <po-image class="po-md-3"
               [p-height]="150"
@@ -56,7 +61,7 @@
               <po-info class="po-md-12" p-label="Geolocalização" [p-value]="item.geo"> </po-info>
             </div>
           </div>
-        </div>
+        </div> -->
       </div>
 
     </po-tab>

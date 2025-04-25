@@ -1,8 +1,10 @@
 import { DailyReportService } from './daily-report.service';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
-import { PoBreadcrumb, PoPageAction, PoTableAction, PoTableColumn, PoTableDetail } from '@po-ui/ng-components';
+import { PoBreadcrumb, PoModalAction, PoModalComponent, PoNotificationService, PoPageAction, PoPageFilter, PoTableAction, PoTableColumn, PoTableDetail } from '@po-ui/ng-components';
 import { CrudService } from '../../services/crud.service';
+import { ExcelService } from '../../services/excel.service';
+import { FormBuilder, FormGroup, NgForm, Validators } from '@angular/forms';
 
 @Component({
     selector: 'app-home',
@@ -12,16 +14,161 @@ import { CrudService } from '../../services/crud.service';
 })
 export class HomeComponent implements OnInit{
 
+  @ViewChild('advancedFilterModal', { static: true }) advancedFilterModal!: PoModalComponent;
   logo = '/assets/swl_logo.png';
   columns: Array<PoTableColumn> = this.getColumns();
   selectDailyReport: any;
+  defaultTableItems: Array<any> = [];
   public actions: Array<PoPageAction> = [
     {
-      label: 'Visualizar',
-      action: this.redirectToDailyReportDetail.bind(this)
+      label: 'Excel',
+      icon: 'an an-microsoft-excel-logo',
+      type: 'default',
+      action: this.handleExportToExcel.bind(this)
     }
   ];
   items: any;
+  public readonly filter: PoPageFilter = {
+    action: this.showAction.bind(this),
+    advancedAction: this.showAdvanceAction.bind(this)
+  };
+
+  async showAction(filter: string) {
+    this.filterSearch(this.defaultTableItems, filter);
+
+  }
+
+  close: PoModalAction = {
+    action: () => {
+      this.advancedFilterModal.close();
+    },
+    label: 'Fechar',
+    danger: true
+  };
+
+  confirm: PoModalAction = {
+    action: () => {
+
+      let a = this.filterByDateRange(this.defaultTableItems, this.form.get('datePickerRanger')?.value.start, this.form.get('datePickerRanger')?.value.end);
+
+      this.tableItems = [...a];
+
+      this.advancedFilterModal.close();
+    },
+    label: 'Buscar'
+  };
+
+
+  showAdvanceAction(filter: string) {
+    this.advancedFilterModal.open();
+  }
+
+  filterByDateRange(
+    data: any[],
+    startDateStr: string, // Formato 'YYYY-MM-DD'
+    endDateStr: string    // Formato 'YYYY-MM-DD'
+  ): any[] {
+    // Converte strings 'YYYY-MM-DD' para Date
+    const startDate = new Date(startDateStr);
+    const endDate = new Date(endDateStr);
+
+    // Valida as datas de filtro
+    if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+      console.error('Datas de filtro inválidas');
+      return [];
+    }
+
+    return data.filter(item => {
+      if (!item?.dailyReport) return false;
+
+      return item.dailyReport.some((report: any) => {
+        // Converte dataInicioDisplay (DD/MM/YYYY) para Date
+        const reportDate = report?.dataInicioDisplay
+          ? this.convertDMYToDate(report.dataInicioDisplay)
+          : null;
+
+        // Se a data do relatório for válida, verifica o intervalo
+        return reportDate && reportDate >= startDate && reportDate <= endDate;
+      });
+    });
+  }
+
+
+  private convertDMYToDate(dateStr: string): Date | null {
+    if (!dateStr) return null;
+
+    const [day, month, year] = dateStr.split('/').map(Number);
+    // Validação extra
+    if (day > 31 || month > 12 || year < 1000) return null;
+
+    return new Date(year, month - 1, day);
+  }
+
+  getObjectsByPlate(data: any[], plate: string): any[] {
+    return data.filter(item => {
+      // Check if the item has dailyReport array
+      if (item.dailyReport && Array.isArray(item.dailyReport)) {
+        // Check if any report in dailyReport matches the plate
+        return item.dailyReport.some((report: any) => report.placa === plate);
+      }
+      return false;
+    });
+  }
+
+  filterSearch(data: any[], filters: any) {
+    let filteredByPlateItems: any[] = this.filterByPlate(data, filters);
+
+    let filterdByClientItems: any[] = this.filterByClient(data, filters);
+
+    this.tableItems = [...filteredByPlateItems];
+    this.tableItems = this.tableItems.concat([...filterdByClientItems]);
+
+  }
+
+
+  filterByPlate(data: any[], plate: string): any[] {
+    return data.filter(item => {
+      // Se o item for inválido, ignora
+      if (!item) return false;
+
+      // Se o item tem 'dailyReport' (array ou objeto)
+      if (item.dailyReport) {
+        if (Array.isArray(item.dailyReport)) {
+          // Verifica se algum report dentro de dailyReport tem a placa
+          return item.dailyReport.some((report: any) => report?.placa === plate);
+        }
+        // Se dailyReport for um objeto único (não array)
+        else if (typeof item.dailyReport === 'object' && item.dailyReport.placa === plate) {
+          return true;
+        }
+      }
+
+      // Se o item tem 'placa' diretamente
+      if (item.placa !== undefined && item.placa === plate) {
+        return true;
+      }
+
+      // Se não encontrou a placa em nenhum lugar, descarta o item
+      return false;
+    });
+  }
+
+  filterByClient(data: any[], clientName: string): any[] {
+    return data.filter(item => {
+      // Se o item for inválido, ignora
+      if (!item) return false;
+
+      // Se o item tem 'placa' diretamente
+      if (item.displayNameCliente !== undefined && item.displayNameCliente === clientName) {
+        return true;
+      }
+
+      // Se não encontrou a placa em nenhum lugar, descarta o item
+      return false;
+    });
+  }
+  // Example usage:
+
 
   tableActions: Array<PoTableAction> = [
     {
@@ -31,6 +178,15 @@ export class HomeComponent implements OnInit{
     }
   ];
 
+  actionsTable: Array<PoTableAction> = [
+    {
+      action: this.redirectToDailyReportDetail.bind(this),
+      label: 'Visualizar'
+    }
+  ];
+
+
+  form!: FormGroup;
 
   tableItems: Array<any> = [];
 
@@ -40,10 +196,16 @@ export class HomeComponent implements OnInit{
 
   constructor(
     private router: Router,
+    private excelService: ExcelService,
     private crudService: CrudService,
+    private fb: FormBuilder,
+    private poNotification :PoNotificationService,
     private dailyReportService: DailyReportService) {}
 
   ngOnInit() {
+    this.form = this.fb.group({
+      datePickerRanger: ['', [Validators.required]]
+    });
     this.loadItems();
   }
 
@@ -53,7 +215,9 @@ export class HomeComponent implements OnInit{
 
       this.calcularTotais(this.items);
 
-      this.tableItems = this.items;
+      this.tableItems = [...this.items];
+      this.defaultTableItems = [...this.items];
+
     }
       catch (error) {
       console.error('Error loading items:', error);
@@ -133,6 +297,10 @@ export class HomeComponent implements OnInit{
     this.router.navigate(['edit', this.selectDailyReport['id']]);
   }
 
+  handleExportToExcel() {
+    this.excelService.exportRelatorioToExcel(this.tableItems, 'rdo');
+  }
+
   onShowMore() {}
 
   getColumns() {
@@ -144,6 +312,7 @@ export class HomeComponent implements OnInit{
         { property: 'horasPrevistas', label: 'Horas previstas' },
         { property: 'horasRealizadas', label: 'Horas executadas' },
         { property: 'justificativa' },
+        { property: 'totalImprodutiva', label: 'Horas improdutivas' },
         { property: 'responsavel', label: 'Responsável' },
       ],
       typeHeader: 'top'

@@ -25,6 +25,7 @@ import { initializeApp, provideFirebaseApp } from '@angular/fire/app';
 import { provideFirestore, getFirestore } from '@angular/fire/firestore';
 import { provideStorage, getStorage } from '@angular/fire/storage';
 import { provideDatabase, getDatabase } from '@angular/fire/database';
+import { MapComponent } from './components/home/detail-daily-report/map/map.component';
 
 const firebaseConfig = {
   apiKey: "AIzaSyDTMXi_vhTNEnUgnPpHwZZLVMEfBtXyh7Y",
@@ -43,6 +44,7 @@ const firebaseConfig = {
     DetailDailyReportComponent,
     LoginComponent,
     DailyLogComponent,
+    MapComponent,
     EditDailyReportComponent,
     CameraComponent
   ],

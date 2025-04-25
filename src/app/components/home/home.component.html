@@ -1,13 +1,15 @@
 <po-page-list
+  [p-actions]="actions"
+  [p-filter]="filter"
 >
   <po-table
     [p-selectable]="false"
     p-container="true"
-    [p-hide-table-search]="false"
-    [p-height]="650"
+    [p-hide-table-search]="true"
+    [p-height]="600"
     [p-draggable]="true"
     [p-max-columns]="9"
-    [p-actions]="actions"
+    [p-actions]="actionsTable"
     [p-columns]="columns"
     [p-striped]="true"
     [p-single-select]="true"
@@ -19,3 +21,12 @@
     >
   </po-table>
 </po-page-list>
+
+<po-modal #advancedFilterModal p-title="Busca avançada" [p-primary-action]="confirm" [p-secondary-action]="close">
+  <form [formGroup]="form">
+    <po-datepicker-range
+      name="datepickerRange"
+      formControlName="datePickerRanger"
+      p-label="Intervalo de datas"> </po-datepicker-range>
+  </form>
+</po-modal>

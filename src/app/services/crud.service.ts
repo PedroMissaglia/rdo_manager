@@ -1,17 +1,238 @@
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
-import { Firestore, collection, getDocs, addDoc, doc, updateDoc, deleteDoc, query, limit, where, setDoc, getDoc, arrayUnion } from '@angular/fire/firestore';
-import { inject } from '@angular/core';  // Import inject
+import { Firestore, collection, getDocs, query, where, orderBy, startAt, endAt, limit, doc, setDoc, updateDoc, getDoc, deleteDoc } from '@angular/fire/firestore';
+import { inject } from '@angular/core';
 
 @Injectable({
   providedIn: 'root'
 })
 export class CrudService {
-  private firestore: Firestore = inject(Firestore); // Use inject to inject the Firestore service
+  private firestore: Firestore = inject(Firestore);
 
   constructor() {}
 
-  // Correctly using Firestore's modular API to fetch data from a collection
+  // Get reports by client ID
+  async getReportsByClient(clientId: string, limitCount: number = 100): Promise<any[]> {
+    try {
+      const q = query(
+        collection(this.firestore, 'dailyReports'),
+        where('cliente', '==', clientId),
+        orderBy('dataInicio', 'desc'),
+        limit(limitCount)
+      );
+
+      const querySnapshot = await getDocs(q);
+      return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    } catch (error) {
+      console.error('Error getting reports by client: ', error);
+      throw error;
+    }
+  }
+
+  // Get reports by status (finished/started)
+  async getReportsByStatus(status: 'finished' | 'started', limitCount: number = 100): Promise<any[]> {
+    try {
+      const q = query(
+        collection(this.firestore, 'dailyReports'),
+        where('status', '==', status),
+        orderBy('dataInicio', 'desc'),
+        limit(limitCount)
+      );
+
+      const querySnapshot = await getDocs(q);
+      return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    } catch (error) {
+      console.error('Error getting reports by status: ', error);
+      throw error;
+    }
+  }
+
+  // Get reports by date range
+  async getReportsByDateRange(startDate: Date, endDate: Date, limitCount: number = 100): Promise<any[]> {
+    try {
+      const q = query(
+        collection(this.firestore, 'dailyReports'),
+        where('dataInicio', '>=', startDate),
+        where('dataInicio', '<=', endDate),
+        orderBy('dataInicio', 'desc'),
+        limit(limitCount)
+      );
+
+      const querySnapshot = await getDocs(q);
+      return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    } catch (error) {
+      console.error('Error getting reports by date range: ', error);
+      throw error;
+    }
+  }
+
+  // Get reports by plate (placa)
+  async getReportsByPlate(plate: string, limitCount: number = 100): Promise<any[]> {
+    try {
+      const q = query(
+        collection(this.firestore, 'dailyReport'),
+        where('placa', '==', plate),
+        orderBy('dataInicio', 'desc'),
+        limit(limitCount)
+      );
+
+      const querySnapshot = await getDocs(q);
+      return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    } catch (error) {
+      console.error('Error getting reports by plate: ', error);
+      throw error;
+    }
+  }
+
+  // Get reports by responsible person
+  async getReportsByResponsible(responsavel: string, limitCount: number = 100): Promise<any[]> {
+    try {
+      const q = query(
+        collection(this.firestore, 'dailyReports'),
+        where('responsavel', '==', responsavel),
+        orderBy('dataInicio', 'desc'),
+        limit(limitCount)
+      );
+
+      const querySnapshot = await getDocs(q);
+      return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    } catch (error) {
+      console.error('Error getting reports by responsible: ', error);
+      throw error;
+    }
+  }
+
+  // Get reports with photos (where foto array is not empty)
+  async getReportsWithPhotos(limitCount: number = 100): Promise<any[]> {
+    try {
+      // Note: Firestore doesn't support direct array length queries,
+      // so we need to get all and filter client-side for this case
+      const q = query(
+        collection(this.firestore, 'dailyReports'),
+        orderBy('dataInicio', 'desc'),
+        limit(limitCount)
+      );
+
+      const querySnapshot = await getDocs(q);
+      return querySnapshot.docs
+        .map(doc => ({ id: doc.id, ...doc.data() }))
+        .filter((report: any)  => report['foto'] && report['foto'].length > 0);
+    } catch (error) {
+      console.error('Error getting reports with photos: ', error);
+      throw error;
+    }
+  }
+
+  // Get reports by operator (user)
+  async getReportsByOperator(userId: string, limitCount: number = 100): Promise<any[]> {
+    try {
+      const q = query(
+        collection(this.firestore, 'dailyReports'),
+        where('user', '==', userId),
+        orderBy('dataInicio', 'desc'),
+        limit(limitCount)
+      );
+
+      const querySnapshot = await getDocs(q);
+      return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    } catch (error) {
+      console.error('Error getting reports by operator: ', error);
+      throw error;
+    }
+  }
+
+  // Get reports with negative info
+  async getNegativeReports(limitCount: number = 100): Promise<any[]> {
+    try {
+      const q = query(
+        collection(this.firestore, 'dailyReports'),
+        where('info', '==', 'negative'),
+        orderBy('dataInicio', 'desc'),
+        limit(limitCount)
+      );
+
+      const querySnapshot = await getDocs(q);
+      return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    } catch (error) {
+      console.error('Error getting negative reports: ', error);
+      throw error;
+    }
+  }
+
+  // Get reports with specific justification text (partial match)
+  async searchReportsByJustification(searchText: string, limitCount: number = 10): Promise<any[]> {
+    try {
+      // Convert to lowercase for case-insensitive search
+      const term = searchText.toLowerCase();
+      const startTerm = term;
+      const endTerm = term + '\uf8ff';
+
+      const q = query(
+        collection(this.firestore, 'dailyReports'),
+        orderBy('justificativa'),
+        startAt(startTerm),
+        endAt(endTerm),
+        limit(limitCount)
+      );
+
+      const querySnapshot = await getDocs(q);
+      return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    } catch (error) {
+      console.error('Error searching reports by justification: ', error);
+      throw error;
+    }
+  }
+
+  // Get reports with combined filters
+  async getReportsWithCombinedFilters(filters: {
+    clientId?: string;
+    status?: 'finished' | 'started';
+    startDate?: Date;
+    endDate?: Date;
+    plate?: string;
+    responsible?: string;
+    userId?: string;
+    info?: string;
+  }, limitCount: number = 100): Promise<any[]> {
+    try {
+      const queryConstraints = [];
+
+      // Add filters based on provided parameters
+      if (filters.clientId) {
+        queryConstraints.push(where('cliente', '==', filters.clientId));
+      }
+      if (filters.status) {
+        queryConstraints.push(where('status', '==', filters.status));
+      }
+      if (filters.startDate && filters.endDate) {
+        queryConstraints.push(where('dataInicio', '>=', filters.startDate));
+        queryConstraints.push(where('dataInicio', '<=', filters.endDate));
+      }
+      if (filters.plate) {
+        queryConstraints.push(where('placa', '==', filters.plate));
+      }
+      if (filters.responsible) {
+        queryConstraints.push(where('responsavel', '==', filters.responsible));
+      }
+      if (filters.userId) {
+        queryConstraints.push(where('user', '==', filters.userId));
+      }
+      if (filters.info) {
+        queryConstraints.push(where('info', '==', filters.info));
+      }
+
+      // Always order by date
+      queryConstraints.push(orderBy('dataInicio', 'desc'));
+      queryConstraints.push(limit(limitCount));
+
+      const q = query(collection(this.firestore, 'dailyReports'), ...queryConstraints);
+      const querySnapshot = await getDocs(q);
+      return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    } catch (error) {
+      console.error('Error getting reports with combined filters: ', error);
+      throw error;
+    }
+  }
+
   async getItems(collectionName: string, limitCount: number = 100, conditionName?: string, conditionValue?: string) {
     try {
 

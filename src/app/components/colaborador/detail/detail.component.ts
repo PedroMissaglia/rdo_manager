@@ -19,7 +19,13 @@ export class DetailComponent {
     { property: 'placa', label: 'Placa', gridColumns:4},
     { property: 'displayNameCliente', label: 'Cliente', gridColumns: 8},
     { property: 'type', label: 'Tipo', gridColumns: 6,
-      options: [{label: 'Administrador', value: 'Administrador'}, {label: 'Operador', value: 'Operador'}]
+      options: [
+        {label: 'Administrador', value: 'Administrador'},
+        {label: 'Operador', value: 'Operador'},
+        {label: 'Cliente', value: 'Cliente'},
+        {label: 'Fiscal', value: 'Fiscal'},
+      ]
+
     },
   ];
 

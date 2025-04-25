@@ -603,6 +603,7 @@ export class DailyLogComponent implements OnInit, OnDestroy {
         (daily['dataFim'] = date),
           (daily['dataFimDisplay'] = this.formatDate(date).substring(0, 10)),
           (daily['justificativa'] = this.myThirdForm.get('occo')?.value),
+          (daily['totalImprodutiva'] = this.formatWithColon(this.myThirdForm.get('totalImprodutiva')?.value)),
           (daily['responsavel'] = this.myThirdForm.get('responsavel')?.value),
           (daily['horaFim'] = endTime),
           (daily['status'] = 'finished'),
@@ -624,6 +625,19 @@ export class DailyLogComponent implements OnInit, OnDestroy {
     if (updatedItem) {
       this.reloadPage();
     }
+  }
+
+  formatWithColon(input: string): string {
+    if (input.length !== 4) {
+      throw new Error('A entrada deve ter exatamente 4 caracteres');
+    }
+
+    // Verifica se todos os caracteres são dígitos (opcional)
+    if (!/^\d+$/.test(input)) {
+      throw new Error('A entrada deve conter apenas números');
+    }
+
+    return `${input.substring(0, 2)}:${input.substring(2)}`;
   }
 
   // Função para calcular a diferença entre dois tempos representados como objetos Date

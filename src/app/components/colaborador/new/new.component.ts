@@ -57,7 +57,7 @@ export class NewComponent implements OnInit{
         { property: 'placa', label: 'Placa', gridColumns:4 },
         { property: 'cliente', label: 'Cliente', gridColumns: 8, options: this.optionsOperators, fieldLabel: 'label', fieldValue: 'id'},
         { property: 'type', label: 'Tipo', gridColumns: 6, optional: false,
-          options: ['Administrador', 'Operador']
+          options: ['Administrador', 'Operador', 'Fiscal', 'Cliente']
         },
       ]
 

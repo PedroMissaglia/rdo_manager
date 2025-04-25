@@ -137,6 +137,14 @@
         ></po-textarea>
 
         <po-input
+          class="po-md-12 po-mt-1"
+          formControlName="totalImprodutiva"
+          p-mask="99:99"
+          p-label="Total de horas improdutivas"
+        >
+        </po-input>
+
+        <po-input
           formControlName="responsavel"
           class="po-md-12 po-mt-3"
           p-label="Responsável"
@@ -149,6 +157,7 @@
           p-label="Finalizar diária"
           (p-click)="onHandleCollectSigns()"
         ></po-button>
+
       </form>
     </po-step>
   </po-stepper>

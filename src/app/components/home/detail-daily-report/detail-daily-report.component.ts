@@ -5,6 +5,7 @@ import { Router } from '@angular/router';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { Observable } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
+import { PdfService } from '../../../services/pdf.service';
 
 @Component({
   selector: 'app-detail-daily-report',
@@ -66,12 +67,18 @@ export class DetailDailyReportComponent implements OnInit {
     {
       label: 'Justificar',
       action: this.redirectToDailyReportEdit.bind(this)
+    },
+    {
+      label: 'Exportar',
+      icon: 'an an-file-pdf',
+      action: this.handlePdf.bind(this)
     }
   ];
 
   constructor(
     public dailyReportService: DailyReportService,
     private http: HttpClient,
+    private pdfService: PdfService,
     public fb: FormBuilder,
     private router: Router) {}
 
@@ -82,9 +89,7 @@ export class DetailDailyReportComponent implements OnInit {
       dia: ['', []], // Initialize with a default value
     });
 
-
-    this.dailyReportService.item;
-
+    console.log(this.dailyReportService.item.dailyReport)
     this.items = [...this.agruparPorPlaca(this.dailyReportService.item.dailyReport)]
 
   }
@@ -93,6 +98,20 @@ export class DetailDailyReportComponent implements OnInit {
     this.router.navigate([`home`]);
   }
 
+  handlePdf() {
+    this.pdfService.generateDailyReport({
+      client: "Cliente XYZ",
+      location: "Rua das Obras, 123",
+      contractNumber: "2023/456",
+      date: "15/10/2023",
+      servicesDescription: "Limpeza do canteiro de obras\nInspeção de equipamentos",
+      weatherConditions: "Céu limpo, sem chuva",
+      clientObservations: "Nenhuma observação",
+      teamInvolved: "João Silva (Coord.)\nMaria Oliveira",
+      morning: { start: "08:00", end: "12:00" },
+      afternoon: { start: "13:00", end: "17:00" }
+    });
+  }
 
   redirectToDailyReportEdit(selectedRow: any) {
     const obj = this.dailyReportService.item;
@@ -140,13 +159,31 @@ export class DetailDailyReportComponent implements OnInit {
     this.isFullScreen = false;
   }
 
-  onHandleDia(dia: any) {
-    this.arrFotos = this.obterFotosPorPlacaEDataInicioDisplay(this.selectedPlaca, dia, this.dailyReportService.item.dailyReport);
-    this.arrFotos.forEach(photo => {
-      this.getAddressFromCoordinates(photo.latitude, photo.longitude)
-        .subscribe(obj => photo.geo = obj?.results[0].formatted_address
-        );
-    })
+  async onHandleDia(dia: any) {
+    let arr = this.obterFotosPorPlacaEDataInicioDisplay(this.selectedPlaca, dia, this.dailyReportService.item.dailyReport);
+
+    // Cria um array de promessas
+    const promises = arr.map(photo => {
+      return new Promise<void>((resolve) => {
+        this.getAddressFromCoordinates(photo.latitude, photo.longitude)
+          .subscribe({
+            next: (obj) => {
+              photo.geo = obj?.results[0]?.formatted_address || 'Endereço não encontrado';
+              resolve();
+            },
+            error: () => {
+              photo.geo = 'Erro ao obter endereço';
+              resolve();
+            }
+          });
+      });
+    });
+
+    // Aguarda todas as promessas serem resolvidas
+    await Promise.all(promises);
+
+    this.arrFotos = [...arr];
+    console.log('Fotos com geolocalização:', this.arrFotos);
   }
 
   obterFotosPorPlacaEDataInicioDisplay(placa: string, dataInicioDisplay: string, registros: any[]): any[] {
