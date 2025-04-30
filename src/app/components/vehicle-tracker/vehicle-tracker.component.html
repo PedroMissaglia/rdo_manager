@@ -1,0 +1,68 @@
+<!-- vehicle-tracker.component.html -->
+<po-widget
+  p-title="Integração - Rastreamento de veículo - Positron"
+    class="tracker-container">
+
+  <div class="search-panel">
+
+    <div class="search-box">
+      <po-input
+        type="text"
+        [(ngModel)]="plateNumber"
+        placeholder="Digite a placa do veículo"
+      >
+      </po-input>
+      <po-button p-label="Buscar" (p-click)="trackVehicle()">Rastrear</po-button>
+    </div>
+
+    <div *ngIf="errorMessage" class="error-message">
+      {{ errorMessage }}
+    </div>
+  </div>
+
+  <div *ngIf="currentPosition" class="position-info">
+    <h3>Última Posição: {{ currentPosition.veicTag }}</h3>
+
+    <div class="position-details">
+      <div class="gps-data">
+        <p><strong>Data/Hora:</strong> {{ currentPosition?.gps?.dateGPS | date:'medium' }}</p>
+        <p><strong>Endereço:</strong> {{ currentPosition?.gps?.address }}</p>
+        <p><strong>Coordenadas:</strong>
+          {{ currentPosition?.gps?.latitude | number:'1.4-4' }},
+          {{ currentPosition?.gps?.longitude | number:'1.4-4' }}
+        </p>
+      </div>
+
+      <div class="vehicle-data">
+        <p><strong>Velocidade:</strong> {{ currentPosition?.panel?.speed }} km/h</p>
+        <p><strong>Ignição:</strong> {{ currentPosition?.panel?.ignition ? 'Ligada' : 'Desligada' }}</p>
+        <p><strong>Hodômetro:</strong> {{ currentPosition?.panel?.odometer | number }} m</p>
+      </div>
+    </div>
+
+    <div class="map-container">
+      <!-- Integração com Google Maps ou similar -->
+      <iframe
+        width="100%"
+        height="300"
+        frameborder="0"
+        style="border:0"
+        [src]="getSafeMapUrl(currentPosition?.gps?.latitude, currentPosition?.gps?.longitude)"
+        allowfullscreen>
+      </iframe>
+    </div>
+  </div>
+
+  <div *ngIf="positionsHistory.length > 0" class="history-panel">
+    <h3>Histórico de Posições</h3>
+    <div class="history-list">
+      <div *ngFor="let pos of positionsHistory" class="history-item">
+        <p>{{ pos.data.gps.dateGPS | date:'shortTime' }} -
+           {{ pos.data.gps.latitude | number:'1.4-4' }},
+           {{ pos.data.gps.longitude | number:'1.4-4' }}
+        </p>
+        <p class="small-info">{{ pos?.data.panel?.speed }} km/h - Ignição: {{ pos.data.panel.ignition ? 'ON' : 'OFF' }}</p>
+      </div>
+    </div>
+  </div>
+</po-widget>

@@ -5,6 +5,7 @@ import { PoBreadcrumb, PoModalAction, PoModalComponent, PoNotificationService, P
 import { CrudService } from '../../services/crud.service';
 import { ExcelService } from '../../services/excel.service';
 import { FormBuilder, FormGroup, NgForm, Validators } from '@angular/forms';
+import { isEmpty } from 'rxjs';
 
 @Component({
     selector: 'app-home',
@@ -34,6 +35,10 @@ export class HomeComponent implements OnInit{
   };
 
   async showAction(filter: string) {
+    if (filter.trim() === '') {
+      this.tableItems = [];
+      this.tableItems = this.defaultTableItems;
+    }
     this.filterSearch(this.defaultTableItems, filter);
 
   }

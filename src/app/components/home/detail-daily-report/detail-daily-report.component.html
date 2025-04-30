@@ -20,29 +20,34 @@
     </po-tab>
     <po-tab p-label="Fotos">
       <form [formGroup]="form">
-        <po-combo
+        <div class="po-md-6">
+          <po-combo
           name="combo"
-          class="po-md-6"
+          class="po-md-12"
           formControlName="placa"
           p-label="Selecione a placa"
           (p-change)="onHandlePlaca($event)"
           [p-options]="items"
         >
         </po-combo>
-
         <po-combo
-          *ngIf="showSecondCombo"
-          name="combo"
-          formControlName="dia"
-          class="po-md-6"
-          p-label="Selecione o dia"
-          (p-change)="onHandleDia($event)"
-          [p-options]="itemsDias"
-        >
-        </po-combo>
+        *ngIf="showSecondCombo"
+        name="combo"
+        formControlName="dia"
+        class="po-md-12"
+        p-label="Selecione o dia"
+        (p-change)="onHandleDia($event)"
+        [p-options]="itemsDias"
+      >
+      </po-combo>
+        </div>
+
+
+        <app-vehicle-tracker class="po-md-6" *ngIf="showSecondCombo"></app-vehicle-tracker>
+
       </form>
 
-      <div class="minha-div container" *ngIf="arrFotos.length > 0">
+      <div class="minha-div container po-mt-3" *ngIf="arrFotos.length > 0">
         <app-map apiKey="AIzaSyD1iWjBHl4D5-1zqGNDtJoRlg5WQiFVPf0" [locais]="arrFotos"></app-map>
         <!-- <div *ngFor="let item of arrFotos">
           <div class="po-row po-mt-3">
