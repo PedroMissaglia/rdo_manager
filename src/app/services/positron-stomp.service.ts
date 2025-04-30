@@ -31,7 +31,7 @@ export class PositronService {
 
     const headers = new HttpHeaders({
       'Content-Type': 'text/xml;charset=UTF-8',
-      // 'SOAPAction': '' // Descomente se for exigido pelo servidor
+      SOAPAction: "http://pst.com.br/position.xsd/getServicePackageByPlate"
     });
 
     try {
