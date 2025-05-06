@@ -20,6 +20,9 @@ export class EditDailyReportComponent {
     {property: 'horasPrevistas', label: 'Horas previstas', disabled: true},
     {property: 'horasRealizadas', label: 'Horas executadas', disabled: true},
     {property: 'responsavel', label: 'Responsável', gridColumns: 8},
+    {property: 'aprovacaoFiscal', label: 'Aprovação do fiscal',  type: 'boolean', booleanFalse: 'Não aprovado', booleanTrue: 'Aprovado'},
+    {property: 'aprovacaoCliente', label: 'Aprovação do cliente',  type: 'boolean', booleanFalse: 'Não aprovado', booleanTrue: 'Aprovado'},
+    {property: 'responsavel', label: 'Responsável', gridColumns: 8},
     {property: 'justificativa', label: 'Justificativa', rows: 4, gridColumns: 12}
   ];
 

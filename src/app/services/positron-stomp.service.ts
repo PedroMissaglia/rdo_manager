@@ -7,7 +7,7 @@ import { firstValueFrom } from 'rxjs';
   providedIn: 'root',
 })
 export class PositronService {
-  private readonly url = 'http://mensageria-integracao.positronrt.com.br:12353'; // Substitua pela URL real
+  private readonly url = 'https://mensageria-integracao.positronrt.com.br:12353'; // Substitua pela URL real
   private readonly username = 'swl'; // Substitua com credenciais reais
   private readonly password = '2AEPnX3KBQhX';
 

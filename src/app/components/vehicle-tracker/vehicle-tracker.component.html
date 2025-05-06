@@ -7,14 +7,18 @@
 
       <div class="search-panel">
 
-        <div class="search-box">
-          <po-input
-            type="text"
-            [(ngModel)]="plateNumber"
-            placeholder="Digite a placa do veículo"
-          >
-          </po-input>
-          <po-button p-label="Buscar" (p-click)="trackVehicle()">Rastrear</po-button>
+        <div class="po-md-12">
+          <form [formGroup]="form">
+            <po-combo
+              name="combo"
+              class="po-md-8"
+              formControlName="placa"
+              p-label="Selecione a placa"
+              [p-options]="items"
+            >
+            </po-combo>
+            <po-button class="po-md-4 po-mt-4" p-label="Buscar" (p-click)="trackVehicle()">Rastrear</po-button>
+          </form>
         </div>
 
         <div *ngIf="errorMessage" class="error-message">

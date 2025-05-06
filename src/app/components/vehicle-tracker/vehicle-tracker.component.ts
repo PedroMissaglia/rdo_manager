@@ -1,8 +1,9 @@
 // vehicle-tracker.component.ts
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, Input } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { PositronService } from '../../services/positron-stomp.service';
+import { FormBuilder, FormGroup } from '@angular/forms';
 
 @Component({
   selector: 'app-vehicle-tracker',
@@ -16,18 +17,28 @@ export class VehicleTrackerComponent implements OnInit, OnDestroy {
   positionsHistory: any[] = [];
   connectionStatus: string = 'Desconectado';
   errorMessage: string = '';
+  plate!: string;
+  form!: FormGroup;
+
+  @Input() items: any;
 
   private positionSubscription!: Subscription;
   private statusSubscription!: Subscription;
 
   constructor(
     private positronService: PositronService ,
+    public fb: FormBuilder,
     private readonly sanitizer: DomSanitizer
   ) { }
 
   async ngOnInit() {
-    let packageDescription = await this.positronService.getServicePackageByPlate('ABC1234');
-    console.log(packageDescription)
+
+    this.form = this.fb.group({
+      placa: ['', []]
+    });
+
+    // let packageDescription = await this.positronService.getServicePackageByPlate('ABC1234');
+    // console.log(packageDescription)
   }
 
 
@@ -37,7 +48,7 @@ export class VehicleTrackerComponent implements OnInit, OnDestroy {
   }
 
   trackVehicle(): void {
-    if (!this.plateNumber) {
+    if (!this.form.get('placa')!.value) {
       this.errorMessage = 'Por favor, informe a placa do veículo';
       return;
     }
@@ -48,7 +59,7 @@ export class VehicleTrackerComponent implements OnInit, OnDestroy {
     }
 
     // Obtém a última posição conhecida
-    this.currentPosition = this.positronService.getServicePackageByPlate(this.plateNumber);
+    this.currentPosition = this.positronService.getServicePackageByPlate(this.form.get('placa')!.value);
 
 
   }

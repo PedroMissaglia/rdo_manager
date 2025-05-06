@@ -20,7 +20,7 @@
     </po-tab>
     <po-tab p-label="Fotos">
       <form [formGroup]="form">
-        <div class="po-md-6">
+        <div class="po-md-12">
           <po-combo
           name="combo"
           class="po-md-12"
@@ -42,14 +42,11 @@
       </po-combo>
         </div>
 
-
-        <app-vehicle-tracker class="po-md-6" *ngIf="showSecondCombo"></app-vehicle-tracker>
-
       </form>
 
       <div class="minha-div container po-mt-3" *ngIf="arrFotos.length > 0">
         <app-map apiKey="AIzaSyD1iWjBHl4D5-1zqGNDtJoRlg5WQiFVPf0" [locais]="arrFotos"></app-map>
-        <!-- <div *ngFor="let item of arrFotos">
+        <div *ngFor="let item of arrFotos">
           <div class="po-row po-mt-3">
             <po-image class="po-md-3"
               [p-height]="150"
@@ -66,9 +63,13 @@
               <po-info class="po-md-12" p-label="Geolocalização" [p-value]="item.geo"> </po-info>
             </div>
           </div>
-        </div> -->
+        </div>
       </div>
 
+    </po-tab>
+
+    <po-tab p-label="Integração - Positron">
+      <app-vehicle-tracker [items]="items" class="po-md-12"></app-vehicle-tracker>
     </po-tab>
   </po-tabs>
 

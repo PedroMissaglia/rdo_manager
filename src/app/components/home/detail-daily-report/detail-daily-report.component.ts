@@ -224,7 +224,7 @@ export class DetailDailyReportComponent implements OnInit {
     const agrupado: any = {};
 
     // Iterando sobre o array de objetos
-    arr.forEach((item: { placa: any; horasPrevistas: any; horasRealizadas: any; dataInicioDisplay: any; justificativa: any; responsavel: any; }) => {
+    arr.forEach((item: { placa: any; horasPrevistas: any; horasRealizadas: any; dataInicioDisplay: any; justificativa: any; responsavel: any; aprovacaoFiscal: any; aprovacaoCliente: any; }) => {
       // Obter a placa
       const placa = item.placa;
 
@@ -247,6 +247,8 @@ export class DetailDailyReportComponent implements OnInit {
         dataInicioDisplay: item.dataInicioDisplay,
         horasPrevistas: item.horasPrevistas,
         horasRealizadas: item.horasRealizadas,
+        aprovacaoCliente: item.aprovacaoCliente === true ? 'Sim' : 'Não',
+        aprovacaoFiscal: item.aprovacaoFiscal  === true ? 'Sim' : 'Não',
         justificativa: item.justificativa || "",
         responsavel: item.responsavel || ""
       });
@@ -287,6 +289,8 @@ export class DetailDailyReportComponent implements OnInit {
         { property: 'dataInicioDisplay', label: 'Data' },
         { property: 'horasPrevistas', label: 'Horas previstas' },
         { property: 'horasRealizadas', label: 'Horas executadas' },
+        { property: 'aprovacaoCliente', label: 'Aprovação cliente' },
+        { property: 'aprovacaoFiscal', label: 'Aprovação fiscal' },
         { property: 'justificativa' },
         { property: 'responsavel', label: 'Responsável' },
       ],

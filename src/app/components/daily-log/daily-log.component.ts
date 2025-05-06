@@ -469,7 +469,7 @@ export class DailyLogComponent implements OnInit, OnDestroy {
     this.myThirdForm = this.fb.group({
       occo: ['', []], // Initialize with a default value
       justificativaImprodutiva: ['', []], // Initialize with a default value
-      totalImprodutiva: ['', []], // Initialize with a default value
+      totalImprodutiva: ['00:00', []], // Initialize with a default value
       responsavel: ['', []], // Initialize with a default value
     });
 
@@ -601,14 +601,16 @@ export class DailyLogComponent implements OnInit, OnDestroy {
 
         daily['horasRealizadas'] = workedHours;
         (daily['dataFim'] = date),
-          (daily['dataFimDisplay'] = this.formatDate(date).substring(0, 10)),
-          (daily['justificativa'] = this.myThirdForm.get('occo')?.value),
-          (daily['totalImprodutiva'] = this.formatWithColon(this.myThirdForm.get('totalImprodutiva')?.value)),
-          (daily['responsavel'] = this.myThirdForm.get('responsavel')?.value),
-          (daily['horaFim'] = endTime),
-          (daily['status'] = 'finished'),
-          (daily['horasRealizadas'] = workedHours),
-          (daily['info'] = a ? 'positive' : 'negative');
+        (daily['dataFimDisplay'] = this.formatDate(date).substring(0, 10)),
+        (daily['justificativa'] = this.myThirdForm.get('occo')?.value),
+        (daily['totalImprodutiva'] = this.formatWithColon(this.myThirdForm.get('totalImprodutiva')?.value)),
+        (daily['responsavel'] = this.myThirdForm.get('responsavel')?.value),
+        (daily['horaFim'] = endTime),
+        (daily['status'] = 'finished'),
+        (daily['horasRealizadas'] = workedHours),
+        (daily['aprovacaoFiscal'] = false),
+        (daily['aprovacaoCliente'] = false),
+        (daily['info'] = a ? 'positive' : 'negative');
       }
     });
 
@@ -627,16 +629,7 @@ export class DailyLogComponent implements OnInit, OnDestroy {
     }
   }
 
-  formatWithColon(input: string): string {
-    if (input.length !== 4) {
-      throw new Error('A entrada deve ter exatamente 4 caracteres');
-    }
-
-    // Verifica se todos os caracteres são dígitos (opcional)
-    if (!/^\d+$/.test(input)) {
-      throw new Error('A entrada deve conter apenas números');
-    }
-
+  formatWithColon(input: string = ''): string {
     return `${input.substring(0, 2)}:${input.substring(2)}`;
   }
 
