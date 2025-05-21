@@ -4,6 +4,7 @@ import { PoDynamicFormField, PoDynamicViewField, PoNotificationService } from '@
 import { CrudService } from '../../../services/crud.service';
 import { Router } from '@angular/router';
 import { DailyReportService } from '../daily-report.service';
+import { UserService } from '../../../services/user.service';
 
 @Component({
   selector: 'app-edit-daily-report',
@@ -13,27 +14,32 @@ import { DailyReportService } from '../daily-report.service';
 })
 export class EditDailyReportComponent {
 
+
+
+  constructor(
+    private dailyReportService: DailyReportService,
+    private notificationService: PoNotificationService,
+    private userService: UserService,
+    private crudService: CrudService,
+    private router: Router) {}
+
   value: any;
   fields: Array<PoDynamicFormField> = [
+  ];
+
+  ngOnInit() {
+    this.value = this.dailyReportService.itemFilteredByPlate;
+    this.fields = [
     {property: 'placa', label: 'Placa', disabled: true},
     {property: 'dataInicioDisplay', label: 'Data', disabled: true},
     {property: 'horasPrevistas', label: 'Horas previstas', disabled: true},
     {property: 'horasRealizadas', label: 'Horas executadas', disabled: true},
     {property: 'responsavel', label: 'Responsável', gridColumns: 8},
-    {property: 'aprovacaoFiscal', label: 'Aprovação do fiscal',  type: 'boolean', booleanFalse: 'Não aprovado', booleanTrue: 'Aprovado'},
-    {property: 'aprovacaoCliente', label: 'Aprovação do cliente',  type: 'boolean', booleanFalse: 'Não aprovado', booleanTrue: 'Aprovado'},
+    {property: 'aprovacaoFiscal', label: 'Aprovação do fiscal',  type: 'boolean', booleanFalse: 'Não aprovado', booleanTrue: 'Aprovado', disabled: (this.userService.getUser().type !== 'Fiscal')},
+    {property: 'aprovacaoCliente', label: 'Aprovação do cliente',  type: 'boolean', booleanFalse: 'Não aprovado', booleanTrue: 'Aprovado', disabled: (this.userService.getUser().type !== 'Cliente')},
     {property: 'responsavel', label: 'Responsável', gridColumns: 8},
     {property: 'justificativa', label: 'Justificativa', rows: 4, gridColumns: 12}
   ];
-
-  constructor(
-    private dailyReportService: DailyReportService,
-    private notificationService: PoNotificationService,
-    private crudService: CrudService,
-    private router: Router) {}
-
-  ngOnInit() {
-    this.value = this.dailyReportService.itemFilteredByPlate;
   }
 
   onHandleGoBack() {

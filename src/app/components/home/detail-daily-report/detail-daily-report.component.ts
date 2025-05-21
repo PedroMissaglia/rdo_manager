@@ -89,7 +89,6 @@ export class DetailDailyReportComponent implements OnInit {
       dia: ['', []], // Initialize with a default value
     });
 
-    console.log(this.dailyReportService.item.dailyReport)
     this.items = [...this.agruparPorPlaca(this.dailyReportService.item.dailyReport)]
 
   }
