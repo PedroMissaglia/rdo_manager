@@ -32,6 +32,7 @@ import { WebcamImage, WebcamInitError } from 'ngx-webcam';
 import { finalize, Observable, Subject } from 'rxjs';
 import { Router } from '@angular/router';
 import { StorageService } from '../../services/storage.service';
+import { SiengeApiService } from '../../services/sienge-api.service';
 
 @Component({
   selector: 'app-daily-log',
@@ -93,12 +94,38 @@ export class DailyLogComponent implements OnInit, OnDestroy {
   confirm: PoModalAction = {
     action: async () => {
       const id = this.crudService.generateFirebaseId();
-
       const match = this.labelNow.match(/(\d{2}:\d{2})$/);
       const time = match ? match[1] : null;
       let date = new Date();
-
       const currentDate = this.getDate();
+
+
+
+      // Criar payload para o Sienge
+      const siengePayload = {
+        constructionId: 12345, // Substitua pelo ID real da obra no Sienge
+        date: this.formatDateForSienge(date), // Formato YYYY-MM-DD
+        foremanId: 67890, // Substitua pelo ID do encarregado no Sienge
+        weather: 'sunny',
+        notes: 'Relatório gerado via RDO Manager',
+        activities: this.heroes.map((operator) => ({
+          employeeId: operator.id, // Ou o campo correto que corresponde ao ID no Sienge
+          productiveHours: 8, // Ajuste conforme necessário
+          nonProductiveHours: 0, // Ajuste conforme necessário
+          description: 'Trabalho diário',
+        })),
+      };
+
+    this.siengeApiService.createDailyReport(siengePayload).subscribe({
+      next: (response) => {
+        console.log('RDO criado no Sienge:', response);
+        this.notificationService.success('RDO sincronizado com sucesso!');
+      },
+      error: (err) => {
+        console.error('Erro ao criar RDO:', err);
+        this.notificationService.error('Falha na sincronização com o Sienge');
+      }
+    });
 
       // Verifica se a obra já foi iniciada
       const currentDailyLog: Array<any> =
@@ -209,13 +236,17 @@ export class DailyLogComponent implements OnInit, OnDestroy {
 
         // Converter dataUrl para Blob
         const blob = this.dataURItoBlob(this.webcamImage.imageAsDataUrl);
-        const file = new File([blob], `foto_${Date.now()}.jpg`, { type: 'image/jpeg' });
+        const file = new File([blob], `foto_${Date.now()}.jpg`, {
+          type: 'image/jpeg',
+        });
 
         // Mostrar loading enquanto faz upload
         this.notificationService.information('Enviando foto...');
 
         // 2. Fazer upload para o Storage
-        const downloadUrl = await this.storageService.uploadFile(file, 'fotos-daily-report').toPromise();
+        const downloadUrl = await this.storageService
+          .uploadFile(file, 'fotos-daily-report')
+          .toPromise();
 
         // 3. Atualizar o objeto com a URL da foto
         this.dailyLogService.item.dailyReport.forEach((dailyReport: any) => {
@@ -244,7 +275,6 @@ export class DailyLogComponent implements OnInit, OnDestroy {
 
         this.poModalCamera?.close();
         this.notificationService.success('Foto salva com sucesso.');
-
       } catch (error) {
         console.error('Erro ao salvar foto:', error);
         this.notificationService.error('Erro ao salvar foto. Tente novamente.');
@@ -252,6 +282,13 @@ export class DailyLogComponent implements OnInit, OnDestroy {
     },
     label: 'Enviar',
   };
+
+  formatDateForSienge(date: Date): string {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }
 
   private dataURItoBlob(dataURI: string): Blob {
     // Converter base64 para bytes
@@ -318,7 +355,6 @@ export class DailyLogComponent implements OnInit, OnDestroy {
     this.photoTaken = true;
     this.myForm.get('upload')?.setValue(webcamImage.imageAsDataUrl);
   }
-
 
   // Capture the photo
   public handleImageImprodutiva(webcamImage: WebcamImage): void {
@@ -433,6 +469,7 @@ export class DailyLogComponent implements OnInit, OnDestroy {
     public userService: UserService,
     private dailyLogService: DailyLogService,
     private router: Router,
+    private siengeApiService: SiengeApiService,
     private notificationService: PoNotificationService,
     private fb: FormBuilder
   ) {}
@@ -444,7 +481,6 @@ export class DailyLogComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-
     this.profile = {
       subtitle: this.userService.getUser()?.login ?? '',
       title: this.userService.getUser()?.displayName ?? '',
@@ -452,8 +488,7 @@ export class DailyLogComponent implements OnInit, OnDestroy {
     this.atualizarHora();
     this.intervalo = setInterval(() => {
       this.atualizarHora();
-    }, 1000);  // Atualiza a hora a cada 1000ms (1 segundo)
-
+    }, 1000); // Atualiza a hora a cada 1000ms (1 segundo)
 
     this.myForm = this.fb.group({
       labelNow: [this.labelNow, [Validators.required]], // Initialize with a default value
@@ -538,13 +573,10 @@ export class DailyLogComponent implements OnInit, OnDestroy {
 
   getGeoLocation(): void {
     if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          this.latitude = position.coords.latitude;
-          this.longitude = position.coords.longitude;
-        },
-
-      );
+      navigator.geolocation.getCurrentPosition((position) => {
+        this.latitude = position.coords.latitude;
+        this.longitude = position.coords.longitude;
+      });
     } else {
       this.errorMessage = 'Geolocation is not supported by this browser.';
       console.error('Geolocation is not supported.');
@@ -591,26 +623,32 @@ export class DailyLogComponent implements OnInit, OnDestroy {
         const isTimestamp = dataInicio?.seconds ? true : false;
 
         let workedHours = this.calculate(
-          isTimestamp ? new Date(dataInicio.seconds * 1000) : new Date(dataInicio),
+          isTimestamp
+            ? new Date(dataInicio.seconds * 1000)
+            : new Date(dataInicio),
           date
         );
         let a = this.isDifferenceGreaterThanOrEqualToEightHours(
-          isTimestamp ? new Date(dataInicio.seconds * 1000) : new Date(dataInicio),
+          isTimestamp
+            ? new Date(dataInicio.seconds * 1000)
+            : new Date(dataInicio),
           date
         );
 
         daily['horasRealizadas'] = workedHours;
         (daily['dataFim'] = date),
-        (daily['dataFimDisplay'] = this.formatDate(date).substring(0, 10)),
-        (daily['justificativa'] = this.myThirdForm.get('occo')?.value),
-        (daily['totalImprodutiva'] = this.formatWithColon(this.myThirdForm.get('totalImprodutiva')?.value)),
-        (daily['responsavel'] = this.myThirdForm.get('responsavel')?.value),
-        (daily['horaFim'] = endTime),
-        (daily['status'] = 'finished'),
-        (daily['horasRealizadas'] = workedHours),
-        (daily['aprovacaoFiscal'] = false),
-        (daily['aprovacaoCliente'] = false),
-        (daily['info'] = a ? 'positive' : 'negative');
+          (daily['dataFimDisplay'] = this.formatDate(date).substring(0, 10)),
+          (daily['justificativa'] = this.myThirdForm.get('occo')?.value),
+          (daily['totalImprodutiva'] = this.formatWithColon(
+            this.myThirdForm.get('totalImprodutiva')?.value
+          )),
+          (daily['responsavel'] = this.myThirdForm.get('responsavel')?.value),
+          (daily['horaFim'] = endTime),
+          (daily['status'] = 'finished'),
+          (daily['horasRealizadas'] = workedHours),
+          (daily['aprovacaoFiscal'] = false),
+          (daily['aprovacaoCliente'] = false),
+          (daily['info'] = a ? 'positive' : 'negative');
       }
     });
 
@@ -656,5 +694,4 @@ export class DailyLogComponent implements OnInit, OnDestroy {
     this.userService.logout();
     this.router.navigate(['login']);
   }
-
 }
