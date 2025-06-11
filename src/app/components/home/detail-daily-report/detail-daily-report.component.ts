@@ -1,4 +1,5 @@
-import { PoBreadcrumb, PoDynamicViewField, PoModalComponent, PoPageAction, PoTableColumn, PoTableDetail } from '@po-ui/ng-components';
+import { poThemeDefaultActions } from '@po-ui/ng-components';
+import { PoBreadcrumb, PoComboComponent, PoComboOption, PoDynamicViewField, PoModalAction, PoModalComponent, PoPageAction, PoTableColumn, PoTableDetail } from '@po-ui/ng-components';
 import { DailyReportService } from './../daily-report.service';
 import { Component, EventEmitter, HostListener, OnInit, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
@@ -7,6 +8,7 @@ import { Observable } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 import { DailyReportPdfService } from '../../../services/pdf.service';
 import { SiengeApiService } from '../../../services/sienge-api.service';
+import { CrudService } from '../../../services/crud.service';
 
 @Component({
   selector: 'app-detail-daily-report',
@@ -20,9 +22,11 @@ export class DetailDailyReportComponent implements OnInit {
   api = "AIzaSyD1iWjBHl4D5-1zqGNDtJoRlg5WQiFVPf0";
   showSecondCombo = false;
   selectedPlaca = '';
+  poComboExportPdfPerDate: PoComboOption[] = [];
   private apiKey = 'AIzaSyD1iWjBHl4D5-1zqGNDtJoRlg5WQiFVPf0';
   private geocodeUrl = 'https://maps.googleapis.com/maps/api/geocode/json';
 
+  rdos: any;
   imageUrl: string = '';
   visible: boolean = false;
   close = new EventEmitter<void>();
@@ -54,6 +58,7 @@ export class DetailDailyReportComponent implements OnInit {
 
   arrFotos: Array<any> = [];
   form!: FormGroup;
+  formModalPDF!: FormGroup;
   columns: Array<PoTableColumn> = this.getColumns();
   fields: Array<PoDynamicViewField> = [
     {property: 'displayNameCliente', label: 'Cliente' },
@@ -62,8 +67,10 @@ export class DetailDailyReportComponent implements OnInit {
   ];
   imageSrc: string = ''; // Input image source
   isFullScreen: boolean = false;
-  @ViewChild(PoModalComponent, { static: false })
-  poModal!: PoModalComponent;
+  @ViewChild(PoModalComponent, { static: false }) poModal!: PoModalComponent;
+  @ViewChild('poComboPDF', { static: false }) poComboPDF!: PoComboComponent;
+  @ViewChild('modal', { static: false }) poModalExportPDF!: PoModalComponent;
+
   siengeResponse = null;
 
   public actions: Array<PoPageAction> = [
@@ -74,9 +81,18 @@ export class DetailDailyReportComponent implements OnInit {
     {
       label: 'Exportar',
       icon: 'an an-file-pdf',
-      action: this.handlePdf.bind(this)
+      action: this.poModalPDFOpen.bind(this)
     }
   ];
+
+  primaryAction: PoModalAction = {
+    action: () => {
+      this.handlePdf(this.formModalPDF.value["dia"]);
+      // this.pdfService.generateDailyReport(reportData);
+    },
+    label: 'Exportar',
+    // disabled: !!this.formModalPDF.value["dia"]
+  };
 
   constructor(
     public dailyReportService: DailyReportService,
@@ -84,12 +100,17 @@ export class DetailDailyReportComponent implements OnInit {
     private pdfService: DailyReportPdfService,
     public fb: FormBuilder,
     private siengeApiService: SiengeApiService,
+    private crudService: CrudService,
     private router: Router) {}
 
   ngOnInit(): void {
 
     this.form = this.fb.group({
       placa: ['', []], // Initialize with a default value
+      dia: ['', []], // Initialize with a default value
+    });
+
+    this.formModalPDF = this.fb.group({
       dia: ['', []], // Initialize with a default value
     });
 
@@ -100,37 +121,103 @@ export class DetailDailyReportComponent implements OnInit {
 
   }
 
+  filtrarDailyReportsPorData(relatorio: any, dataFiltro: string) {
+  // Filtra os reports pela data
+  const filteredDailyReports = relatorio.dailyReport.filter((report: any) => {
+    return report.dataInicioDisplay === dataFiltro;
+  });
+
+  relatorio.dailyReport = filteredDailyReports;
+  return relatorio;
+
+}
+
+  async poModalPDFOpen(row: any) {
+
+    this.poComboExportPdfPerDate = this.transformarParaPoCombo(row["detalhes"]);
+    this.poModalExportPDF.open();
+  }
   onHandleGoBack() {
     this.router.navigate([`home`]);
   }
 
-  handlePdf(row: any) {
-    console.log(row)
+  consolidarFotos(dailyReports: any[]): any[] {
+  if (!dailyReports || !Array.isArray(dailyReports)) {
+    return [];
+  }
+
+  // Extrai todas as fotos de todos os reports
+  const todasFotos = dailyReports.reduce((acc, report) => {
+    if (report.foto && Array.isArray(report.foto)) {
+      return [...acc, ...report.foto];
+    }
+    return acc;
+  }, []);
+
+  // Ordena as fotos por horário (dataFoto)
+  return todasFotos.sort((a: any, b: any) => {
+    const timeA = this.converterHoraParaMinutos(a.dataFoto);
+    const timeB = this.converterHoraParaMinutos(b.dataFoto);
+    return timeA - timeB;
+  });
+}
+
+/**
+ * Converte hora no formato HH:MM para minutos totais
+ * @param hora String no formato HH:MM
+ * @returns Número total de minutos
+ */
+private converterHoraParaMinutos(hora: string): number {
+  if (!hora || !hora.includes(':')) return 0;
+
+  const [horas, minutos] = hora.split(':').map(Number);
+  return horas * 60 + minutos;
+}
+
+  async handlePdf(row: any) {
+    this.rdos = await this.crudService.getItems('rdo') ?? [];
+    const dailyReportsFiltrados = this.filtrarDailyReportsPorData(this.rdos[0], this.formModalPDF.get('dia')!.value)
+    const fotosConsolidadas = this.consolidarFotos(dailyReportsFiltrados["dailyReport"]);
 
     const reportData = {
-  companyName: 'SWL',
-  companyTagline: 'Tecnologia em Saneamento e Limpeza',
-  companyFullName: 'SWL TECNOLOGIA EM LIMPEZA, SANEAMENTO E CONSTRUÇÃO LTDA',
-  cnpj: '24.337.551/0001-03',
-  companyAddress: 'ROD BR 101, Nº 8025 - BOX 02',
-  cep: '88.312-501',
-  city: 'SÃO VICENTE - ITAJAL',
-  state: 'SC',
-  client: 'Client Name',
-  location: 'Construction Site',
-  contractNumber: 'CT-2023-001',
-  date: '10/06/2023',
-  servicesDescription: 'Description of services performed today...',
-  weatherConditions: 'Sunny with occasional clouds',
-  clientObservations: 'No observations from client',
-  teamInvolved: 'John Doe, Jane Smith, Carlos Silva',
-  morning: { start: '08:00', end: '12:00' },
-  afternoon: { start: '13:00', end: '17:00' },
-  night: { start: '', end: '' }
-};
+      companyName: 'SWL',
+      companyTagline: 'Tecnologia em Saneamento e Limpeza',
+      companyFullName: 'SWL TECNOLOGIA EM LIMPEZA, SANEAMENTO E CONSTRUÇÃO LTDA',
+      cnpj: '24.337.551/0001-03',
+      companyAddress: 'ROD BR 101, Nº 8025 - BOX 02',
+      cep: '88.312-501',
+      city: 'SÃO VICENTE - ITAJAL',
+      state: 'SC',
+      client: dailyReportsFiltrados.displayNameCliente,
+      date: this.formModalPDF.get('dia')!.value,
+      servicesDescription: 'Description of services performed today...',
+      weatherConditions: 'Sunny with occasional clouds',
+      clientObservations: 'No observations from client',
+      teamInvolved: 'John Doe, Jane Smith, Carlos Silva',
+      morning: { start: '08:00', end: '12:00' },
+      afternoon: { start: '13:00', end: '17:00' },
+      night: { start: '', end: '' },
+      foto: fotosConsolidadas,
+      dailyReport: dailyReportsFiltrados["dailyReport"]
+    };
+    this.pdfService.generateDailyReport(reportData)
 
-this.pdfService.generateDailyReport(reportData);
   }
+
+  transformarParaPoCombo(dadosOriginais: any[]): PoComboOption[] {
+  return dadosOriginais.map(item => {
+    // Cria a label base combinando data e horas realizadas
+    let label = `${item.dataInicioDisplay}`;
+
+
+    return {
+      label: label,
+      value: label, // Pode ser o objeto completo ou um identificador único
+      // Mantém os dados originais para referência se necessário
+      originalData: item
+    };
+  });
+}
 
   redirectToDailyReportEdit(selectedRow: any) {
     const obj = this.dailyReportService.item;
@@ -313,7 +400,8 @@ this.pdfService.generateDailyReport(reportData);
         { property: 'justificativa' },
         { property: 'responsavel', label: 'Responsável' },
       ],
-      typeHeader: 'top'
+      typeHeader: 'top',
+      hideSelect: false
     };
 
     return [

@@ -67,10 +67,16 @@ export class DailyReportPdfService {
 
     // --- Sections ---
     const sections = [
-      { title: 'DESCRIÇÃO DOS SERVIÇOS/OCORRÊNCIAS', content: data.servicesDescription },
-      { title: 'OCORRÊNCIAS CLIMÁTICAS', content: data.weatherConditions },
-      { title: 'OBSERVAÇÕES DO CLIENTE', content: data.clientObservations },
-      { title: 'EQUIPE ENVOLVIDA', content: data.teamInvolved }
+      // { title: 'DESCRIÇÃO DOS SERVIÇOS/OCORRÊNCIAS', content: data.servicesDescription },
+      // { title: 'OCORRÊNCIAS CLIMÁTICAS', content: data.weatherConditions },
+      {
+        title: 'OBSERVAÇÕES DO CLIENTE',
+        content: this.getClientObservationsFromJustifications(data.dailyReport || [])
+      },
+      {
+        title: 'EQUIPE ENVOLVIDA',
+        content: this.getTeamInvolvedFromOperators(data.dailyReport || [])
+      }
     ];
 
     sections.forEach(section => {
@@ -90,37 +96,54 @@ export class DailyReportPdfService {
       yPos += 10;
     });
 
-    // --- Time Table ---
-    const tableOptions: UserOptions = {
-      startY: yPos,
-      head: [['', 'INÍCIO', 'SAÍDA']],
-      body: [
-        ['Manhã:', data.morning?.start || '', data.morning?.end || ''],
-        ['Tarde:', data.afternoon?.start || '', data.afternoon?.end || ''],
-        ['Noite:', data.night?.start || '', data.night?.end || '']
-      ],
-      headStyles: {
-        fillColor: [255, 255, 255],
-        textColor: [0, 0, 0],
-        fontStyle: 'bold',
-        lineWidth: 0.5
-      },
-      styles: {
-        lineWidth: 0.5,
-        lineColor: [0, 0, 0]
-      },
-      columnStyles: {
-        0: { cellWidth: 30, fontStyle: 'bold' },
-        1: { cellWidth: 40 },
-        2: { cellWidth: 40 }
-      },
-      margin: { left: margin }
-    };
+    // --- Time Table Baseada em dataFoto ---
+    if (data.foto && data.foto.length > 0) {
+      // Ordena as fotos por horário
+      const sortedPhotos = [...data.foto].sort((a, b) => {
+        const timeA = this.convertTimeToMinutes(a.dataFoto);
+        const timeB = this.convertTimeToMinutes(b.dataFoto);
+        return timeA - timeB;
+      });
 
-    autoTable(doc, tableOptions);
+      // Pega o primeiro e último horário para determinar o período
+      const firstPhotoTime = sortedPhotos[0].dataFoto;
+      const lastPhotoTime = sortedPhotos[sortedPhotos.length - 1].dataFoto;
+
+      // Determina os períodos do dia
+      const morningEnd = '12:00';
+      const afternoonStart = '13:00';
+      const afternoonEnd = '18:00';
+
+      const tableOptions: UserOptions = {
+        startY: yPos,
+        head: [['Período', 'Início', 'Término']],
+        body: [
+          ['Manhã:', firstPhotoTime, this.isMorning(lastPhotoTime) ? lastPhotoTime : morningEnd],
+          ['Tarde:', this.isAfternoon(firstPhotoTime) ? firstPhotoTime : afternoonStart, lastPhotoTime]
+        ],
+        headStyles: {
+          fillColor: [220, 220, 220],
+          textColor: [0, 0, 0],
+          fontStyle: 'bold'
+        },
+        styles: {
+          lineWidth: 0.5,
+          lineColor: [0, 0, 0]
+        },
+        columnStyles: {
+          0: { cellWidth: 30, fontStyle: 'bold' },
+          1: { cellWidth: 40 },
+          2: { cellWidth: 40 }
+        },
+        margin: { left: margin }
+      };
+
+      autoTable(doc, tableOptions);
+      yPos = (doc as any).lastAutoTable.finalY + 10;
+    }
 
     // --- Signatures ---
-    const finalY = (doc as any).lastAutoTable.finalY + 20;
+    const finalY = yPos + 10;
 
     // First signature line
     this.drawHorizontalLine(doc, finalY, 60);
@@ -134,6 +157,78 @@ export class DailyReportPdfService {
 
     // Save the PDF
     doc.save(`${data.companyName || 'REPORT'} - RELATÓRIO DIÁRIO DE OBRA.pdf`);
+  }
+
+  private getClientObservationsFromJustifications(dailyReports: any[]): string {
+  if (!dailyReports || !Array.isArray(dailyReports)) {
+    return 'Nenhuma observação registrada';
+  }
+
+  const observations: string[] = [];
+
+  // Coleta todas as justificativas não vazias
+  dailyReports.forEach(report => {
+    if (report.justificativa && report.justificativa.trim() !== '') {
+      // Remove a parte "Opa sem operação motivo" se existir
+     report.justificativa
+
+      observations.push(`${report.justificativa}`);
+    }
+  });
+
+  // Converte para string formatada
+  if (observations.length === 0) {
+    return 'Nenhuma observação registrada';
+  }
+
+  return observations.join('\n');
+}
+
+  private getTeamInvolvedFromOperators(dailyReports: any[]): string {
+  if (!dailyReports || !Array.isArray(dailyReports)) {
+    return 'Nenhuma informação de equipe disponível';
+  }
+
+
+
+  const uniqueOperators = new Map<string, string>();
+
+  // Coleta todos os operadores únicos
+  dailyReports.forEach(report => {
+    if (report.operadores && Array.isArray(report.operadores)) {
+      report.operadores.forEach((operador: any) => {
+        const operatorName = operador.displayName || operador.label || 'Operador desconhecido';
+        const operatorPlaca = operador.placa ? ` (Placa: ${operador.placa})` : '';
+        const operatorInfo = `${operatorName}${operatorPlaca}`;
+
+        if (!uniqueOperators.has(operatorInfo)) {
+          uniqueOperators.set(operatorInfo, operatorInfo);
+        }
+      });
+    }
+  });
+
+  // Converte para string formatada
+  if (uniqueOperators.size === 0) {
+    return 'Nenhum operador registrado';
+  }
+
+  return Array.from(uniqueOperators.keys()).join(', ');
+}
+
+  private convertTimeToMinutes(time: string): number {
+    const [hours, minutes] = time.split(':').map(Number);
+    return hours * 60 + minutes;
+  }
+
+  private isMorning(time: string): boolean {
+    const [hours] = time.split(':').map(Number);
+    return hours < 12;
+  }
+
+  private isAfternoon(time: string): boolean {
+    const [hours] = time.split(':').map(Number);
+    return hours >= 12;
   }
 
   private drawHorizontalLine(doc: jsPDF, y: number, x1: number = 20, x2: number = 190) {

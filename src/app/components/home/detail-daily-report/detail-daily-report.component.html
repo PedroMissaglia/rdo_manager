@@ -44,8 +44,7 @@
           </div>
         </form>
 
-            <po-container
-
+    <po-container
       [p-no-border]="true"
        *ngIf="arrFotos.length > 0">
       <app-map
@@ -133,3 +132,21 @@
     />
   </div>
 </div>
+
+
+<po-modal #modal
+p-title="Arquivo PDF"
+[p-primary-action]="primaryAction">
+
+<form [formGroup]="formModalPDF">
+  <po-combo
+
+  *ngIf="poComboExportPdfPerDate"
+    p-label="Selecione o dia"
+    formControlName="dia"
+    [p-options]="poComboExportPdfPerDate">
+  </po-combo>
+</form>
+
+
+</po-modal>
