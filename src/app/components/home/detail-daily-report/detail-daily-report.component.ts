@@ -5,7 +5,7 @@ import { Router } from '@angular/router';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { Observable } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
-import { PdfService } from '../../../services/pdf.service';
+import { DailyReportPdfService } from '../../../services/pdf.service';
 
 @Component({
   selector: 'app-detail-daily-report',
@@ -16,6 +16,7 @@ import { PdfService } from '../../../services/pdf.service';
 export class DetailDailyReportComponent implements OnInit {
   items: Array<any> = [];
   itemsDias: Array<any> = [];
+  api = "AIzaSyD1iWjBHl4D5-1zqGNDtJoRlg5WQiFVPf0";
   showSecondCombo = false;
   selectedPlaca = '';
   private apiKey = 'AIzaSyD1iWjBHl4D5-1zqGNDtJoRlg5WQiFVPf0';
@@ -78,7 +79,7 @@ export class DetailDailyReportComponent implements OnInit {
   constructor(
     public dailyReportService: DailyReportService,
     private http: HttpClient,
-    private pdfService: PdfService,
+    private pdfService: DailyReportPdfService,
     public fb: FormBuilder,
     private router: Router) {}
 
@@ -97,19 +98,32 @@ export class DetailDailyReportComponent implements OnInit {
     this.router.navigate([`home`]);
   }
 
-  handlePdf() {
-    this.pdfService.generateDailyReport({
-      client: "Cliente XYZ",
-      location: "Rua das Obras, 123",
-      contractNumber: "2023/456",
-      date: "15/10/2023",
-      servicesDescription: "Limpeza do canteiro de obras\nInspeção de equipamentos",
-      weatherConditions: "Céu limpo, sem chuva",
-      clientObservations: "Nenhuma observação",
-      teamInvolved: "João Silva (Coord.)\nMaria Oliveira",
-      morning: { start: "08:00", end: "12:00" },
-      afternoon: { start: "13:00", end: "17:00" }
-    });
+  handlePdf(row: any) {
+    console.log(row)
+
+    const reportData = {
+  companyName: 'SWL',
+  companyTagline: 'Tecnologia em Saneamento e Limpeza',
+  companyFullName: 'SWL TECNOLOGIA EM LIMPEZA, SANEAMENTO E CONSTRUÇÃO LTDA',
+  cnpj: '24.337.551/0001-03',
+  companyAddress: 'ROD BR 101, Nº 8025 - BOX 02',
+  cep: '88.312-501',
+  city: 'SÃO VICENTE - ITAJAL',
+  state: 'SC',
+  client: 'Client Name',
+  location: 'Construction Site',
+  contractNumber: 'CT-2023-001',
+  date: '10/06/2023',
+  servicesDescription: 'Description of services performed today...',
+  weatherConditions: 'Sunny with occasional clouds',
+  clientObservations: 'No observations from client',
+  teamInvolved: 'John Doe, Jane Smith, Carlos Silva',
+  morning: { start: '08:00', end: '12:00' },
+  afternoon: { start: '13:00', end: '17:00' },
+  night: { start: '', end: '' }
+};
+
+this.pdfService.generateDailyReport(reportData);
   }
 
   redirectToDailyReportEdit(selectedRow: any) {
@@ -293,7 +307,7 @@ export class DetailDailyReportComponent implements OnInit {
         { property: 'justificativa' },
         { property: 'responsavel', label: 'Responsável' },
       ],
-      typeHeader: 'inline'
+      typeHeader: 'top'
     };
 
     return [

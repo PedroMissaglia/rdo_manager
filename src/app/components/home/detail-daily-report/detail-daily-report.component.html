@@ -1,8 +1,5 @@
-<po-page-detail
-  (p-back)="onHandleGoBack()"
-  p-title="Detalhes">
-
-    <po-dynamic-view
+<po-page-detail (p-back)="onHandleGoBack()" p-title="Detalhes">
+  <po-dynamic-view
     class="po-mt-3"
     [p-fields]="fields"
     [p-value]="dailyReportService.item"
@@ -11,7 +8,6 @@
 
   <po-tabs>
     <po-tab [p-active]="true" p-label="Detalhes da obra">
-
       <po-table
         [p-items]="items"
         [p-actions]="actions"
@@ -20,63 +16,87 @@
       ></po-table>
     </po-tab>
     <po-tab p-label="Fotos">
-      <form [formGroup]="form">
-        <div class="po-md-12">
-          <po-combo
-          name="combo"
-          class="po-md-12"
-          formControlName="placa"
-          p-label="Selecione a placa"
-          (p-change)="onHandlePlaca($event)"
-          [p-options]="items"
-        >
-        </po-combo>
-        <po-combo
-        *ngIf="showSecondCombo"
-        name="combo"
-        formControlName="dia"
-        class="po-md-12"
-        p-label="Selecione o dia"
-        (p-change)="onHandleDia($event)"
-        [p-options]="itemsDias"
-      >
-      </po-combo>
-        </div>
 
-      </form>
+      <po-container class="po-lg-4" [p-height]="640">
+        <form [formGroup]="form">
+          <div class="po-md-12">
+            <po-combo
+              name="combo"
+              class="po-md-12"
+              formControlName="placa"
+              p-label="Selecione a placa"
+              (p-change)="onHandlePlaca($event)"
+              [p-options]="items"
+            >
+            </po-combo>
+            <po-combo
+              *ngIf="showSecondCombo"
+              name="combo"
+              formControlName="dia"
+              class="po-md-12"
+              p-label="Selecione o dia"
+              (p-change)="onHandleDia($event)"
+              [p-options]="itemsDias"
+            >
+            </po-combo>
+          </div>
+        </form>
 
-      <div class="minha-div container po-mt-3" *ngIf="arrFotos.length > 0">
-        <app-map apiKey="AIzaSyD1iWjBHl4D5-1zqGNDtJoRlg5WQiFVPf0" [locais]="arrFotos"></app-map>
+            <po-container
+
+      [p-no-border]="true"
+       *ngIf="arrFotos.length > 0">
+      <app-map
+        [apiKey]="api"
+        [locais]="arrFotos"
+      ></app-map>
+    </po-container>
+      </po-container>
+
+
+      <po-container class="po-lg-8" [p-height]="600">
         <div *ngFor="let item of arrFotos">
           <div class="po-row po-mt-3">
-            <po-image class="po-md-3"
-              [p-height]="150"
+            <img
+              class="po-md-3"
+              [height]="150"
               (click)="openImageViewer(item.foto)"
-              [p-src]="item.foto"
-            >
-            </po-image>
+            [src]="item.foto">
 
             <div class="po-md-9">
-              <po-info class="po-md-3" p-label="Hora da foto" [p-value]="item.dataFoto">
+              <po-info
+                class="po-md-3"
+                p-label="Hora da foto"
+                [p-value]="item.dataFoto"
+              >
               </po-info>
-              <po-info class="po-md-9" p-label="Observação" [p-value]="item.observacao">
+              <po-info
+                class="po-md-9"
+                p-label="Observação"
+                [p-value]="item.observacao"
+              >
               </po-info>
-              <po-info class="po-md-12" p-label="Geolocalização" [p-value]="item.geo"> </po-info>
+              <po-info
+                class="po-md-12"
+                p-label="Geolocalização"
+                [p-value]="item.geo"
+              >
+              </po-info>
             </div>
           </div>
         </div>
-      </div>
-
+      </po-container>
     </po-tab>
 
     <po-tab p-label="Integração - Positron">
-      <app-vehicle-tracker [items]="items" class="po-md-12"></app-vehicle-tracker>
+      <app-vehicle-tracker
+        [items]="items"
+        class="po-md-12"
+      ></app-vehicle-tracker>
     </po-tab>
   </po-tabs>
 
-  <div class="">
-
-  </div>
+  <div class=""></div>
 </po-page-detail>
 
 <po-modal p-title="Detalhes da foto">

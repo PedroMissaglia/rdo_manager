@@ -1,4 +1,4 @@
-// pdf.service.ts
+// daily-report-pdf.service.ts
 import { Injectable } from '@angular/core';
 import jsPDF from 'jspdf';
 import autoTable, { UserOptions } from 'jspdf-autotable';
@@ -6,7 +6,7 @@ import autoTable, { UserOptions } from 'jspdf-autotable';
 @Injectable({
   providedIn: 'root'
 })
-export class PdfService {
+export class DailyReportPdfService {
 
   generateDailyReport(data: any): void {
     const doc = new jsPDF();
@@ -16,11 +16,11 @@ export class PdfService {
     // --- Header ---
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(18);
-    doc.text('SWL', margin, yPos);
+    doc.text(data.companyName || 'COMPANY NAME', margin, yPos);
     yPos += 8;
 
     doc.setFontSize(14);
-    doc.text('Tecnologia em Saneamento e Limpeza', margin, yPos);
+    doc.text(data.companyTagline || 'COMPANY TAGLINE', margin, yPos);
     yPos += 10;
 
     doc.setFontSize(16);
@@ -35,10 +35,10 @@ export class PdfService {
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(10);
     const companyInfo = [
-      'SWL TECNOLOGIA EM LIMPEZA, SANEAMENTO E CONSTRUÇÃO LTDA',
-      'CNPJ: 24.337.551/0001-03',
-      'ROD BR 101, Nº 8025 - BOX 02',
-      'CEP: 88.312-501 - SÃO VICENTE - ITAJAL - SC'
+      data.companyFullName || 'COMPANY FULL NAME LTDA',
+      `CNPJ: ${data.cnpj || 'XX.XXX.XXX/XXXX-XX'}`,
+      data.companyAddress || 'ADDRESS, NUMBER - COMPLEMENT',
+      `CEP: ${data.cep || 'XXXXX-XXX'} - ${data.city || 'CITY'} - ${data.state || 'STATE'}`
     ];
 
     companyInfo.forEach(line => {
@@ -100,16 +100,17 @@ export class PdfService {
         ['Noite:', data.night?.start || '', data.night?.end || '']
       ],
       headStyles: {
-        fillColor: [255, 255, 255], // White background for header
-        textColor: [0, 0, 0],       // Black text
-        lineWidth: 0.5               // Border width
+        fillColor: [255, 255, 255],
+        textColor: [0, 0, 0],
+        fontStyle: 'bold',
+        lineWidth: 0.5
       },
       styles: {
         lineWidth: 0.5,
-        lineColor: [0, 0, 0]         // Black borders
+        lineColor: [0, 0, 0]
       },
       columnStyles: {
-        0: { cellWidth: 30 },
+        0: { cellWidth: 30, fontStyle: 'bold' },
         1: { cellWidth: 40 },
         2: { cellWidth: 40 }
       },
@@ -121,20 +122,23 @@ export class PdfService {
     // --- Signatures ---
     const finalY = (doc as any).lastAutoTable.finalY + 20;
 
-    // Signature lines
-    this.drawHorizontalLine(doc, finalY);
+    // First signature line
+    this.drawHorizontalLine(doc, finalY, 60);
+    this.drawHorizontalLine(doc, finalY, 60, 150);
     doc.text('Assinatura do Coordenador da Obra', margin, finalY + 10);
     doc.text('Assinatura do Gestor de Service', margin + 90, finalY + 10);
 
+    // Second signature line (wider)
     this.drawHorizontalLine(doc, finalY + 25);
     doc.text('Carimbo e Assinatura do Gestor do Contrato (quando requerido)', 105, finalY + 35, { align: 'center' });
 
-    doc.save('SWL - RELATÓRIO DIÁRIO DE OBRA.pdf');
+    // Save the PDF
+    doc.save(`${data.companyName || 'REPORT'} - RELATÓRIO DIÁRIO DE OBRA.pdf`);
   }
 
-  private drawHorizontalLine(doc: jsPDF, y: number) {
+  private drawHorizontalLine(doc: jsPDF, y: number, x1: number = 20, x2: number = 190) {
     doc.setDrawColor(0);
     doc.setLineWidth(0.5);
-    doc.line(20, y, 190, y);
+    doc.line(x1, y, x2, y);
   }
 }

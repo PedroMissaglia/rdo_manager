@@ -1,7 +1,8 @@
+import { SiengeApiService } from './../../services/sienge-api.service';
 import { DailyReportService } from './daily-report.service';
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
-import { PoBreadcrumb, PoModalAction, PoModalComponent, PoNotificationService, PoPageAction, PoPageFilter, PoTableAction, PoTableColumn, PoTableDetail } from '@po-ui/ng-components';
+import { PoBreadcrumb, PoModalAction, PoModalComponent, PoNotificationService, PoPageAction, PoPageFilter, PoTableAction, PoTableColumn, PoTableComponent, PoTableDetail } from '@po-ui/ng-components';
 import { CrudService } from '../../services/crud.service';
 import { ExcelService } from '../../services/excel.service';
 import { FormBuilder, FormGroup, NgForm, Validators } from '@angular/forms';
@@ -20,6 +21,7 @@ export class HomeComponent implements OnInit{
   columns: Array<PoTableColumn> = this.getColumns();
   selectDailyReport: any;
   defaultTableItems: Array<any> = [];
+  @ViewChild("poTableInstance") poTableInstance!: PoTableComponent;
   public actions: Array<PoPageAction> = [
     {
       label: 'Excel',
@@ -205,6 +207,7 @@ export class HomeComponent implements OnInit{
     private crudService: CrudService,
     private fb: FormBuilder,
     private poNotification :PoNotificationService,
+    private siengeApiService: SiengeApiService,
     private dailyReportService: DailyReportService) {}
 
   ngOnInit() {
@@ -212,6 +215,7 @@ export class HomeComponent implements OnInit{
       datePickerRanger: ['', [Validators.required]]
     });
     this.loadItems();
+    this.siengeApiService.getConstructions().subscribe();
   }
 
   async loadItems() {
@@ -303,7 +307,7 @@ export class HomeComponent implements OnInit{
   }
 
   handleExportToExcel() {
-    this.excelService.exportRelatorioToExcel(this.tableItems, 'rdo');
+    this.excelService.exportRelatorioToExcel(this.poTableInstance.filteredItems, 'rdo');
   }
 
   onShowMore() {}

@@ -1,0 +1,8 @@
+{
+  "rewrites": [
+    {
+      "source": "/sienge-api/:path*",
+      "destination": "https://api.sienge.com.br/swltec/public/api/v1/:path*"
+    }
+  ]
+}

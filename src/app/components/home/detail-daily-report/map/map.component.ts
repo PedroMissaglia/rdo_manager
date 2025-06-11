@@ -1,11 +1,17 @@
-import { Component, ElementRef, Input, SimpleChanges, ViewChild } from '@angular/core';
+import {
+  Component,
+  ElementRef,
+  Input,
+  SimpleChanges,
+  ViewChild,
+} from '@angular/core';
 import { Loader } from '@googlemaps/js-api-loader';
 
 @Component({
   selector: 'app-map',
   standalone: false,
   templateUrl: './map.component.html',
-  styleUrl: './map.component.scss'
+  styleUrl: './map.component.scss',
 })
 export class MapComponent {
   @ViewChild('mapContainer') mapContainer!: ElementRef;
@@ -30,7 +36,7 @@ export class MapComponent {
   private async carregarMapa(): Promise<void> {
     const loader = new Loader({
       apiKey: this.apiKey,
-      version: "weekly"
+      version: 'weekly',
     });
 
     try {
@@ -45,7 +51,7 @@ export class MapComponent {
   private inicializarMapa(): void {
     // Calcula o centro do mapa baseado nas coordenadas
     const bounds = new google.maps.LatLngBounds();
-    this.locais.forEach(local => {
+    this.locais.forEach((local) => {
       bounds.extend(new google.maps.LatLng(local.latitude, local.longitude));
     });
 
@@ -53,7 +59,7 @@ export class MapComponent {
       center: bounds.getCenter(),
       zoom: 14,
       mapTypeControl: true,
-      streetViewControl: false
+      streetViewControl: false,
     });
 
     // Ajusta o zoom para mostrar todos os marcadores
@@ -61,37 +67,63 @@ export class MapComponent {
   }
 
   private adicionarMarcadores(): void {
-    // Remove marcadores existentes
-    this.markers.forEach(marker => marker.setMap(null));
-    this.markers = [];
+  // Remove marcadores existentes
+  this.markers.forEach(marker => marker.setMap(null));
+  this.markers = [];
 
-    this.locais.forEach(local => {
-      const marker = new google.maps.Marker({
-        position: { lat: local.latitude, lng: local.longitude },
-        map: this.map,
-        title: local.observacao
-      });
+  // Array to store info windows
+  const infoWindows: google.maps.InfoWindow[] = [];
 
-      // Adiciona InfoWindow com detalhes
-      const infoWindow = new google.maps.InfoWindow({
-        content: this.criarConteudoInfoWindow(local)
-      });
-
-      marker.addListener('click', () => {
-        infoWindow.open(this.map, marker);
-      });
-
-      this.markers.push(marker);
+  this.locais.forEach((local, index) => {
+    const marker = new google.maps.Marker({
+      position: { lat: local.latitude, lng: local.longitude },
+      map: this.map,
+      title: local.observacao
     });
-  }
+
+    // Adiciona InfoWindow com detalhes
+    const infoWindow = new google.maps.InfoWindow({
+      content: this.criarConteudoInfoWindow(local)
+    });
+
+    marker.addListener('click', () => {
+      // Close all other info windows when opening a new one
+      infoWindows.forEach(iw => iw.close());
+      infoWindow.open(this.map, marker);
+    });
+
+    this.markers.push(marker);
+    infoWindows.push(infoWindow);
+
+    // Open the first marker's info window automatically
+if (index === 0) {
+  setTimeout(() => {
+    infoWindow.open(this.map, marker);
+    // Animação de "pulo" no marcador
+    marker.setAnimation(google.maps.Animation.BOUNCE);
+    setTimeout(() => marker.setAnimation(null), 1500);
+  }, 500);
+}
+  });
+}
 
   private criarConteudoInfoWindow(local: any): string {
     return `
       <div style="font-family: Arial; max-width: 250px;">
-        <h4 style="margin: 0 0 10px 0; color: #1a73e8;">${local.observacao || 'Atividade'}</h4>
-        <p style="margin: 5px 0;"><strong>Endereço:</strong> ${local.geo || 'Não informado'}</p>
-        <p style="margin: 5px 0;"><strong>Horário:</strong> ${local.dataFoto || 'Não informado'}</p>
-        ${local.foto ? `<img src="${local.foto}" style="max-width: 200px; max-height: 150px; margin-top: 10px;" onerror="this.style.display='none'">` : ''}
+        <h4 style="margin: 0 0 10px 0; color: #1a73e8;">${
+          local.observacao || 'Atividade'
+        }</h4>
+        <p style="margin: 5px 0;"><strong>Endereço:</strong> ${
+          local.geo || 'Não informado'
+        }</p>
+        <p style="margin: 5px 0;"><strong>Horário:</strong> ${
+          local.dataFoto || 'Não informado'
+        }</p>
+        ${
+          local.foto
+            ? `<img src="${local.foto}" style="max-width: 200px; max-height: 150px; margin-top: 10px;" onerror="this.style.display='none'">`
+            : ''
+        }
       </div>
     `;
   }

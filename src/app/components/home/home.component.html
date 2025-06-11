@@ -1,11 +1,11 @@
 <po-page-list
   [p-actions]="actions"
-  [p-filter]="filter"
 >
   <po-table
+    #poTableInstance
     [p-selectable]="false"
     p-container="true"
-    [p-hide-table-search]="true"
+    [p-hide-table-search]="false"
     [p-height]="600"
     [p-draggable]="true"
     [p-max-columns]="9"

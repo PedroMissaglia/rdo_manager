@@ -7,8 +7,11 @@ import { Observable } from 'rxjs';
   providedIn: 'root'
 })
 export class SiengeApiService {
-  private baseUrl = environment.siengeApiUrl;
+  // private baseUrl = environment.siengeApiUrl;
+  private baseUrl = '/sienge-api';
 
+
+  //[ Base URL: api.sienge.com.br/{subdominio-do-cliente}/public/api/v1 ]
   constructor(private http: HttpClient) {}
 
     /**
@@ -29,8 +32,9 @@ export class SiengeApiService {
    * Método genérico para chamadas autenticadas
    */
   private authenticatedRequest<T>(method: string, endpoint: string, data?: any): Observable<T> {
-    const url = `${this.baseUrl}/swl/public/api/v1${endpoint}`;
-    const headers = this.getBasicAuthHeader();
+
+    const url = `${this.baseUrl}${endpoint}`;
+      const headers = this.getBasicAuthHeader();
 
     return this.http.request<T>(method, url, {
       headers,
@@ -40,11 +44,11 @@ export class SiengeApiService {
 
   // Exemplo: Criar RDO
   createDailyReport(payload: any): Observable<any> {
-    return this.authenticatedRequest('POST', '/construction/api/v1/daily-reports', payload);
+    return this.authenticatedRequest('POST', '/construction-daily-reports', payload);
   }
 
   // Exemplo: Listar obras
   getConstructions(): Observable<any> {
-    return this.authenticatedRequest('GET', '/construction/api/v1/constructions');
+    return this.authenticatedRequest('GET', '/construction-daily-report');
   }
 }

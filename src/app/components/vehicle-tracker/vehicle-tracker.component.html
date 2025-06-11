@@ -14,11 +14,15 @@
     (p-click)="trackVehicle()"
   ></po-button>
 
-  <po-widget p-title="Ocorrências de veículos - Versão desatualizada (Positron)">
+  <po-widget p-title="Última posição de veículos - Versão XML (Positron)">
     <pre *ngIf="currentPosition">
 
 
     {{currentPosition | json}}
+    <po-dynamic-form
+      [p-fields]="fields"
+      [p-value]="currentPosition">
+    </po-dynamic-form>
 
     </pre>
   </po-widget>
