@@ -3,6 +3,10 @@
     {
       "source": "/sienge-api/:path*",
       "destination": "https://api.sienge.com.br/swltec/public/api/v1/:path*"
+    },
+    {
+      "source": "/api/mensageria/:path*",
+      "destination": "https://mensageria-integracao.positronrt.com.br:12353/:path*"
     }
   ]
 }
