@@ -12,12 +12,14 @@
         [p-items]="items"
         [p-actions]="actions"
         [p-columns]="columns"
-        [p-height]="500"
+        [p-height]="450"
       ></po-table>
     </po-tab>
     <po-tab p-label="Fotos">
 
-      <po-container class="po-lg-4" [p-height]="640">
+      <po-container
+        class="po-lg-4"
+        [p-height]="640">
         <form [formGroup]="form">
           <div class="po-md-12">
             <po-combo
@@ -93,6 +95,18 @@
         [items]="items"
         class="po-md-12"
       ></app-vehicle-tracker>
+    </po-tab>
+    <po-tab p-label="Integração - Sienge">
+      <pre *ngIf="siengeResponse">
+
+
+      {{siengeResponse | json}}
+      <!-- <po-dynamic-form
+        [p-fields]="fields"
+        [p-value]="currentPosition">
+      </po-dynamic-form> -->
+
+      </pre>
     </po-tab>
   </po-tabs>
 

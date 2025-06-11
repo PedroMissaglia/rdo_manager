@@ -6,6 +6,7 @@ import { FormBuilder, FormGroup } from '@angular/forms';
 import { Observable } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 import { DailyReportPdfService } from '../../../services/pdf.service';
+import { SiengeApiService } from '../../../services/sienge-api.service';
 
 @Component({
   selector: 'app-detail-daily-report',
@@ -63,6 +64,7 @@ export class DetailDailyReportComponent implements OnInit {
   isFullScreen: boolean = false;
   @ViewChild(PoModalComponent, { static: false })
   poModal!: PoModalComponent;
+  siengeResponse = null;
 
   public actions: Array<PoPageAction> = [
     {
@@ -81,6 +83,7 @@ export class DetailDailyReportComponent implements OnInit {
     private http: HttpClient,
     private pdfService: DailyReportPdfService,
     public fb: FormBuilder,
+    private siengeApiService: SiengeApiService,
     private router: Router) {}
 
   ngOnInit(): void {
@@ -90,7 +93,10 @@ export class DetailDailyReportComponent implements OnInit {
       dia: ['', []], // Initialize with a default value
     });
 
-    this.items = [...this.agruparPorPlaca(this.dailyReportService.item.dailyReport)]
+    this.items = [...this.agruparPorPlaca(this.dailyReportService.item.dailyReport)];
+    this.siengeApiService.getConstructions().subscribe(
+      response => this.siengeResponse = response
+    );
 
   }
 

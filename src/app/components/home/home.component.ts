@@ -215,7 +215,6 @@ export class HomeComponent implements OnInit{
       datePickerRanger: ['', [Validators.required]]
     });
     this.loadItems();
-    this.siengeApiService.getConstructions().subscribe();
   }
 
   async loadItems() {

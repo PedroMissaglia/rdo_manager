@@ -21,18 +21,18 @@ export class VehicleTrackerComponent implements OnInit {
   plate!: string;
   form!: FormGroup;
   fields = [
-    { property: 'veicId', label: 'ID do Veículo', required: true },
-    { property: 'veicTag', label: 'Placa' },
+    { property: 'veicId', label: 'ID do Veículo', type: 'string', required: true },
+    { property: 'veicTag', label: 'Placa', type: 'string' },
     { property: 'blocked', label: 'Bloqueado', type: 'boolean' },
     // Campos aninhados (GPS)
     { property: 'gps.memory', label: 'Memória GPS', type: 'boolean' },
     { property: 'gps.satellite', label: 'Satélite', type: 'boolean' },
     { property: 'gps.dateGPS', label: 'Data GPS', type: 'datetime' },
-    { property: 'gps.long', label: 'Longitude' },
-    { property: 'gps.lat', label: 'Latitude' },
+    { property: 'gps.long', label: 'Longitude', type: 'string' },
+    { property: 'gps.lat', label: 'Latitude', type: 'string' },
     // Campos aninhados (Painel)
     { property: 'panel.ignition', label: 'Ignição', type: 'boolean' },
-    { property: 'panel.speed', label: 'Velocidade', type: 'number' }
+    { property: 'panel.speed', label: 'Velocidade', type: 'string' }
   ];
 
   @Input() items: any;
