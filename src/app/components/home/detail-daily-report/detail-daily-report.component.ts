@@ -289,7 +289,6 @@ private converterHoraParaMinutos(hora: string): number {
     await Promise.all(promises);
 
     this.arrFotos = [...arr];
-    console.log('Fotos com geolocalização:', this.arrFotos);
   }
 
   obterFotosPorPlacaEDataInicioDisplay(placa: string, dataInicioDisplay: string, registros: any[]): any[] {

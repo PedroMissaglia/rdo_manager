@@ -1,11 +1,20 @@
 <po-page-list
   [p-actions]="actions"
+   [p-filter]="filter"
 >
+  <po-disclaimer-group
+    class="po-row po-lg-12 po-md-12 po-sm-12"
+    *ngIf="disclamer"
+    [p-disclaimers]="disclamer"
+    [p-hide-remove-all]="true"
+    p-title="Filtros ativos"
+  >
+  </po-disclaimer-group>
   <po-table
     #poTableInstance
     [p-selectable]="false"
     p-container="true"
-    [p-hide-table-search]="false"
+    [p-hide-table-search]="true"
     [p-height]="600"
     [p-draggable]="true"
     [p-max-columns]="9"

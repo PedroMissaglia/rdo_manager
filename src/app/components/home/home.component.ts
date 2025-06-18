@@ -32,18 +32,23 @@ export class HomeComponent implements OnInit{
   ];
   items: any;
   public readonly filter: PoPageFilter = {
-    action: this.showAction.bind(this),
-    advancedAction: this.showAdvanceAction.bind(this)
+    action: this.simpleSearch.bind(this),
+    advancedAction: this.showAdvanceAction.bind(this),
+    placeholder: 'Busque por clientes ou placas',
+    width: 4
   };
 
-  async showAction(filter: string) {
+  simpleSearch(filter: string) {
     if (filter.trim() === '') {
       this.tableItems = [];
       this.tableItems = this.defaultTableItems;
     }
     this.filterSearch(this.defaultTableItems, filter);
+    this.disclamer.concat()
 
   }
+
+  disclamer: Array<any> = [];
 
   close: PoModalAction = {
     action: () => {
@@ -75,9 +80,9 @@ export class HomeComponent implements OnInit{
     startDateStr: string, // Formato 'YYYY-MM-DD'
     endDateStr: string    // Formato 'YYYY-MM-DD'
   ): any[] {
-    // Converte strings 'YYYY-MM-DD' para Date
-    const startDate = new Date(startDateStr);
-    const endDate = new Date(endDateStr);
+    // Converte strings 'YYYY-MM-DD' para Date, ajustando para o timezone local
+    const startDate = new Date(startDateStr + 'T00:00:00');
+    let endDate = new Date(endDateStr + 'T00:00:00');
 
     // Valida as datas de filtro
     if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
@@ -85,30 +90,47 @@ export class HomeComponent implements OnInit{
       return [];
     }
 
-    return data.filter(item => {
-      if (!item?.dailyReport) return false;
+    // Ajusta o final do dia para incluir todo o dia final (23:59:59.999)
+    const endOfDay = new Date(endDate);
+    endOfDay.setHours(23, 59, 59, 999);
 
-      return item.dailyReport.some((report: any) => {
-        // Converte dataInicioDisplay (DD/MM/YYYY) para Date
+    return data.map(item => {
+      if (!item?.dailyReport) return item;
+
+      // Filtra os dailyReports que estão no intervalo de datas
+      const filteredDailyReports = item.dailyReport.filter((report: any) => {
         const reportDate = report?.dataInicioDisplay
           ? this.convertDMYToDate(report.dataInicioDisplay)
           : null;
 
-        // Se a data do relatório for válida, verifica o intervalo
-        return reportDate && reportDate >= startDate && reportDate <= endDate;
+        if (!reportDate) return false;
+
+        // Verifica se a data está entre startDate (início do dia) e endOfDay (final do dia)
+        return reportDate >= startDate && reportDate <= endOfDay;
       });
-    });
+
+      // Retorna o item com apenas os dailyReports filtrados
+      return {
+        ...item,
+        dailyReport: filteredDailyReports
+      };
+    }).filter(item => item.dailyReport.length > 0); // Remove itens sem dailyReports no intervalo
   }
 
+  // Função auxiliar para converter DD/MM/YYYY para Date
+  convertDMYToDate(dateStr: string): Date | null {
+    const parts = dateStr.split('/');
+    if (parts.length !== 3) return null;
 
-  private convertDMYToDate(dateStr: string): Date | null {
-    if (!dateStr) return null;
+    const day = parseInt(parts[0], 10);
+    const month = parseInt(parts[1], 10) - 1; // Mês é 0-based
+    const year = parseInt(parts[2], 10);
 
-    const [day, month, year] = dateStr.split('/').map(Number);
-    // Validação extra
-    if (day > 31 || month > 12 || year < 1000) return null;
+    // Verifica se os valores são válidos
+    if (isNaN(day) || isNaN(month) || isNaN(year)) return null;
 
-    return new Date(year, month - 1, day);
+    // Retorna a data no início do dia (00:00:00)
+    return new Date(year, month, day);
   }
 
   getObjectsByPlate(data: any[], plate: string): any[] {
@@ -123,12 +145,14 @@ export class HomeComponent implements OnInit{
   }
 
   filterSearch(data: any[], filters: any) {
-    let filteredByPlateItems: any[] = this.filterByPlate(data, filters);
 
-    let filterdByClientItems: any[] = this.filterByClient(data, filters);
+    if (filters !== '') {
+      let filteredByPlateItems: any[] = this.filterByPlate(data, filters);
+      let filterdByClientItems: any[] = this.filterByClient(data, filters);
 
-    this.tableItems = [...filteredByPlateItems];
-    this.tableItems = this.tableItems.concat([...filterdByClientItems]);
+      this.tableItems = [...filteredByPlateItems];
+      this.tableItems = this.tableItems.concat([...filterdByClientItems]);
+    }
 
   }
 
@@ -142,16 +166,16 @@ export class HomeComponent implements OnInit{
       if (item.dailyReport) {
         if (Array.isArray(item.dailyReport)) {
           // Verifica se algum report dentro de dailyReport tem a placa
-          return item.dailyReport.some((report: any) => report?.placa === plate);
+          return item.dailyReport.some((report: any) => (report?.placa as string).toUpperCase().includes(plate.toUpperCase()));
         }
         // Se dailyReport for um objeto único (não array)
-        else if (typeof item.dailyReport === 'object' && item.dailyReport.placa === plate) {
+        else if (typeof item.dailyReport === 'object' && (item.dailyReport.placa as string).toUpperCase().includes(plate.toUpperCase())) {
           return true;
         }
       }
 
       // Se o item tem 'placa' diretamente
-      if (item.placa !== undefined && item.placa === plate) {
+      if (item.placa !== undefined && item.placa.includes(plate)) {
         return true;
       }
 
@@ -166,7 +190,7 @@ export class HomeComponent implements OnInit{
       if (!item) return false;
 
       // Se o item tem 'placa' diretamente
-      if (item.displayNameCliente !== undefined && item.displayNameCliente === clientName) {
+      if (item.displayNameCliente !== undefined && (item.displayNameCliente as string).toUpperCase().includes(clientName.toUpperCase()) ) {
         return true;
       }
 

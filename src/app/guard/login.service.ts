@@ -22,7 +22,9 @@ export class LoginGuard implements CanActivate {
 
 
   if(this.userService.isLoggedIn()) {
-    if (this.userService.getUser().type === 'Administrador') {
+    if (
+      this.userService.getUser().type === 'Administrador' ||
+      this.userService.getUser().type === 'Cliente') {
       this.router.navigate(['/home']);
     }
     else {

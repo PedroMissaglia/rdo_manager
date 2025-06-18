@@ -35,7 +35,7 @@ export class LoginComponent {
     this.userService.user = user;
     this.userService.setUser(user);
 
-    if (user.type === 'Administrador') {
+    if (user.type === 'Administrador' || user.type === 'Cliente') {
       this.router.navigate(['home']);
     }
 

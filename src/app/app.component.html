@@ -1,12 +1,12 @@
-<div class="po-wrapper" *ngIf="userService.isLoggedIn() && userService.getUser().type === 'Administrador'; else loggedOutTemplate">
+<div class="po-wrapper" *ngIf="userService.isLoggedIn() && (userService.getUser().type === 'Administrador' || userService.getUser().type === 'Cliente'); else loggedOutTemplate">
   <!-- Menu and Toolbar visible only when user is logged in -->
-  <po-menu *ngIf="userService.getUser().type === 'Administrador'"
+  <po-menu *ngIf="userService.getUser().type === 'Administrador' || userService.getUser().type === 'Cliente'"
     [p-menus]="menus"
     [p-collapsed]="true"
     [p-logo]="logo">
   </po-menu>
 
-  <po-toolbar *ngIf="userService.getUser().type === 'Administrador'"
+  <po-toolbar *ngIf="userService.getUser().type === 'Administrador' || userService.getUser().type === 'Cliente'"
     p-title="RDO - Relatório de obra diário"
     [p-profile]="profile"
     [p-profile-actions]="profileActions"
