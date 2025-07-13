@@ -7,6 +7,7 @@ import { CrudService } from '../../services/crud.service';
 import { ExcelService } from '../../services/excel.service';
 import { FormBuilder, FormGroup, NgForm, Validators } from '@angular/forms';
 import { isEmpty } from 'rxjs';
+import { UserService } from '../../services/user.service';
 
 @Component({
     selector: 'app-home',
@@ -60,10 +61,24 @@ export class HomeComponent implements OnInit{
 
   confirm: PoModalAction = {
     action: () => {
+      let filteredItems = [...this.defaultTableItems];
 
-      let a = this.filterByDateRange(this.defaultTableItems, this.form.get('datePickerRanger')?.value.start, this.form.get('datePickerRanger')?.value.end);
+      // Filtro por intervalo de datas
+      if (this.form.get('datePickerRanger')?.value?.start && this.form.get('datePickerRanger')?.value?.end) {
+        filteredItems = this.filterByDateRange(filteredItems, this.form.get('datePickerRanger')?.value.start, this.form.get('datePickerRanger')?.value.end);
+      }
 
-      this.tableItems = [...a];
+      // Filtro por cliente
+      if (this.form.get('cliente')?.value?.trim()) {
+        filteredItems = this.filterByClient(filteredItems, this.form.get('cliente')?.value);
+      }
+
+      // Filtro por placa
+      if (this.form.get('placa')?.value?.trim()) {
+        filteredItems = this.filterByPlate(filteredItems, this.form.get('placa')?.value);
+      }
+
+      this.tableItems = [...filteredItems];
 
       this.advancedFilterModal.close();
     },
@@ -232,26 +247,39 @@ export class HomeComponent implements OnInit{
     private fb: FormBuilder,
     private poNotification :PoNotificationService,
     private siengeApiService: SiengeApiService,
-    private dailyReportService: DailyReportService) {}
+    private dailyReportService: DailyReportService,
+    private userService: UserService) {}
 
   ngOnInit() {
     this.form = this.fb.group({
-      datePickerRanger: ['', [Validators.required]]
+      datePickerRanger: [''],
+      cliente: [''],
+      placa: ['']
     });
     this.loadItems();
   }
 
   async loadItems() {
     try {
-      this.items = await this.crudService.getItems('rdo') ?? [];
+      // Busca todos os RDOs
+      const allItems = await this.crudService.getItems('rdo') ?? [];
+
+      // Recupera o usuário logado
+      const user = this.userService.getUser();
+
+      // Se o usuário for do tipo Cliente, filtra os RDOs do cliente dele
+      if (user && user.type === 'Cliente' && user.cliente) {
+        this.items = allItems.filter((item: any) => item.cliente === user.cliente);
+      } else {
+        // Se não for cliente, mostra todos
+        this.items = allItems;
+      }
 
       this.calcularTotais(this.items);
-
       this.tableItems = [...this.items];
       this.defaultTableItems = [...this.items];
-
     }
-      catch (error) {
+    catch (error) {
       console.error('Error loading items:', error);
     }
   }

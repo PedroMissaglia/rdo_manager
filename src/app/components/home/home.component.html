@@ -33,9 +33,28 @@
 
 <po-modal #advancedFilterModal p-title="Busca avançada" [p-primary-action]="confirm" [p-secondary-action]="close">
   <form [formGroup]="form">
+    <div class="po-row">
+      <po-input
+        class="po-md-6 po-sm-12"
+        name="cliente"
+        formControlName="cliente"
+        p-label="Cliente"
+        p-placeholder="Digite o nome do cliente">
+      </po-input>
+
+      <po-input
+        class="po-md-6 po-sm-12"
+        name="placa"
+        formControlName="placa"
+        p-label="Placa"
+        p-placeholder="Digite a placa do veículo">
+      </po-input>
+    </div>
+
     <po-datepicker-range
       name="datepickerRange"
       formControlName="datePickerRanger"
-      p-label="Intervalo de datas"> </po-datepicker-range>
+      p-label="Intervalo de datas">
+    </po-datepicker-range>
   </form>
 </po-modal>

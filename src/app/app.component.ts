@@ -70,9 +70,36 @@ export class AppComponent implements OnInit {
   ];
 
   ngOnInit(): void {
+    const user = this.userService.getUser();
+
     this.profile = {
-      subtitle: this.userService.getUser()?.login ?? '',
-      title: this.userService.getUser()?.displayName ?? '',
+      subtitle: user?.login ?? '',
+      title: user?.displayName ?? '',
     };
+
+    // Monta o menu conforme o tipo do usuário
+    this.menus = [
+      {
+        label: 'Início',
+        icon: 'an an-file-text',
+        link: '/home',
+        shortLabel: 'Início',
+      },
+      // Só adiciona o menu Cadastros se for Administrador
+      ...(user?.type === 'Administrador'
+        ? [
+            {
+              label: 'Cadastros',
+              icon: 'an an-folder-plus',
+              shortLabel: 'Cadastros',
+              subItems: [
+                { label: 'Cliente', link: '/clients' },
+                { label: 'Colaborador', link: '/collaborators' },
+                { label: 'Serviço', link: '/jobs' },
+              ],
+            },
+          ]
+        : []),
+    ];
   }
 }
